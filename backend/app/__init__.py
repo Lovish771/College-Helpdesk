@@ -26,8 +26,17 @@ def create_app(config_name=None, **kwargs):
         if os.getenv('DATABASE_URL'):
             app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
         elif os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
-            # Vercel serverless environment: only /tmp is writable
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/lpu_helpdesk.db'
+            # Vercel serverless environment: copy bundled database to /tmp if not present
+            tmp_db = '/tmp/lpu_helpdesk.db'
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            source_db = os.path.join(base_dir, 'lpu_helpdesk.db')
+            if not os.path.exists(tmp_db) and os.path.exists(source_db):
+                import shutil
+                try:
+                    shutil.copyfile(source_db, tmp_db)
+                except Exception:
+                    pass
+            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{tmp_db}'
         else:
             # Use absolute or instance-relative database path so running from any directory works
             base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -44,6 +53,10 @@ def create_app(config_name=None, **kwargs):
         "http://localhost:5000",
         "http://127.0.0.1:5000",
     ]
+    if os.getenv('FRONTEND_URL'):
+        allowed_origins.append(os.getenv('FRONTEND_URL'))
+    if os.getenv('VERCEL_URL'):
+        allowed_origins.append(f"https://{os.getenv('VERCEL_URL')}")
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
     
     # Strict security headers middleware (OWASP Top 10 hardening)
