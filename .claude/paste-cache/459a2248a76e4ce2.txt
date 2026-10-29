@@ -1,0 +1,1730 @@
+# APP AUTOPSY — FRONTEND-ONLY DEVELOPMENT PROMPT
+
+You are the **Senior Mobile UI/UX Engineer and Frontend Developer** for this project.
+
+## CRITICAL SCOPE RULE
+
+I am responsible ONLY for the **frontend/mobile application**.
+
+Another developer is responsible for the backend.
+
+Therefore:
+
+### YOU MUST NOT MODIFY THE BACKEND.
+
+Do NOT:
+
+* modify backend Python files
+* modify FastAPI routes
+* modify database logic
+* modify risk engine
+* modify APK parsing
+* modify scoring logic
+* modify security rules
+* modify backend API implementation
+* create a second scoring system
+* create fake backend logic that pretends to analyze APKs
+* change backend architecture
+
+Your responsibility is ONLY:
+
+> **Create a beautiful, realistic, customer-friendly mobile frontend that consumes the backend API later.**
+
+The backend API may not be fully available while you develop the frontend.
+
+Therefore, build the frontend using a **clean API abstraction layer + mock data** so that the backend can be connected later without redesigning the UI.
+
+---
+
+# 1. PROJECT
+
+Application:
+
+**AppAutopsy**
+
+Tagline:
+
+**Know what an app can do before it does it.**
+
+Purpose:
+
+AppAutopsy helps users understand whether an APK, download link, QR code, or suspicious message may be risky before installation.
+
+The project specification describes the core flow as:
+
+APK / link / message
+→ analysis
+→ category
+→ permission comparison
+→ risk score
+→ reasons
+→ recommendation
+
+The frontend must represent this flow clearly without implementing the security analysis itself.
+
+---
+
+# 2. PRIMARY GOAL
+
+Create a frontend that feels like a:
+
+**real consumer Android security application**
+
+NOT:
+
+* a college project
+* a generic dashboard
+* a website wrapped inside an app
+* an AI-generated UI
+* a template
+* a futuristic hacker interface
+* a SaaS analytics dashboard
+
+The interface must feel:
+
+* realistic
+* clean
+* premium
+* trustworthy
+* simple
+* modern
+* attractive
+* human-designed
+* accessible
+* responsive
+* fast
+* easy for non-technical users
+
+Imagine this app being used by:
+
+* parents
+* grandparents
+* students
+* normal Android users
+* people who receive APKs through WhatsApp
+
+The user may know **nothing about cybersecurity**.
+
+The interface must explain everything in simple language.
+
+---
+
+# 3. IMPORTANT — MOBILE FIRST
+
+Design for mobile phones FIRST.
+
+Do NOT design a desktop website and then shrink it.
+
+The project specification already requires a mobile-first frontend.
+
+Every screen must work naturally on:
+
+* small Android phones
+* normal Android phones
+* large Android phones
+
+Use responsive layouts.
+
+Avoid unnecessary horizontal scrolling.
+
+---
+
+# 4. RECOMMENDED FRONTEND STACK
+
+Use:
+
+* React
+* Vite
+* TypeScript
+* Tailwind CSS
+* React Router or React Navigation-compatible architecture depending on the existing project
+* Lucide React or another consistent icon library
+
+If the repository already has a frontend stack, **reuse it instead of unnecessarily replacing it.**
+
+First inspect the project.
+
+Do not install huge numbers of dependencies.
+
+Keep the frontend lightweight.
+
+---
+
+# 5. FIRST ACTION — INSPECT THE PROJECT
+
+Before writing code:
+
+1. Inspect the repository.
+2. Read `AGENTS.md`.
+3. Read `CONTEXT.md`.
+4. Inspect the existing frontend.
+5. Identify existing components.
+6. Identify existing API files.
+7. Identify existing styling.
+8. Identify what your friend has already implemented.
+9. Do NOT touch backend files.
+
+Then create the frontend implementation plan.
+
+---
+
+# 6. FILE OWNERSHIP RULE
+
+You may modify/create:
+
+```text
+frontend/
+src/
+components/
+pages/
+hooks/
+services/
+api/
+i18n/
+assets/
+styles/
+```
+
+You must NOT modify:
+
+```text
+backend/
+```
+
+unless I explicitly tell you otherwise.
+
+If you discover a backend problem:
+
+DO NOT fix it yourself.
+
+Instead tell me:
+
+> Backend integration issue found: [problem]
+
+Then continue with frontend development using mock data.
+
+---
+
+# 7. FRONTEND ARCHITECTURE
+
+Create a clean architecture like:
+
+```text
+src/
+│
+├── components/
+│   ├── AppHeader
+│   ├── BottomNavigation
+│   ├── PrimaryButton
+│   ├── SecondaryButton
+│   ├── RiskGauge
+│   ├── RiskBadge
+│   ├── PermissionCard
+│   ├── PermissionRow
+│   ├── PatternCard
+│   ├── RepackagingCard
+│   ├── UpdateDiffCard
+│   ├── CrowdIntelCard
+│   ├── PlaybookCard
+│   ├── CalibrationCard
+│   ├── PrescriptionCard
+│   ├── ScanOptionCard
+│   ├── EmptyState
+│   ├── LoadingState
+│   └── ErrorState
+│
+├── pages/
+│   ├── Home
+│   ├── Scan
+│   ├── ApkResult
+│   ├── LinkChecker
+│   ├── QrScanner
+│   ├── MessageChecker
+│   ├── History
+│   ├── Learn
+│   └── Settings
+│
+├── services/
+│   └── api.ts
+│
+├── mocks/
+│   └── scanResults.ts
+│
+├── hooks/
+│
+├── i18n/
+│   ├── en.json
+│   ├── hi.json
+│   └── pa.json
+│
+├── types/
+│
+├── utils/
+│
+└── App.tsx
+```
+
+Adapt this to the actual repository.
+
+Do not blindly create duplicate files if equivalents already exist.
+
+---
+
+# 8. API ABSTRACTION — VERY IMPORTANT
+
+Because another developer owns the backend, create a clean API service.
+
+For example:
+
+```ts
+api.analyzeApk()
+api.checkLink()
+api.checkMessage()
+api.getReport()
+api.getHashIntel()
+```
+
+The UI should never directly call `fetch()` from random components.
+
+Instead:
+
+```text
+UI
+ ↓
+api.ts
+ ↓
+backend
+```
+
+This makes backend integration easy later.
+
+---
+
+# 9. MOCK DATA
+
+Until the backend is connected, use realistic mock responses.
+
+Create:
+
+```text
+src/mocks/
+```
+
+Example mock result:
+
+```ts
+{
+  app: {
+    label: "Flashlight Pro",
+    package: "com.example.flashlight",
+    version: "2.1"
+  },
+
+  score: 78,
+
+  band: "high",
+
+  verdict: "red",
+
+  category: {
+    id: "flashlight",
+    confidence: "medium"
+  },
+
+  permissions: [
+    {
+      name: "SMS",
+      group: "sms",
+      status: "unexpected"
+    },
+    {
+      name: "Camera",
+      group: "camera",
+      status: "expected"
+    }
+  ],
+
+  patterns: [],
+
+  repackaging: {
+    detected: true
+  },
+
+  calibration: [],
+
+  playbook: [],
+
+  limitations:
+    "Static analysis only. This is not a guarantee of safety."
+}
+```
+
+The mock data must clearly be development/demo data.
+
+Never pretend mock results are real security analysis.
+
+---
+
+# 10. DESIGN LANGUAGE
+
+Create a unique AppAutopsy visual identity.
+
+## Overall style
+
+Use:
+
+* clean white/off-white surfaces
+* deep blue primary
+* subtle neutral backgrounds
+* restrained shadows
+* medium corner radius
+* strong typography
+* generous spacing
+
+Use:
+
+### Green
+
+Low risk
+
+### Amber
+
+Medium risk
+
+### Red
+
+High risk
+
+But NEVER use color alone.
+
+Always combine:
+
+* icon
+* text
+* color
+
+Example:
+
+```text
+🟢 LOW RISK
+```
+
+not merely:
+
+```text
+[green box]
+```
+
+---
+
+# 11. DO NOT MAKE IT "AI LOOKING"
+
+Absolutely avoid:
+
+* glowing gradients
+* cyberpunk
+* neon
+* robot illustrations
+* AI brains
+* circuit-board backgrounds
+* futuristic HUDs
+* excessive glassmorphism
+* excessive floating cards
+* huge gradient text
+* random 3D illustrations
+
+AppAutopsy should look like a **serious consumer security app**.
+
+---
+
+# 12. HOME SCREEN
+
+This is the most important frontend screen.
+
+Design it carefully.
+
+Suggested structure:
+
+```text
+AppAutopsy
+
+Know what an app can do
+before it does it.
+
+[ Scan APK ]
+
+[ Check Link ]
+
+[ Scan QR ]
+
+[ Check Message ]
+
+────────────────
+
+Recent Scan
+
+Flashlight Pro
+High Risk
+78/100
+
+────────────────
+
+Why AppAutopsy?
+
+Understand permissions
+before you install.
+
+────────────────
+
+Static analysis only.
+This is not a guarantee of safety.
+```
+
+Do NOT make it look like a dashboard.
+
+The primary action should immediately be obvious.
+
+---
+
+# 13. HOME SCREEN — VISUAL HIERARCHY
+
+Priority:
+
+### 1
+
+Scan APK
+
+### 2
+
+Check Link
+
+### 3
+
+Scan QR
+
+### 4
+
+Check Message
+
+Then:
+
+Recent scans
+
+Then:
+
+Educational/trust information.
+
+Do not give Settings or History equal visual importance to Scan APK.
+
+---
+
+# 14. APK SCAN SCREEN
+
+Create:
+
+### Scan an APK
+
+Subtitle:
+
+> Select an Android APK to check its permissions and potential risks.
+
+Primary button:
+
+**Choose APK**
+
+Secondary:
+
+**How does this work?**
+
+The frontend should provide the file picker UI.
+
+Do not implement APK parsing in the frontend.
+
+The selected file will eventually be passed to the backend API.
+
+---
+
+# 15. ANALYSIS SCREEN
+
+After selecting an APK, show a polished analysis screen.
+
+Example:
+
+```text
+Analyzing APK
+
+Flashlight Pro
+
+✓ File received
+
+✓ Reading app information
+
+● Checking permissions
+
+○ Checking suspicious patterns
+
+○ Preparing report
+```
+
+If the backend doesn't provide actual progress stages, DO NOT fake completion states.
+
+Instead use:
+
+```text
+Analyzing Flashlight Pro...
+
+Checking the information provided by this file.
+```
+
+and subtle animation.
+
+---
+
+# 16. RESULT SCREEN
+
+The result screen should be visually impressive.
+
+Top:
+
+App icon
+
+App name
+
+Package name in small text
+
+Then:
+
+```text
+HIGH RISK
+
+78 / 100
+
+Do not install
+```
+
+Then a short human explanation:
+
+> This flashlight app requests access that is unusual for its purpose.
+
+The user should understand the result within seconds.
+
+---
+
+# 17. RISK GAUGE
+
+Create a polished risk visualization.
+
+Possible:
+
+```text
+LOW       MEDIUM       HIGH
+0----------50----------100
+                    ●
+                   78
+```
+
+or a clean semicircle gauge.
+
+Do NOT create a huge gaming-style speedometer.
+
+The score bands are:
+
+```text
+0–25    Low
+26–60   Medium
+61–100  High
+```
+
+These are backend values; the frontend only displays them.
+
+---
+
+# 18. RESULT PAGE STRUCTURE
+
+Use this order:
+
+```text
+Risk Summary
+
+Why this result?
+
+Permissions
+
+Suspicious patterns
+
+Repackaging
+
+What changed?
+
+What should I do?
+
+Why this result might be wrong
+
+Technical details
+
+Disclaimer
+```
+
+Do not overwhelm the user.
+
+Use expandable sections where appropriate.
+
+---
+
+# 19. WHY THIS RESULT?
+
+Create:
+
+## Why this result?
+
+Example:
+
+### SMS access
+
+⚠ Unexpected
+
+> This app can access SMS-related functionality.
+
+### Camera
+
+✓ Expected
+
+> Camera access can be relevant for this type of application.
+
+The user should understand the reason without knowing Android permission names.
+
+---
+
+# 20. PERMISSION CARDS
+
+Each permission should have:
+
+* friendly name
+* status
+* short explanation
+* optional technical name
+
+Example:
+
+```text
+SMS Access
+
+⚠ Unexpected
+
+This permission can provide access to SMS-related functionality.
+
+Technical details ▾
+android.permission.READ_SMS
+```
+
+Do not lead with:
+
+`android.permission.READ_SMS`
+
+Lead with:
+
+**SMS Access**
+
+---
+
+# 21. EXPECTED VS UNEXPECTED
+
+Create obvious visual differentiation.
+
+Expected:
+
+✓ Expected
+
+Unexpected:
+
+⚠ Unexpected
+
+Never simply display a list of Android permission strings.
+
+---
+
+# 22. REPACKAGING CARD
+
+This is a major product differentiator.
+
+If backend returns:
+
+```ts
+repackaging.detected === true
+```
+
+display a strong card:
+
+```text
+⚠ Possible Repackaged App
+
+This app appears to have a different
+signing identity than expected.
+
+Why does this matter?
+
+A modified copy of a legitimate app
+can keep the same name while being
+signed by another developer.
+
+[View technical details]
+```
+
+If not detected:
+
+Do not show a giant "SAFE" message.
+
+Use a compact:
+
+```text
+✓ No signer mismatch detected
+```
+
+---
+
+# 23. ACTION PLAYBOOK
+
+For dangerous results:
+
+```text
+What should I do now?
+
+1. Do not install this app.
+
+2. If you already installed it,
+   consider removing it.
+
+3. If you shared sensitive information,
+   contact the relevant service immediately.
+
+4. Follow the appropriate official
+   cybercrime reporting guidance.
+```
+
+Use numbered steps.
+
+Make this section visually prominent.
+
+---
+
+# 24. CALIBRATION CARD
+
+Add:
+
+## Why this result might be wrong
+
+Possible items:
+
+* App category could not be confidently identified.
+* Some legitimate apps require unusual permissions.
+* Some checks were unavailable.
+* The purpose of the app was unclear.
+
+This should visually communicate honesty.
+
+---
+
+# 25. LOW-RISK RESULT
+
+Never show:
+
+❌ "100% SAFE"
+
+Instead:
+
+```text
+LOW RISK
+
+No major red flags were found
+in the checks that were run.
+```
+
+Then show supporting information.
+
+The source specification explicitly prohibits "100% safe" and requires the static-analysis disclaimer.
+
+---
+
+# 26. MEDIUM-RISK RESULT
+
+Display:
+
+```text
+REVIEW CAREFULLY
+
+Some requested access is unusual
+for this app's detected purpose.
+```
+
+Then explain exactly which permissions caused concern.
+
+---
+
+# 27. HIGH-RISK RESULT
+
+Display:
+
+```text
+HIGH RISK
+
+Do not install
+```
+
+Then explain why.
+
+Never use sensational language such as:
+
+"YOUR PHONE IS HACKED!!!"
+
+Keep the interface calm and factual.
+
+---
+
+# 28. LINK CHECKER
+
+Create a beautiful screen:
+
+```text
+Check a Download Link
+
+Paste a suspicious link below.
+
+[ https://........................ ]
+
+[ Check Link ]
+
+or
+
+[ Scan QR Code ]
+```
+
+Result:
+
+```text
+Link Analysis
+
+Domain
+example.com
+
+Redirects
+2
+
+APK download
+Detected
+
+Reputation
+Not checked
+```
+
+Remember:
+
+The frontend displays backend information.
+
+It does NOT perform security analysis itself.
+
+---
+
+# 29. QR SCANNER
+
+Create a dedicated QR screen.
+
+```text
+Scan QR Code
+
+Point your camera at
+a QR code containing a link.
+
+[ Camera preview ]
+
+Enter link manually
+```
+
+If camera access is denied:
+
+```text
+Camera access isn't available.
+
+You can paste the link manually instead.
+
+[ Enter Link ]
+```
+
+---
+
+# 30. MESSAGE CHECKER
+
+Create:
+
+```text
+Check a Message
+
+Paste the suspicious message below.
+
+[ Large text area ]
+
+[ Check Message ]
+```
+
+After analysis:
+
+```text
+Potential Warning Signs
+
+⚠ Urgency
+
+⚠ OTP request
+
+⚠ Suspicious link
+
+⚠ APK mentioned
+```
+
+Again, this is only a frontend representation of backend results.
+
+Do not implement a separate message-scoring algorithm.
+
+---
+
+# 31. HISTORY SCREEN
+
+Create a clean history.
+
+Example:
+
+```text
+Scan History
+
+Today
+
+Flashlight Pro
+High Risk
+78/100
+
+Calculator
+Low Risk
+5/100
+
+Yesterday
+
+Unknown App
+Review Carefully
+42/100
+```
+
+Use attractive list items.
+
+Each item should be tappable.
+
+Open the corresponding report.
+
+If no history:
+
+```text
+No scans yet
+
+Your recent scan reports
+will appear here.
+```
+
+---
+
+# 32. LEARN SCREEN
+
+Create simple educational content.
+
+Cards:
+
+### What is an APK?
+
+### What are permissions?
+
+### Why is SMS access sensitive?
+
+### What is Accessibility access?
+
+### What is a repackaged APK?
+
+Keep each explanation short and friendly.
+
+---
+
+# 33. SETTINGS
+
+Include:
+
+### Language
+
+English
+हिन्दी
+ਪੰਜਾਬੀ
+
+### Appearance
+
+System
+Light
+Dark
+
+### Voice
+
+Enable/disable if implemented.
+
+### About AppAutopsy
+
+Version
+
+### Privacy
+
+Explain simply that the frontend does not store APK files locally.
+
+Do not make unsupported privacy claims.
+
+---
+
+# 34. MULTILINGUAL UI
+
+Implement:
+
+```text
+English
+Hindi
+Punjabi
+```
+
+Use:
+
+```text
+i18n/en.json
+i18n/hi.json
+i18n/pa.json
+```
+
+Never hardcode UI strings throughout components.
+
+The project specification requires EN / HI / PA explanations.
+
+---
+
+# 35. DESIGN FOR OLDER USERS
+
+Remember the target user can be a parent or grandparent.
+
+Therefore:
+
+* large buttons
+* clear labels
+* high contrast
+* readable font
+* minimal navigation
+* no tiny icons
+* no confusing gestures
+* no hidden primary actions
+
+Minimum touch target:
+
+**44–48 dp**
+
+---
+
+# 36. BUTTON DESIGN
+
+Primary button:
+
+Strong solid color.
+
+Example:
+
+```text
+┌──────────────────────────┐
+│       Scan APK           │
+└──────────────────────────┘
+```
+
+Secondary:
+
+Outlined or subtle filled button.
+
+Do not use five different button styles.
+
+---
+
+# 37. CARDS
+
+Cards should be used only when they improve hierarchy.
+
+Avoid:
+
+```text
+CARD
+  CARD
+    CARD
+      CARD
+```
+
+Do not put every sentence inside a card.
+
+Use whitespace and typography.
+
+---
+
+# 38. ICONOGRAPHY
+
+Use one consistent icon library.
+
+Recommended:
+
+**Lucide**
+
+Use icons for:
+
+* APK
+* link
+* QR
+* message
+* warning
+* shield
+* settings
+* history
+* information
+* permissions
+* arrow
+* chevron
+
+Do not use random emoji as primary interface icons.
+
+---
+
+# 39. ANIMATIONS
+
+Use subtle animations:
+
+* button press
+* page transition
+* risk gauge
+* expandable sections
+* scanning state
+
+Do NOT use:
+
+* particles
+* glowing effects
+* excessive bouncing
+* constant motion
+* hacker-style animations
+
+The app should feel premium and calm.
+
+---
+
+# 40. DARK MODE
+
+If practical, implement dark mode.
+
+It should not simply invert colors.
+
+Create proper dark-mode tokens.
+
+Ensure:
+
+* readable text
+* correct contrast
+* correct risk colors
+* cards remain visually distinct
+
+---
+
+# 41. API MOCK SWITCH
+
+Create a simple development mechanism:
+
+```text
+USE_MOCK_DATA=true
+```
+
+When true:
+
+Frontend uses mock responses.
+
+When false:
+
+Frontend calls backend.
+
+This allows me to develop the entire UI before my friend's backend is ready.
+
+Do NOT modify backend to achieve this.
+
+---
+
+# 42. TYPES
+
+Create TypeScript interfaces matching the backend contract.
+
+For example:
+
+```ts
+interface ApkReport {
+  report_id: string;
+
+  app: {
+    label: string;
+    package: string;
+    version_name?: string;
+    version_code?: number;
+    sha256?: string;
+    signing_cert_sha256?: string[];
+  };
+
+  category: {
+    id: string;
+    confidence: string;
+    method: string;
+  };
+
+  score: number;
+  band: "low" | "medium" | "high";
+  verdict: "green" | "yellow" | "red";
+
+  permissions: Permission[];
+
+  patterns: Pattern[];
+
+  repackaging?: Repackaging;
+
+  calibration?: string[];
+
+  playbook?: PlaybookStep[];
+
+  limitations: string;
+}
+```
+
+Adapt types to the actual API contract.
+
+Do not invent backend fields if they are not needed.
+
+---
+
+# 43. API ERROR HANDLING
+
+Frontend must gracefully handle:
+
+* 400
+* 404
+* 413
+* 429
+* 500
+* network failure
+* timeout
+
+Never display raw server errors.
+
+Instead:
+
+```text
+Something went wrong.
+
+We couldn't complete the check.
+
+[ Try Again ]
+```
+
+---
+
+# 44. LOADING STATES
+
+Every API-based screen must have a proper loading state.
+
+Do not show blank white screens.
+
+Use:
+
+* skeletons
+* progress indicators
+* meaningful loading messages
+
+---
+
+# 45. EMPTY STATES
+
+Every list needs an empty state.
+
+History:
+
+"No scans yet."
+
+Message:
+
+"Paste a suspicious message to begin."
+
+Link:
+
+"Paste a link to check it."
+
+---
+
+# 46. NO FAKE SECURITY CLAIMS
+
+Frontend text must NEVER contain:
+
+* "100% safe"
+* "100% fake"
+* "We detect every virus"
+* "Guaranteed safe"
+* "Guaranteed malware"
+* "We monitor your phone"
+* "We detect everything"
+
+The source project explicitly prohibits these claims.
+
+---
+
+# 47. DISCLAIMER
+
+Create a reusable:
+
+`Disclaimer`
+
+component.
+
+Text:
+
+> Static analysis only. This is not a guarantee of safety.
+
+It should appear on result/report surfaces.
+
+---
+
+# 48. REALISTIC CONTENT
+
+Do not use meaningless placeholder copy like:
+
+"Lorem ipsum"
+
+or:
+
+"AI-powered intelligent cybersecurity ecosystem."
+
+Use realistic product language.
+
+---
+
+# 49. NO FAKE STATISTICS
+
+Do not invent:
+
+* users protected
+* apps scanned
+* threats detected
+* percentage safe
+* crowd intelligence numbers
+
+If mock data is required for a demo, clearly isolate it inside mock files.
+
+---
+
+# 50. ACCESSIBILITY
+
+Implement:
+
+* semantic labels
+* accessible buttons
+* screen-reader labels
+* sufficient contrast
+* keyboard accessibility where applicable
+* large touch targets
+
+Never communicate risk through color alone.
+
+---
+
+# 51. PERFORMANCE
+
+Avoid unnecessary re-renders.
+
+Use:
+
+* lazy loading
+* memoization where useful
+* efficient lists
+* optimized assets
+
+Do not prematurely optimize everything.
+
+Prioritize a smooth mobile experience.
+
+---
+
+# 52. IMPORTANT: NO BACKEND LOGIC
+
+If you find yourself writing code like:
+
+```ts
+calculateRisk()
+calculatePermissionScore()
+detectMalware()
+detectRepackaging()
+```
+
+STOP.
+
+That logic belongs to the backend.
+
+Frontend should only do:
+
+```text
+receive result
+→ display result
+```
+
+The frontend can perform normal UI validation, such as:
+
+* empty input
+* invalid URL format
+* unsupported file extension
+
+But it must not recreate security analysis.
+
+---
+
+# 53. DEMO MODE
+
+Create at least three mock states for UI development:
+
+### Mock 1 — Low Risk
+
+Calculator
+
+Score:
+
+8
+
+Verdict:
+
+Low Risk
+
+### Mock 2 — Medium Risk
+
+Unknown utility
+
+Score:
+
+48
+
+Verdict:
+
+Review Carefully
+
+### Mock 3 — High Risk
+
+Flashlight Pro
+
+Score:
+
+78
+
+Verdict:
+
+High Risk
+
+Include repackaging information in the high-risk mock so the complete UI can be demonstrated.
+
+These are ONLY frontend demo states.
+
+---
+
+# 54. IMPORTANT UI TEST
+
+After building, test these flows:
+
+### Flow 1
+
+Home
+
+→ Scan APK
+
+→ Choose APK
+
+→ Loading
+
+→ High Risk Result
+
+### Flow 2
+
+Home
+
+→ Check Link
+
+→ Enter Link
+
+→ Result
+
+### Flow 3
+
+Home
+
+→ QR Scanner
+
+→ Camera denied
+
+→ Manual URL
+
+### Flow 4
+
+Home
+
+→ History
+
+→ Previous Report
+
+### Flow 5
+
+Settings
+
+→ Hindi
+
+→ UI changes to Hindi
+
+### Flow 6
+
+Settings
+
+→ Punjabi
+
+→ UI changes to Punjabi
+
+---
+
+# 55. VISUAL QA
+
+Before finishing, inspect every screen.
+
+Ask:
+
+### Does this look like a real mobile app?
+
+### Does it look professionally designed?
+
+### Is the first action obvious?
+
+### Is the text readable?
+
+### Are risk states understandable?
+
+### Does the app feel trustworthy?
+
+### Is anything unnecessarily flashy?
+
+### Does anything look AI-generated?
+
+### Are there too many cards?
+
+### Is the navigation intuitive?
+
+### Can a non-technical person use it?
+
+If the answer to any of these is no, improve the UI.
+
+---
+
+# 56. DO NOT OVERDESIGN
+
+Remember:
+
+**Professional ≠ complicated**
+
+The best interface should feel:
+
+Simple.
+
+Clear.
+
+Confident.
+
+Calm.
+
+Human.
+
+---
+
+# 57. FINAL FRONTEND STRUCTURE
+
+The final user journey should be:
+
+```text
+HOME
+ │
+ ├── Scan APK
+ │      │
+ │      ├── Select APK
+ │      ├── Loading
+ │      └── Result
+ │
+ ├── Check Link
+ │      │
+ │      └── Link Result
+ │
+ ├── Scan QR
+ │      │
+ │      └── Link Result
+ │
+ ├── Check Message
+ │      │
+ │      └── Message Result
+ │
+ ├── History
+ │
+ ├── Learn
+ │
+ └── Settings
+```
+
+---
+
+# 58. FINAL REQUIREMENT
+
+At the end, provide:
+
+1. Frontend architecture summary
+2. List of created components
+3. List of created screens
+4. API integration points
+5. Mock data location
+6. How my backend developer can connect his API
+7. How to run the frontend
+8. How to build the Android APK
+9. Any frontend limitations
+
+DO NOT modify backend files.
+
+DO NOT claim backend features are implemented.
+
+---
+
+# 59. START NOW
+
+Start by:
+
+1. Inspecting the repository.
+2. Reading `AGENTS.md`.
+3. Reading `CONTEXT.md`.
+4. Inspecting the existing frontend.
+5. Creating the frontend plan.
+6. Building the design system.
+7. Building the Home screen.
+8. Building the APK scan flow.
+9. Building the result screen.
+10. Adding mock API responses.
+11. Adding API abstraction.
+12. Building secondary screens.
+13. Testing all frontend states.
+14. Polishing the UI.
+15. Building the Android APK.
+
+### MOST IMPORTANT RULE:
+
+**I want a beautiful frontend, not backend work.**
+
+Focus your effort on:
+
+**UI + UX + mobile responsiveness + realistic design + reusable components + API integration layer + mock data + Android build.**
+
+Do not touch the backend.
