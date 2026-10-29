@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
+import ProgramsCarousel from '../components/ProgramsCarousel';
 import { PROGRAM_IMAGES } from '../data/programImages';
 
 // Academic Schools / Faculties representing LPU's institutional hierarchy
@@ -282,7 +283,7 @@ export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [selectedSchoolId, setSelectedSchoolId] = useState('all');
   const [selectedDegree, setSelectedDegree] = useState('All Degrees');
-  const [viewMode, setViewMode] = useState('hierarchical'); // 'hierarchical' | 'catalog'
+  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'hierarchical' | 'catalog'
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
 
@@ -466,6 +467,18 @@ export default function Programs({ ask, onOpenCompare }) {
               {/* View Mode Switcher */}
               <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
                 <button
+                  onClick={() => setViewMode('carousel')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                    viewMode === 'carousel'
+                      ? 'bg-orange-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                  aria-label="Interactive 3D Carousel"
+                >
+                  <Sparkles size={12} />
+                  <span>3D Carousel</span>
+                </button>
+                <button
                   onClick={() => setViewMode('hierarchical')}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-500 ${
                     viewMode === 'hierarchical'
@@ -487,7 +500,7 @@ export default function Programs({ ask, onOpenCompare }) {
                   aria-label="Display flat catalog"
                 >
                   <Filter size={12} />
-                  <span className="hidden sm:inline">Flat Catalog</span>
+                  <span className="hidden sm:inline">Flat Grid</span>
                 </button>
               </div>
 
@@ -596,6 +609,14 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
+        ) : viewMode === 'carousel' ? (
+          /* ── Premium Infinite Horizontal 3D Carousel (Prominent Center + Smooth Right-to-Left Loop) ── */
+          <ProgramsCarousel
+            programs={filtered}
+            onView={(prog) => setSelectedProgram(prog)}
+            onAsk={ask}
+            onCompare={(id) => handleToggleCompareQueue(id)}
+          />
         ) : viewMode === 'hierarchical' && selectedSchoolId === 'all' && !q ? (
           /* ── Hierarchical School View (Eliminates flat crowded feeling) ── */
           <div className="space-y-12">
