@@ -470,10 +470,6 @@ export default function Home({ go, ask, onOpenCompare }) {
           </div>
         </div>
       </section>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ──────────────────────────────────────────────────────────
           SECTION 4: DIRECT 24/7 AI ADMISSION ASSISTANT BANNER
