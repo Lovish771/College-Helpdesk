@@ -49,15 +49,15 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
           {/* Column 1: Brand & Identity (4 Cols) */}
           <div className="lg:col-span-4 flex flex-col">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-                <LpuLogo size={36} />
+              <div className="shrink-0">
+                <LpuLogo size={42} />
               </div>
               <div className="flex flex-col justify-center leading-none">
-                <span className="font-display font-extrabold text-2xl tracking-tight text-slate-900 dark:text-white">
-                  LPU
-                </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-0.5">
+                <span className="font-display font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-white">
                   Student Helpdesk
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                  Admissions, Courses &amp; Living Guide
                 </span>
               </div>
             </div>

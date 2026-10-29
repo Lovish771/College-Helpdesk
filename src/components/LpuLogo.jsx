@@ -6,20 +6,20 @@ export default function LpuLogo({
 }) {
   return (
     <div className={`inline-flex items-center gap-2 select-none ${className}`}>
-      {/* Real Official LPU University Logo with adaptive contrast container */}
+      {/* LPU Help Desk Mascot Logo - transparent, no background container */}
       <div
-        className="shrink-0 flex items-center justify-center rounded-lg bg-white/90 dark:bg-white p-0.5 shadow-2xs transition-transform duration-200 group-hover:scale-105"
+        className="shrink-0 flex items-center justify-center transition-transform duration-200 group-hover:scale-105"
         style={{
           width: `${size}px`,
           height: `${size}px`,
         }}
       >
         <img
-          src="/images/lpu-logo.png"
-          alt="Lovely Professional University Logo"
-          width={size - 4}
-          height={size - 4}
-          className="w-full h-full object-contain"
+          src="/images/lpu-mascot-logo.png"
+          alt="LPU Help Desk Mascot Logo"
+          width={size}
+          height={size}
+          className="w-full h-full object-contain filter drop-shadow-xs"
           loading="eager"
         />
       </div>
@@ -27,9 +27,6 @@ export default function LpuLogo({
       {showText && (
         <div className="flex flex-col justify-center leading-none">
           <span className="font-display font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-            LPU
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-0.5">
             Student Helpdesk
           </span>
         </div>

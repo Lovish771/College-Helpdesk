@@ -231,8 +231,8 @@ export default function HeroCampusShowcase() {
         >
           <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-xl bg-slate-900 shadow-md border border-white/20">
-                <LpuLogo variant="dark" size={32} showSubtitle={false} />
+              <div className="shrink-0">
+                <LpuLogo variant="dark" size={36} showSubtitle={false} />
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">

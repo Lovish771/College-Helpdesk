@@ -130,20 +130,17 @@ export default function Navbar({
               : 'bg-white/75 dark:bg-slate-900/75 border-slate-200/60 dark:border-white/[0.06] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.05),inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.06)]'
           }`}
         >
-          {/* Brand: Real LPU Logo + Stacked Title */}
+          {/* Brand: Mascot Logo + Title */}
           <button
             onClick={() => to('home')}
-            aria-label="Lovely Professional University Student Helpdesk"
+            aria-label="Student Helpdesk"
             className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl group transition-transform active:scale-95 shrink-0 cursor-pointer text-left pr-2"
           >
             <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <LpuLogo variant={isDark ? 'dark' : 'light'} size={34} />
+              <LpuLogo variant={isDark ? 'dark' : 'light'} size={38} />
             </div>
             <div className="flex flex-col justify-center leading-none">
-              <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                LPU
-              </span>
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-0.5 leading-tight">
+              <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                 Student Helpdesk
               </span>
             </div>
