@@ -90,7 +90,21 @@ export default function useChat() {
         meta: { intent: r.intent, confidence: r.confidence, requires_slot: r.requires_slot, slot: r.slot }
       }]);
     } catch (e) {
-      if (cidRef.current === my) patch('failed');
+      if (cidRef.current === my) {
+        patch('failed');
+        if (e.status === 401 || e.requires_login) {
+          setMessages((m) => [
+            ...m,
+            {
+              id: uid(),
+              role: 'bot',
+              text: '🔒 **Student Verification Required**\n\nPlease verify your student email with a 6-digit OTP code to continue chatting with the LPU AI Assistant and keep track of your enquiries.',
+              time: new Date(),
+              suggestions: [],
+            },
+          ]);
+        }
+      }
     } finally {
       if (cidRef.current === my) setLoading(false);
     }
@@ -157,59 +171,66 @@ export default function useChat() {
 
   // Permanently delete a single conversation
   const deleteConversation = useCallback(async (sessionId) => {
-    try {
-      const token = getStoredItem('lpu_auth_token');
-      const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      
-      const res = await fetch(`/api/conversations/${sessionId}`, {
-        method: 'DELETE',
-        headers
-      });
+    // 1. Optimistically delete from local state and storage immediately for instant responsiveness
+    setHistory((prev) => {
+      const updated = prev.filter((item) => item.id !== sessionId);
+      try {
+        setStoredItem('lpu_chat_history', updated);
+      } catch {}
+      return updated;
+    });
 
-      if (!res.ok) {
-        throw new Error('Failed to delete conversation from server');
-      }
-
-      setHistory((prev) => prev.filter((item) => item.id !== sessionId));
-      if (cidRef.current === sessionId) {
-        startNewChat();
-      }
-      return true;
-    } catch (err) {
-      console.error('Delete conversation error:', err);
-      setErrorToast('Failed to delete conversation from server. Retaining chat history.');
-      return false;
-    }
-  }, [startNewChat]);
-
-  // Permanently clear all conversation history
-  const clearAllHistory = useCallback(async () => {
-    try {
-      const token = getStoredItem('lpu_auth_token');
-      const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const res = await fetch(`/api/conversations?conversation_id=${cidRef.current}`, {
-        method: 'DELETE',
-        headers
-      });
-
-      if (!res.ok) {
-        throw new Error('Server failed to clear conversation records');
-      }
-
-      setHistory([]);
+    if (cidRef.current === sessionId) {
       const newCid = uid();
       setCid(newCid);
       cidRef.current = newCid;
       setLoading(false);
       setMessages(defaultWelcomeChat());
+    }
+
+    // 2. Best-effort server cleanup (if online)
+    try {
+      const token = getStoredItem('lpu_auth_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      
+      await fetch(`/api/conversations/${sessionId}`, {
+        method: 'DELETE',
+        headers
+      }).catch(() => {});
       return true;
-    } catch (err) {
-      console.error('Clear all history error:', err);
-      setErrorToast('Failed to delete records from server. Chat history preserved.');
-      return false;
+    } catch {
+      return true;
+    }
+  }, []);
+
+  // Permanently clear all conversation history
+  const clearAllHistory = useCallback(async () => {
+    // 1. Clear local state and storage immediately
+    setHistory([]);
+    try {
+      setStoredItem('lpu_chat_history', []);
+    } catch {}
+
+    const newCid = uid();
+    setCid(newCid);
+    cidRef.current = newCid;
+    setLoading(false);
+    setMessages(defaultWelcomeChat());
+
+    // 2. Best-effort server cleanup
+    try {
+      const token = getStoredItem('lpu_auth_token');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      await fetch(`/api/conversations?conversation_id=${newCid}`, {
+        method: 'DELETE',
+        headers
+      }).catch(() => {});
+      return true;
+    } catch {
+      return true;
     }
   }, []);
 

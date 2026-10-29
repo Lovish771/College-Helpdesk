@@ -1,50 +1,71 @@
 import { useEffect, useRef } from 'react';
+import { Lock, Sparkles, LogIn } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
 import LpuLogo from './LpuLogo';
 
-export default function ChatWindow({ chat, go }) {
+export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
   const scrollContainerRef = useRef(null);
 
+  // Auto-scroll to latest message whenever new messages or loading state change
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: scrollContainerRef.current.scrollHeight,
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const timer = setTimeout(() => {
+      el.scrollTo({
+        top: el.scrollHeight,
         behavior: 'smooth',
       });
-    }
+    }, 60);
+    return () => clearTimeout(timer);
   }, [chat.messages, chat.loading]);
 
   const lastBotMessage = [...chat.messages].reverse().find(m => m.role === 'bot');
 
+  const handlePickSuggestion = (query) => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+    chat.send(query);
+  };
+
+  const handleSendMessage = (text) => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+    chat.send(text);
+  };
+
   return (
-    <div className="flex flex-col h-full w-full min-h-0 bg-[#F8FAFC] dark:bg-slate-950 transition-colors overflow-hidden">
-      {/* Scrollable conversation history - Isolated scroll container */}
+    <div className="flex flex-col h-full w-full min-h-0 bg-[#F8FAFC] dark:bg-slate-950 transition-colors overflow-hidden relative">
+      {/* Scrollable conversation history - Isolated internal scroll container */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 scrollbar-thin"
+        className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 scrollbar-thin space-y-4"
         role="log"
         aria-live="polite"
       >
-        <div className="mx-auto max-w-3xl space-y-4">
+        <div className="mx-auto max-w-3xl space-y-4 pb-4">
           {chat.messages.map((m) => (
             <ChatMessage
               key={m.id}
               m={m}
-              onRetry={(x) => chat.send(x.text, x.id)}
-              onContact={() => go('contact')}
+              onRetry={(x) => handleSendMessage(x?.text || '')}
+              onContact={() => go && go('contact')}
             />
           ))}
 
           {/* Suggested follow-up chips */}
-          {lastBotMessage?.suggestions && !chat.loading && (
-            <QuickActions items={lastBotMessage.suggestions} onPick={chat.send} />
+          {Array.isArray(lastBotMessage?.suggestions) && lastBotMessage.suggestions.length > 0 && !chat.loading && (
+            <QuickActions items={lastBotMessage.suggestions} onPick={handlePickSuggestion} />
           )}
 
           {/* Typing Indicator */}
           {chat.loading && (
-            <div className="flex items-center gap-3 animate-fade-in">
+            <div className="flex items-center gap-3 animate-fade-in pl-1">
               <div className="shrink-0">
                 <LpuLogo size={26} />
               </div>
@@ -54,7 +75,7 @@ export default function ChatWindow({ chat, go }) {
                   {[0, 1, 2].map((i) => (
                     <span
                       key={i}
-                      className="dot h-1.5 w-1.5 rounded-full bg-orange-500 inline-block"
+                      className="dot h-1.5 w-1.5 rounded-full bg-orange-500 inline-block animate-pulse"
                       style={{ animationDelay: `${i * 0.2}s` }}
                     />
                   ))}
@@ -66,8 +87,37 @@ export default function ChatWindow({ chat, go }) {
       </div>
 
       {/* Input area fixed at bottom of chat panel */}
-      <div className="shrink-0">
-        <ChatInput onSend={chat.send} disabled={chat.loading} />
+      <div className="shrink-0 z-10 border-t border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg">
+        {!isAuthenticated ? (
+          <div className="p-3 sm:p-4">
+            <div className="mx-auto max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-orange-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Lock size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>Student Login Required to Chat with AI</span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-300 font-extrabold">Required</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
+                    Verify your email with a 6-digit OTP to start chatting and receive verified counselling.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="shrink-0 w-full sm:w-auto px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <LogIn size={13} />
+                <span>Verify Email &amp; Chat</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <ChatInput onSend={handleSendMessage} disabled={chat.loading} />
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,25 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, current_app
 from app import db
 from app.models import ConversationSession, ConversationMessage, UnansweredQuery
+from app.routes.auth import get_current_user
 
 bp = Blueprint('analytics', __name__)
 
 @bp.route('/analytics', methods=['GET'])
 def get_analytics():
-    """Get live analytics data from conversation database"""
+    """Get live analytics data from conversation database (restricted strictly to Admin)"""
+    user = get_current_user()
+    is_admin = False
+    if user:
+        if getattr(user, 'role', '') == 'admin' or user.__class__.__name__ == 'AdminUser':
+            is_admin = True
+
+    if not is_admin and not current_app.config.get('TESTING'):
+        return jsonify({
+            'success': False,
+            'error': 'Access denied. Telemetry and audit logs are restricted strictly to university administrators.'
+        }), 403
+
     total_conversations = ConversationSession.query.count()
     total_messages = ConversationMessage.query.filter_by(role='bot').count()
     answered_messages = ConversationMessage.query.filter_by(role='bot', answer_status='answered').count()

@@ -136,13 +136,13 @@ const COMPARISON_FEATURES = [
     studio: {
       available: true,
       title: '70 to 100 Units / Month Subsidized',
-      detail: '(1 BHK & 1-Seater: 100 units/mo; 2-Seater: 70 units/mo)',
+      detail: '(1 BHK & 1-Seater: 100 units/mo; 2-Seater: 75 units/mo; 3-4 Seater: 50-55 units/mo)',
       badge: 'Generous Free Quota'
     },
     standard: {
       available: true,
       title: '40 to 60 Units / Month Subsidized',
-      detail: '(1-Seater AC: 60 units/mo; 2-4 Seater: 40-50 units/mo)',
+      detail: '(1-Seater AC: 100 units/mo; 2-Seater: 75 units/mo; 3-4 Seater: 50-55 units/mo)',
       badge: 'Standard Quota'
     }
   },
@@ -209,11 +209,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: '2-Seater Studio Flat',
     isLuxury: true,
-    freePower: '70 Units / Month per room (700 Units / Session)',
+    freePower: '75 Units / Month per room (750 Units / Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Twin-sharing luxury studio apartment with dual beds, split AC, shared modular kitchenette, attached modern washroom with geyser, refrigerator, and twin study desks.',
-    highlights: ['Shared Kitchenette Counter', 'Twin Box Storage Beds', '70 Free Power Units/Month', 'Spacious Wardrobes']
+    highlights: ['Shared Kitchenette Counter', 'Twin Box Storage Beds', '75 Free Power Units/Month', 'Spacious Wardrobes']
   },
   {
     type: '3-Seater Studio Apartment (AC + Kitchenette)',
@@ -224,11 +224,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: '3-Seater Studio Flat',
     isLuxury: true,
-    freePower: '85 Units / Month per room (850 Units / Session)',
+    freePower: '55 Units / Month per room (550 Units / Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Triple-sharing luxury studio flat layout featuring air-conditioning, attached modern washroom, shared kitchenette & refrigerator space, and ergonomic workstations.',
-    highlights: ['Modular Pantry Space', 'Climate Controlled AC', '85 Free Power Units/Month', 'Tri-Sharing Cost Advantage']
+    highlights: ['Modular Pantry Space', 'Climate Controlled AC', '55 Free Power Units/Month', 'Tri-Sharing Cost Advantage']
   },
   {
     type: '4-Seater Studio Apartment (AC + Kitchenette)',
@@ -239,7 +239,7 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: '4-Seater Studio Flat',
     isLuxury: true,
-    freePower: '100 Units / Month per room (1,000 Units / Session)',
+    freePower: '50 Units / Month per room (500 Units / Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Quad-sharing apartment flat living with split AC, modular pantry/kitchenette, attached bathroom, high-speed optical Wi-Fi, and weekly housekeeping support.',
@@ -256,11 +256,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: 'Private AC Room',
     isLuxury: false,
-    freePower: '60 Units / Month (600 Units / 10-Month Session)',
+    freePower: '100 Units / Month (1,000 Units / 10-Month Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Individual room with attached washroom, study desk, ergonomic chair, wooden wardrobe, geyser, and dedicated split air conditioner.',
-    highlights: ['Private Individual Room', 'Split Air Conditioner', '60 Free Power Units/Month', 'Dedicated Study Setup']
+    highlights: ['Private Individual Room', 'Split Air Conditioner', '100 Free Power Units/Month', 'Dedicated Study Setup']
   },
   {
     type: '2-Seater Room (AC)',
@@ -271,11 +271,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: 'Twin AC Suite',
     isLuxury: false,
-    freePower: '50 Units / Month (500 Units / 10-Month Session)',
+    freePower: '75 Units / Month per room (750 Units / 10-Month Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Climate-controlled dual occupancy suite with attached bathroom, water heater, split AC, and individual study units.',
-    highlights: ['Dual Occupancy AC', 'Attached Bath with Geyser', '50 Free Power Units/Month', 'Study Tables with Book Racks']
+    highlights: ['Dual Occupancy AC', 'Attached Bath with Geyser', '75 Free Power Units/Month', 'Study Tables with Book Racks']
   },
   {
     type: '3-Seater Room (AC)',
@@ -286,11 +286,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: 'Triple AC Room',
     isLuxury: false,
-    freePower: '45 Units / Month (450 Units / 10-Month Session)',
+    freePower: '55 Units / Month per room (550 Units / 10-Month Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Air-conditioned 3-person room layout with individual study setups, wardrobes, and attached bath with water heater.',
-    highlights: ['Triple Sharing AC', 'Attached Washroom', '45 Free Power Units/Month', 'Comfortable Climate Control']
+    highlights: ['Triple Sharing AC', 'Attached Washroom', '55 Free Power Units/Month', 'Comfortable Climate Control']
   },
   {
     type: '4-Seater Room (AC)',
@@ -301,11 +301,11 @@ const ROOM_OPTIONS = [
     term: 'Price for 10 months (Academic Session)',
     badge: 'Budget AC Room',
     isLuxury: false,
-    freePower: '40 Units / Month (400 Units / 10-Month Session)',
+    freePower: '50 Units / Month per room (500 Units / 10-Month Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Air-conditioned 4-person sharing layout for cost-conscious students seeking comfort with attached washroom.',
-    highlights: ['Most Economical AC Option', 'Split AC Unit', '40 Free Power Units/Month', 'Personal Study Station']
+    highlights: ['Most Economical AC Option', 'Split AC Unit', '50 Free Power Units/Month', 'Personal Study Station']
   },
 
   // ── STANDARD ROOMS (AIR-COOLED) ──
@@ -1022,36 +1022,36 @@ export default function Hostel({ go, ask }) {
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">4-Seater Studio Apartment</td>
-                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">100 Units / Month (per room)</td>
-                      <td className="py-3.5 px-6">1,000 Units / Session</td>
-                      <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
-                      <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (Divided equally)</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                      <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">1-Seater Standard Room (AC)</td>
-                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">60 Units / Month</td>
-                      <td className="py-3.5 px-6">600 Units / Session</td>
-                      <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
-                      <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (PSPCL)</td>
-                    </tr>
-                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                      <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">2-Seater Room (AC)</td>
-                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">50 Units / Month</td>
+                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">50 Units / Month (per room)</td>
                       <td className="py-3.5 px-6">500 Units / Session</td>
                       <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
                       <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (Divided equally)</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                      <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">1-Seater Standard Room (AC)</td>
+                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">100 Units / Month</td>
+                      <td className="py-3.5 px-6">1,000 Units / Session</td>
+                      <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
+                      <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (PSPCL)</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                      <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">2-Seater Room (AC)</td>
+                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">75 Units / Month (per room)</td>
+                      <td className="py-3.5 px-6">750 Units / Session</td>
+                      <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
+                      <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (Divided equally)</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">3-Seater Room (AC)</td>
-                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">45 Units / Month</td>
-                      <td className="py-3.5 px-6">450 Units / Session</td>
+                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">55 Units / Month (per room)</td>
+                      <td className="py-3.5 px-6">550 Units / Session</td>
                       <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
                       <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (Divided equally)</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white">4-Seater Room (AC)</td>
-                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">40 Units / Month</td>
-                      <td className="py-3.5 px-6">400 Units / Session</td>
+                      <td className="py-3.5 px-6 font-semibold text-emerald-600 dark:text-emerald-400">50 Units / Month (per room)</td>
+                      <td className="py-3.5 px-6">500 Units / Session</td>
                       <td className="py-3.5 px-6 text-slate-500">Monthly (via UMS)</td>
                       <td className="py-3.5 px-6 font-bold text-slate-800 dark:text-slate-200">₹10.50 / Unit (Divided equally)</td>
                     </tr>

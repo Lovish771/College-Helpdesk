@@ -1,5 +1,6 @@
 from datetime import datetime
 from app import db
+from app.models.user import utc_now
 import bcrypt
 
 class AdminUser(db.Model):
@@ -10,7 +11,7 @@ class AdminUser(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
     last_login = db.Column(db.DateTime)
     
     def set_password(self, password):
@@ -40,7 +41,7 @@ class AuditLog(db.Model):
     old_value = db.Column(db.JSON)
     new_value = db.Column(db.JSON)
     ip_address = db.Column(db.String(50))
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=utc_now)
     
     def to_dict(self):
         return {

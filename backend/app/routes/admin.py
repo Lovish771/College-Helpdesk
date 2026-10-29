@@ -2,10 +2,11 @@ import os
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, g
 from app import db
-from app.models.user import User, SecurityLog
+from app.models.user import User, SecurityLog, utc_now
 from app.models.conversation import ConversationSession, ConversationMessage
 from app.models.feedback import UnansweredQuery
 from app.models.program import Program
+from app.models.intent import IntentPattern
 from app.routes.auth import admin_required
 
 bp = Blueprint('admin', __name__)
@@ -16,7 +17,7 @@ def admin_metrics():
     """Retrieve comprehensive system metrics and real database analytics."""
     range_param = request.args.get('range', '30d')
     days = 7 if range_param == '7d' else (90 if range_param == '90d' else 30)
-    cutoff = datetime.utcnow() - timedelta(days=days)
+    cutoff = utc_now() - timedelta(days=days)
 
     total_users = User.query.count()
     active_users = User.query.filter(User.last_login >= cutoff).count()
@@ -154,3 +155,89 @@ def admin_logs():
         'page': page,
         'limit': limit
     }), 200
+
+@bp.route('/admin/unanswered', methods=['GET'])
+@admin_required
+def admin_unanswered():
+    """Retrieve and analyze unanswered student queries for continuous model & rule learning."""
+    page = int(request.args.get('page', 1))
+    limit = min(int(request.args.get('limit', 20)), 100)
+    status_filter = request.args.get('status')
+
+    query = UnansweredQuery.query
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    total = query.count()
+    items = query.order_by(UnansweredQuery.occurrence_count.desc(), UnansweredQuery.last_seen.desc()).offset((page - 1) * limit).limit(limit).all()
+
+    return jsonify({
+        'success': True,
+        'unanswered': [q.to_dict() for q in items],
+        'total': total,
+        'page': page,
+        'limit': limit
+    }), 200
+
+@bp.route('/admin/unanswered/<int:query_id>', methods=['PATCH'])
+@admin_required
+def update_unanswered_status(query_id):
+    """Mark an unanswered query as reviewed, pending, or resolved."""
+    q = db.session.get(UnansweredQuery, query_id)
+    if not q:
+        return jsonify({'success': False, 'error': 'Query not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    status = data.get('status')
+    if status:
+        q.status = status
+    if 'notes' in data:
+        q.notes = data['notes']
+    db.session.commit()
+
+    return jsonify({'success': True, 'query': q.to_dict()}), 200
+
+@bp.route('/admin/intents', methods=['GET'])
+@admin_required
+def admin_get_intents():
+    """List all registered intent patterns from the rule base."""
+    patterns = IntentPattern.query.order_by(IntentPattern.priority.desc()).all()
+    return jsonify({
+        'success': True,
+        'intents': [
+            {
+                'id': p.id,
+                'name': p.intent_name,
+                'patterns': p.patterns,
+                'priority': p.priority,
+                'is_active': p.is_active
+            } for p in patterns
+        ]
+    }), 200
+
+@bp.route('/admin/intents', methods=['POST'])
+@admin_required
+def admin_add_intent():
+    """Dynamically expand the rule base with new intent patterns and regex."""
+    data = request.get_json(silent=True) or {}
+    intent_name = (data.get('intent_name') or '').strip()
+    patterns = data.get('patterns') or []
+    priority = int(data.get('priority', 5))
+
+    if not intent_name or not patterns:
+        return jsonify({'success': False, 'error': 'Both intent_name and patterns are required'}), 400
+
+    existing = IntentPattern.query.filter_by(intent_name=intent_name).first()
+    if existing:
+        existing.patterns = patterns
+        existing.priority = priority
+        existing.is_active = True
+    else:
+        new_intent = IntentPattern(intent_name=intent_name, patterns=patterns, priority=priority, is_active=True)
+        db.session.add(new_intent)
+
+    db.session.commit()
+    return jsonify({
+        'success': True,
+        'message': f'Intent pattern {intent_name} registered into active rule base.'
+    }), 201

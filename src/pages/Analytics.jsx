@@ -1,15 +1,48 @@
 import { useState } from 'react';
 import {
   ChevronDown, TrendingUp, Users, MessageSquare, Clock, BarChart3, HelpCircle,
-  FileText, ShieldCheck, AlertCircle, ArrowUpRight, Search, CheckCircle2
+  FileText, ShieldCheck, AlertCircle, ArrowUpRight, Search, CheckCircle2, Lock
 } from 'lucide-react';
 import { getAnalytics } from '../api/analyticsApi';
 import { useAsync } from '../utils/useAsync';
+import useAuth from '../hooks/useAuth';
 
-export default function Analytics() {
+export default function Analytics({ onOpenAuth }) {
+  const { isAdmin } = useAuth();
   const [timeRange, setTimeRange] = useState('Last 30 Days');
   const [queryFilter, setQueryFilter] = useState('');
   const s = useAsync(getAnalytics);
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-[75vh] flex items-center justify-center p-6 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl text-center space-y-4 animate-scale-up">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <Lock size={26} />
+          </div>
+          <div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+              Restricted Confidential Area
+            </span>
+            <h2 className="text-xl font-extrabold font-display text-slate-900 dark:text-white mt-2">
+              Administrator Access Required
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+              Telemetry metrics, query distributions, and student audit logs are confidential and restricted strictly to university administrators.
+            </p>
+          </div>
+          <div className="pt-2">
+            <button
+              onClick={() => (onOpenAuth ? onOpenAuth() : (window.location.hash = '#/home'))}
+              className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-md"
+            >
+              Sign In as Administrator
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totals = s.data?.totals || { conversations: 1248, answered: 1082, rate: 86.7, unanswered: 166 };
   const recentLogs = s.data?.recent || [

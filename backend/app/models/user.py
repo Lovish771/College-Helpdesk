@@ -1,7 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import hashlib
 import secrets
 from app import db
+
+def utc_now():
+    """Return timezone-naive UTC datetime for SQLite/SQLAlchemy compatibility without Python 3.12 deprecation warnings."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -12,8 +16,8 @@ class User(db.Model):
     role = db.Column(db.String(50), default='student')  # 'student', 'admin'
     is_verified = db.Column(db.Boolean, default=True)
     accepted_terms = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
+    last_login = db.Column(db.DateTime, default=utc_now)
     
     # Relationship with conversation sessions
     conversations = db.relationship('ConversationSession', backref='user', lazy='dynamic')
@@ -36,7 +40,7 @@ class EmailOTP(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False, index=True)
     otp_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utc_now)
     expires_at = db.Column(db.DateTime, nullable=False)
     attempts = db.Column(db.Integer, default=0)
     is_used = db.Column(db.Boolean, default=False)
@@ -48,7 +52,7 @@ class EmailOTP(db.Model):
     def verify(self, candidate_otp: str) -> bool:
         if self.is_used:
             return False
-        if datetime.utcnow() > self.expires_at:
+        if utc_now() > self.expires_at:
             return False
         if self.attempts >= 5:
             return False
@@ -73,24 +77,23 @@ class SecurityLog(db.Model):
     ip_address = db.Column(db.String(50), nullable=True)
     user_agent = db.Column(db.String(255), nullable=True)
     details = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=utc_now)
     
     def to_dict(self):
         # Mask email for privacy: jo***@example.com
         masked_email = None
         if self.email and '@' in self.email:
             parts = self.email.split('@')
-            local = parts[0]
-            masked_local = (local[:2] + '***') if len(local) > 2 else (local[0] + '***')
-            masked_email = f"{masked_local}@{parts[1]}"
-        elif self.email:
-            masked_email = self.email[:3] + '***'
+            user_part = parts[0]
+            masked_user = (user_part[:2] + '***') if len(user_part) > 2 else (user_part[:1] + '***')
+            masked_email = f"{masked_user}@{parts[1]}"
             
         return {
             'id': self.id,
             'event_type': self.event_type,
             'email': masked_email,
             'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
             'details': self.details,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
         }

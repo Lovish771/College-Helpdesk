@@ -185,6 +185,36 @@ def seed_intent_patterns():
             'patterns': [r'\b(program|course|degree|branch|speciali[sz]ation|offered)\b'],
             'priority': 4,
         },
+        {
+            'intent_name': 'loan_query',
+            'patterns': [r'\b(loan|education\s*loan|bank\s*loan|vidya\s*lakshmi|emi|installment|sbi\s*loan|pnb\s*loan|financial\s*assistance)\b'],
+            'priority': 7,
+        },
+        {
+            'intent_name': 'hostel_tier_query',
+            'patterns': [r'\b(apartment\s*hostel|studio\s*hostel|studio\s*apartment|hostel\s*tier|room\s*category|ac\s*room|standard\s*hostel)\b'],
+            'priority': 7,
+        },
+        {
+            'intent_name': 'exam_fee_query',
+            'patterns': [r'\b(exam(ination)?\s*(fee|charges?|cost)|when\s*is\s*exam\s*fee)\b'],
+            'priority': 8,
+        },
+        {
+            'intent_name': 'laundry_query',
+            'patterns': [r'\b(laundry|clothes|washing|dry\s*clean|wash\s*charges)\b'],
+            'priority': 7,
+        },
+        {
+            'intent_name': 'total_fee_query',
+            'patterns': [r'\b(total\s*fee|4\s*year\s*fee|four\s*year\s*fee|full\s*fee|overall\s*cost|calculator)\b'],
+            'priority': 7,
+        },
+        {
+            'intent_name': 'compare_query',
+            'patterns': [r'\b(compare|difference\s*between|vs|versus|which\s*is\s*better)\b'],
+            'priority': 7,
+        },
     ]
     
     for intent_data in intents_data:
@@ -250,6 +280,34 @@ def seed_knowledge_entries():
             'answer': 'Admission Helpline: +91-1824-517000, Toll-Free: 1800 102 4431 / 1800 274 0615, WhatsApp: +91-98550-84000, Email: admissions@lpu.co.in. Campus Address: Lovely Professional University, Jalandhar-Delhi G.T. Road, Phagwara, Punjab - 144411.',
             'verification_status': 'verified_official',
             'notes': 'LPU Official Contact Directorate',
+        },
+        {
+            'category': 'education_loan',
+            'question': 'What is the education loan process for Lovely Professional University?',
+            'answer': 'LPU has dedicated institutional loan facilitation tie-ups with premier nationalized and private banks (State Bank of India, Punjab National Bank, Canara Bank, Union Bank of India, HDFC, ICICI). Process: 1) Secure admission offer letter via admission.lpu.in; 2) Download official Loan Estimate & Bonafide Letter from the UMS portal; 3) Apply via national Vidya Lakshmi portal (vidyalakshmi.co.in) or visit bank branches located inside the Uni-Mall on campus for direct processing.',
+            'verification_status': 'verified_official',
+            'notes': 'LPU Student Welfare & Bank Tie-up Cell 2026-27',
+        },
+        {
+            'category': 'apartment_hostel',
+            'question': 'What are the charges and amenities for Apartment and Studio Hostels at LPU?',
+            'answer': 'LPU offers premium Apartment and Studio hostel living alongside Standard dormitories for a 10-month academic session: 1) Standard Rooms (1, 2, 3, 4 seater, AC/Air-Cooled): ₹80,000 - ₹1,60,000/yr; 2) Apartment Accommodations: Feature attached washrooms, geyser, air conditioning, and shared kitchenette/pantry access; 3) Studio Apartments: Private self-contained living with microwave/refrigerator space and high-speed Wi-Fi. Free electricity allowance is provided; excess consumption is billed at commercial institutional slab rates (~₹10.50/unit).',
+            'verification_status': 'verified_official',
+            'notes': 'LPU Residence Handbook Session 2026-27',
+        },
+        {
+            'category': 'laundry_mess',
+            'question': 'What are the laundry and mess meal plan charges at LPU?',
+            'answer': '1) Laundry Services: Annual laundry charge is ₹5,400 per academic year for on-campus residents (covering 40 bundles/washes with steam ironing); 2) Mess Dining Plans: Standard Mess (~₹36,000 - ₹44,000/yr for 4 daily meals), Special Mess (extended continental & multi-cuisine menu), and dedicated South Indian dining halls.',
+            'verification_status': 'verified_official',
+            'notes': 'LPU Residential Services Official Tariffs 2026-27',
+        },
+        {
+            'category': 'examination_fee',
+            'question': 'When is the examination fee collected at LPU and how much is it?',
+            'answer': 'The official Lovely Professional University examination fee is ₹4,500 per academic year. Institutional policy states that this fee is assessed strictly once per year in the even (second) semester of each respective academic year, not in the odd (first) semester.',
+            'verification_status': 'verified_official',
+            'notes': 'LPU Academic Examination Ordinances 2026-27',
         },
     ]
     

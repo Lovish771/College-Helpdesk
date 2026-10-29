@@ -3,7 +3,7 @@ from functools import wraps
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
 from app import db
-from app.models.user import User, SecurityLog
+from app.models.user import User, SecurityLog, utc_now
 from app.models.admin import AdminUser
 from app.services.email_service import EmailService
 from app.services.jwt_service import JWTService
@@ -25,7 +25,7 @@ def get_current_user():
     
     # Check regular User table
     if user_id:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if user:
             return user
             
@@ -91,12 +91,21 @@ def send_otp():
     ip_addr = request.remote_addr
     user_agent = request.headers.get('User-Agent', '')[:250]
     
-    success, msg, status_code = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
-    return jsonify({
+    success, msg, status_code, meta = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
+    resp = {
         'success': success,
         'message': msg,
-        'cooldownSeconds': EmailService.COOLDOWN_SECONDS
-    }), status_code
+        'cooldownSeconds': meta.get('cooldown_seconds', EmailService.COOLDOWN_SECONDS),
+        'deliveredOnline': meta.get('delivered_online', False),
+        'provider': meta.get('provider', '')
+    }
+    if meta.get('dev_otp'):
+        resp['devOtp'] = meta['dev_otp']
+        resp['notice'] = f"Notice: External email credentials are not configured in .env. For testing, your verification code is {meta['dev_otp']}."
+    if not success:
+        resp['error'] = msg
+
+    return jsonify(resp), status_code
 
 @auth_bp.route('/api/auth/verify-otp', methods=['POST'])
 def verify_otp():
@@ -135,8 +144,8 @@ def verify_otp():
             role=role,
             is_verified=True,
             accepted_terms=accepted_terms,
-            created_at=datetime.utcnow(),
-            last_login=datetime.utcnow()
+            created_at=utc_now(),
+            last_login=utc_now()
         )
         db.session.add(user)
     else:
@@ -144,7 +153,7 @@ def verify_otp():
             user.name = name
         if role == 'admin':
             user.role = 'admin'
-        user.last_login = datetime.utcnow()
+        user.last_login = utc_now()
         user.accepted_terms = accepted_terms
 
     db.session.commit()
