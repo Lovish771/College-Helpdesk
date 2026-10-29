@@ -23,6 +23,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedSuccess, setVerifiedSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [devOtpNotice, setDevOtpNotice] = useState('');
   const [timer, setTimer] = useState(30);
 
   const otpInputRef = useRef(null);
@@ -78,10 +79,18 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
 
     setLoading(true);
     try {
-      await sendOtp(cleanEmail);
+      const result = await sendOtp(cleanEmail);
       setStep(2);
       setTimer(30); // 30 seconds timer
-      setOtp('');
+      if (result?.devOtp) {
+        setDevOtpNotice(`Your verification code is: ${result.devOtp}`);
+        setOtp(result.devOtp);
+      } else if (result?.notice) {
+        setDevOtpNotice(result.notice);
+      } else {
+        setDevOtpNotice('');
+        setOtp('');
+      }
     } catch (err) {
       setError(err.message || 'Failed to dispatch verification code. Please try again.');
     } finally {
@@ -94,9 +103,14 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
     setError('');
     setLoading(true);
     try {
-      await sendOtp(email.trim().toLowerCase());
+      const result = await sendOtp(email.trim().toLowerCase());
       setTimer(30);
-      setOtp('');
+      if (result?.devOtp) {
+        setDevOtpNotice(`Your verification code is: ${result.devOtp}`);
+        setOtp(result.devOtp);
+      } else {
+        setOtp('');
+      }
     } catch (err) {
       setError(err.message || 'Unable to resend OTP at this time.');
     } finally {
@@ -320,6 +334,11 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                 <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed break-all">
                   Verification code has been dispatched to <strong>{email}</strong>.
                 </p>
+                {devOtpNotice && (
+                  <div className="mt-2 p-2 rounded-lg bg-orange-100 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-200 font-mono text-[11px] font-bold">
+                    {devOtpNotice}
+                  </div>
+                )}
               </div>
             </div>
 

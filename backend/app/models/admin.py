@@ -1,7 +1,12 @@
 from datetime import datetime
 from app import db
 from app.models.user import utc_now
-import bcrypt
+import hashlib
+import secrets
+try:
+    import bcrypt
+except ImportError:
+    bcrypt = None
 
 class AdminUser(db.Model):
     __tablename__ = 'admin_users'
@@ -15,10 +20,25 @@ class AdminUser(db.Model):
     last_login = db.Column(db.DateTime)
     
     def set_password(self, password):
-        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        if bcrypt:
+            self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        else:
+            salt = secrets.token_hex(16)
+            h = hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
+            self.password_hash = f"sha256${salt}${h}"
     
     def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        if self.password_hash.startswith('sha256$'):
+            parts = self.password_hash.split('$')
+            if len(parts) == 3:
+                _, salt, h = parts
+                return hashlib.sha256((salt + password).encode('utf-8')).hexdigest() == h
+        if bcrypt:
+            try:
+                return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+            except Exception:
+                return False
+        return False
     
     def to_dict(self):
         return {

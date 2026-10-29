@@ -7,10 +7,17 @@
     },
     "backend": {
       "root": "backend",
-      "framework": "flask"
+      "framework": "flask",
+      "entrypoint": "index.py"
     }
   },
   "rewrites": [
+    {
+      "source": "/api",
+      "destination": {
+        "service": "backend"
+      }
+    },
     {
       "source": "/api/(.*)",
       "destination": {

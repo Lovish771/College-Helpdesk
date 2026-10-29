@@ -30,12 +30,16 @@ def create_app(config_name=None, **kwargs):
             tmp_db = '/tmp/lpu_helpdesk.db'
             base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
             source_db = os.path.join(base_dir, 'lpu_helpdesk.db')
-            if not os.path.exists(tmp_db) and os.path.exists(source_db):
+            root_source_db = os.path.abspath(os.path.join(base_dir, '..', 'backend', 'lpu_helpdesk.db'))
+            if not os.path.exists(tmp_db):
                 import shutil
-                try:
-                    shutil.copyfile(source_db, tmp_db)
-                except Exception:
-                    pass
+                for candidate in [source_db, root_source_db, 'backend/lpu_helpdesk.db', 'lpu_helpdesk.db']:
+                    if os.path.exists(candidate):
+                        try:
+                            shutil.copyfile(candidate, tmp_db)
+                            break
+                        except Exception:
+                            pass
             app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{tmp_db}'
         else:
             # Use absolute or instance-relative database path so running from any directory works
