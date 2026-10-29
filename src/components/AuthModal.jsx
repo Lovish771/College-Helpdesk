@@ -82,14 +82,11 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
       const result = await sendOtp(cleanEmail);
       setStep(2);
       setTimer(30); // 30 seconds timer
-      if (result?.devOtp) {
-        setDevOtpNotice(`Your verification code is: ${result.devOtp}`);
-        setOtp(result.devOtp);
-      } else if (result?.notice) {
-        setDevOtpNotice(result.notice);
+      setOtp(''); // Keep input blank for the user to enter
+      if (result?.devOtp && !result?.deliveredOnline) {
+        setDevOtpNotice(`Test Mode Notice: Email service not yet connected in Vercel. Verification code: ${result.devOtp}`);
       } else {
         setDevOtpNotice('');
-        setOtp('');
       }
     } catch (err) {
       setError(err.message || 'Failed to dispatch verification code. Please try again.');
@@ -105,11 +102,11 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
     try {
       const result = await sendOtp(email.trim().toLowerCase());
       setTimer(30);
-      if (result?.devOtp) {
-        setDevOtpNotice(`Your verification code is: ${result.devOtp}`);
-        setOtp(result.devOtp);
+      setOtp('');
+      if (result?.devOtp && !result?.deliveredOnline) {
+        setDevOtpNotice(`Test Mode Notice: Email service not yet connected in Vercel. Verification code: ${result.devOtp}`);
       } else {
-        setOtp('');
+        setDevOtpNotice('');
       }
     } catch (err) {
       setError(err.message || 'Unable to resend OTP at this time.');
@@ -334,13 +331,14 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                 <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed break-all">
                   Verification code has been dispatched to <strong>{email}</strong>.
                 </p>
-                {devOtpNotice && (
-                  <div className="mt-2 p-2 rounded-lg bg-orange-100 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-200 font-mono text-[11px] font-bold">
-                    {devOtpNotice}
-                  </div>
-                )}
               </div>
             </div>
+
+            {devOtpNotice && (
+              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-[11px] text-amber-800 dark:text-amber-300 text-center">
+                {devOtpNotice}
+              </div>
+            )}
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
