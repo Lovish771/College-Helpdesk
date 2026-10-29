@@ -107,7 +107,13 @@ class EmailService:
         last_error = ""
 
         # ── 1. Resend Online REST API ──
-        resend_key = os.environ.get('RESEND_API_KEY', '').strip()
+        resend_key = (
+            os.environ.get('RESEND_API_KEY') or
+            os.environ.get('RESEND_KEY') or
+            os.environ.get('RESEND_TOKEN') or
+            os.environ.get('VITE_RESEND_API_KEY') or
+            ''
+        ).strip()
         if resend_key:
             try:
                 payload = {
@@ -141,7 +147,12 @@ class EmailService:
                 logger.error(f"[Resend] Failed: {e}")
 
         # ── 2. Brevo (Sendinblue) Online REST API ──
-        brevo_key = os.environ.get('BREVO_API_KEY', '').strip()
+        brevo_key = (
+            os.environ.get('BREVO_API_KEY') or
+            os.environ.get('SENDINBLUE_API_KEY') or
+            os.environ.get('BREVO_KEY') or
+            ''
+        ).strip()
         if brevo_key:
             try:
                 brevo_sender = os.environ.get('BREVO_FROM_EMAIL') or os.environ.get('EMAIL_FROM') or 'admissions@lpu.co.in'
@@ -169,7 +180,11 @@ class EmailService:
                 logger.error(f"[Brevo] Failed: {e}")
 
         # ── 3. SendGrid Online REST API ──
-        sendgrid_key = os.environ.get('SENDGRID_API_KEY', '').strip()
+        sendgrid_key = (
+            os.environ.get('SENDGRID_API_KEY') or
+            os.environ.get('SENDGRID_KEY') or
+            ''
+        ).strip()
         if sendgrid_key:
             try:
                 payload = {
@@ -197,38 +212,76 @@ class EmailService:
                 last_error = f"SendGrid error: {e}"
                 logger.error(f"[SendGrid] Failed: {e}")
 
-        # ── 4. Standard SMTP Online Service (e.g. Gmail / Outlook / AWS SES) ──
-        smtp_server = os.environ.get('SMTP_SERVER')
-        smtp_port = int(os.environ.get('SMTP_PORT', 587))
-        smtp_user = os.environ.get('SMTP_USER', '').strip()
-        smtp_pass = os.environ.get('SMTP_PASSWORD', '').strip()
+        # ── 4. Standard SMTP Online Service (Gmail, Outlook, Amazon SES) ──
+        smtp_user = (
+            os.environ.get('SMTP_USER') or
+            os.environ.get('SMTP_USERNAME') or
+            os.environ.get('EMAIL_USER') or
+            os.environ.get('EMAIL_USERNAME') or
+            os.environ.get('MAIL_USERNAME') or
+            os.environ.get('MAIL_USER') or
+            os.environ.get('GMAIL_USER') or
+            ''
+        ).strip()
+
+        smtp_pass = (
+            os.environ.get('SMTP_PASSWORD') or
+            os.environ.get('SMTP_PASS') or
+            os.environ.get('EMAIL_PASS') or
+            os.environ.get('EMAIL_PASSWORD') or
+            os.environ.get('MAIL_PASSWORD') or
+            os.environ.get('MAIL_PASS') or
+            os.environ.get('GMAIL_PASSWORD') or
+            os.environ.get('GMAIL_APP_PASSWORD') or
+            os.environ.get('APP_PASSWORD') or
+            ''
+        ).strip()
+
+        smtp_server = (
+            os.environ.get('SMTP_SERVER') or
+            os.environ.get('SMTP_HOST') or
+            os.environ.get('EMAIL_HOST') or
+            os.environ.get('MAIL_HOST') or
+            os.environ.get('MAIL_SERVER') or
+            ''
+        ).strip()
+
+        if not smtp_server and smtp_user and ('@gmail.com' in smtp_user.lower() or '@googlemail.com' in smtp_user.lower()):
+            smtp_server = 'smtp.gmail.com'
+
+        smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or os.environ.get('MAIL_PORT') or 587)
 
         if smtp_server and smtp_user and smtp_pass:
-            try:
-                msg = MIMEMultipart('alternative')
-                msg['Subject'] = subject
-                msg['From'] = f"LPU Student Helpdesk <{smtp_user}>"
-                msg['To'] = email
+            ports_to_try = [smtp_port]
+            if smtp_port == 587 and smtp_server == 'smtp.gmail.com':
+                ports_to_try.append(465)
 
-                msg.attach(MIMEText(text_content, 'plain'))
-                msg.attach(MIMEText(html_content, 'html'))
+            for p in ports_to_try:
+                try:
+                    msg = MIMEMultipart('alternative')
+                    msg['Subject'] = subject
+                    msg['From'] = f"LPU Student Helpdesk <{smtp_user}>"
+                    msg['To'] = email
 
-                if smtp_port == 465:
-                    server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=12)
-                else:
-                    server = smtplib.SMTP(smtp_server, smtp_port, timeout=12)
-                    server.ehlo()
-                    server.starttls()
-                    server.ehlo()
+                    msg.attach(MIMEText(text_content, 'plain'))
+                    msg.attach(MIMEText(html_content, 'html'))
 
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(smtp_user, [email], msg.as_string())
-                server.quit()
-                logger.info(f"[SMTP] Successfully dispatched OTP email to {email}")
-                return True, f"SMTP ({smtp_server})", "delivered"
-            except Exception as e:
-                last_error = f"SMTP error ({smtp_server}): {e}"
-                logger.error(f"[SMTP] Failed to send SMTP email: {e}")
+                    if p == 465:
+                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=10)
+                    else:
+                        server = smtplib.SMTP(smtp_server, p, timeout=10)
+                        server.ehlo()
+                        server.starttls()
+                        server.ehlo()
+
+                    server.login(smtp_user, smtp_pass)
+                    server.sendmail(smtp_user, [email], msg.as_string())
+                    server.quit()
+                    logger.info(f"[SMTP] Successfully dispatched OTP email to {email} via {smtp_server}:{p}")
+                    return True, f"SMTP ({smtp_server})", "delivered"
+                except Exception as e:
+                    last_error = f"SMTP error ({smtp_server}:{p}): {e}"
+                    logger.error(f"[SMTP] Failed on port {p}: {e}")
 
         # ── Fallback Notice for Developer & Local Testing ──
         detail_msg = last_error if last_error else "No online email provider (RESEND_API_KEY or SMTP_USER/SMTP_PASSWORD) configured in .env"

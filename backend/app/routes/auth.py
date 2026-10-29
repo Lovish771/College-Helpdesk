@@ -97,7 +97,8 @@ def send_otp():
         'message': msg,
         'cooldownSeconds': meta.get('cooldown_seconds', EmailService.COOLDOWN_SECONDS),
         'deliveredOnline': meta.get('delivered_online', False),
-        'provider': meta.get('provider', '')
+        'provider': meta.get('provider', ''),
+        'dispatchDetail': meta.get('dispatch_detail', '')
     }
     if meta.get('dev_otp'):
         resp['devOtp'] = meta['dev_otp']
