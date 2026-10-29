@@ -716,7 +716,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       Fee Breakdown ({activeCourse.short})
                     </span>
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                      {waiverPercent}% Scholarship Applied
+                      {effectiveWaiverPercent}% Scholarship Applied
                     </span>
                   </div>
 
@@ -728,10 +728,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       </span>
                     </div>
 
-                    {waiverPercent > 0 && (
+                    {effectiveWaiverPercent > 0 && (
                       <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Scholarship Concession ({waiverPercent}%):</span>
-                        <span className="font-bold">-₹{concessionAmt.toLocaleString()} / sem</span>
+                        <span>Scholarship Concession ({effectiveWaiverPercent}%):</span>
+                        <span className="font-bold">-₹{totalConcessionPerSem.toLocaleString()} / sem</span>
                       </div>
                     )}
 
