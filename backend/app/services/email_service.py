@@ -218,9 +218,16 @@ class EmailService:
             os.environ.get('SMTP_USERNAME') or
             os.environ.get('EMAIL_USER') or
             os.environ.get('EMAIL_USERNAME') or
+            os.environ.get('EMAIL_ADDRESS') or
+            os.environ.get('GMAIL_ADDRESS') or
             os.environ.get('MAIL_USERNAME') or
             os.environ.get('MAIL_USER') or
             os.environ.get('GMAIL_USER') or
+            os.environ.get('GOOGLE_USER') or
+            os.environ.get('GOOGLE_EMAIL') or
+            os.environ.get('GMAIL') or
+            os.environ.get('GMAIL_ID') or
+            os.environ.get('EMAIL') or
             ''
         ).strip()
 
@@ -233,9 +240,13 @@ class EmailService:
             os.environ.get('MAIL_PASS') or
             os.environ.get('GMAIL_PASSWORD') or
             os.environ.get('GMAIL_APP_PASSWORD') or
+            os.environ.get('GOOGLE_APP_PASSWORD') or
+            os.environ.get('GOOGLE_PASSWORD') or
+            os.environ.get('GOOGLE_PASS') or
             os.environ.get('APP_PASSWORD') or
+            os.environ.get('GMAIL_PASS') or
             ''
-        ).strip()
+        ).strip().replace(' ', '')  # Remove any accidental spaces in 16-char app password
 
         smtp_server = (
             os.environ.get('SMTP_SERVER') or
@@ -252,9 +263,13 @@ class EmailService:
         smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or os.environ.get('MAIL_PORT') or 587)
 
         if smtp_server and smtp_user and smtp_pass:
-            ports_to_try = [smtp_port]
-            if smtp_port == 587 and smtp_server == 'smtp.gmail.com':
-                ports_to_try.append(465)
+            # For Gmail, port 465 (Direct SSL) is 10x faster and never hangs on serverless compared to STARTTLS (587)
+            if smtp_server == 'smtp.gmail.com':
+                ports_to_try = [465, 587]
+            else:
+                ports_to_try = [smtp_port]
+                if smtp_port != 465 and smtp_port != 587:
+                    ports_to_try.append(465)
 
             for p in ports_to_try:
                 try:
@@ -267,9 +282,9 @@ class EmailService:
                     msg.attach(MIMEText(html_content, 'html'))
 
                     if p == 465:
-                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=10)
+                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=8)
                     else:
-                        server = smtplib.SMTP(smtp_server, p, timeout=10)
+                        server = smtplib.SMTP(smtp_server, p, timeout=8)
                         server.ehlo()
                         server.starttls()
                         server.ehlo()
