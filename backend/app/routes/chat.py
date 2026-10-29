@@ -60,13 +60,23 @@ def health():
     except Exception:
         pass
 
+    email_env_detected = {
+        'has_resend': bool(os.environ.get('RESEND_API_KEY') or os.environ.get('RESEND_KEY') or os.environ.get('RESEND_TOKEN') or os.environ.get('VITE_RESEND_API_KEY')),
+        'has_smtp_user': bool(os.environ.get('SMTP_USER') or os.environ.get('EMAIL_USER') or os.environ.get('GMAIL_USER') or os.environ.get('MAIL_USERNAME')),
+        'has_smtp_pass': bool(os.environ.get('SMTP_PASSWORD') or os.environ.get('SMTP_PASS') or os.environ.get('EMAIL_PASS') or os.environ.get('EMAIL_PASSWORD') or os.environ.get('GMAIL_PASSWORD') or os.environ.get('GMAIL_APP_PASSWORD') or os.environ.get('APP_PASSWORD')),
+        'has_smtp_server': bool(os.environ.get('SMTP_SERVER') or os.environ.get('SMTP_HOST') or os.environ.get('EMAIL_HOST')),
+        'has_brevo': bool(os.environ.get('BREVO_API_KEY')),
+        'has_sendgrid': bool(os.environ.get('SENDGRID_API_KEY')),
+    }
+
     return jsonify({
         'status': 'healthy' if db_status == 'connected' else 'degraded',
         'version': '1.0.0',
         'service': 'LPU Helpdesk Backend',
         'university': 'Lovely Professional University',
         'database': db_status,
-        'memory_mb': memory_mb
+        'memory_mb': memory_mb,
+        'email_config': email_env_detected
     })
 
 @bp.route('/chat', methods=['POST'])
