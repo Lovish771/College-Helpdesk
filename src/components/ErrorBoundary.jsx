@@ -43,6 +43,13 @@ export default class ErrorBoundary extends React.Component {
             <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
               An unexpected display issue occurred in this section. You can reload the page or safely return to the home screen without losing saved preferences.
             </p>
+            {this.state.error?.message && (
+              <div className="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-left">
+                <p className="text-xs font-mono text-red-600 dark:text-red-400 break-words">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
             <div className="flex gap-3 justify-center">
               <button
                 onClick={this.handleReset}
