@@ -28,7 +28,7 @@ const DISCIPLINES = [
 ];
 
 export default function Fees({ ask, onOpenCompare, go }) {
-  const [activeTab, setActiveTab] = useState('degree-planner'); // Default to full tenure fee planner
+  const [activeTab, setActiveTab] = useState('program-fees'); // Default to full programme tuition catalog view
   const initialPrefs = useMemo(() => getStoredItem('lpu_fee_preferences'), []);
   const [selectedCourseId, setSelectedCourseId] = useState(initialPrefs.selectedCourseId || 'btech-cse');
   const [calcSlab, setCalcSlab] = useState(initialPrefs.calcSlab || 'cat1'); // 'none' | 'cat1' | 'cat2' | 'cat3' | 'custom'
@@ -181,14 +181,20 @@ export default function Fees({ ask, onOpenCompare, go }) {
       if (selectedDiscipline !== 'All Disciplines') {
         if (selectedDiscipline === 'Computer Science & IT' && !(p.tags?.includes('Computer Science') || p.id.startsWith('btech-cse') || p.id.startsWith('bca') || p.id.startsWith('mca'))) return false;
         if (selectedDiscipline === 'Engineering' && !p.tags?.includes('Engineering')) return false;
-        if (selectedDiscipline === 'Management & Commerce' && !(p.tags?.includes('Management') || p.tags?.includes('Commerce'))) return false;
-        if (selectedDiscipline === 'Law' && !p.tags?.includes('Law')) return false;
-        if (selectedDiscipline === 'Pharmacy & Healthcare' && !(p.tags?.includes('Pharmacy') || p.tags?.includes('Healthcare') || p.tags?.includes('Medical'))) return false;
-        if (selectedDiscipline === 'Agriculture & Science' && !(p.tags?.includes('Agriculture') || p.tags?.includes('Science'))) return false;
+        if (selectedDiscipline === 'Management & Commerce' && !(p.tags?.includes('Management') || p.tags?.includes('Commerce') || p.id.startsWith('bba') || p.id.startsWith('mba') || p.id.startsWith('bcom'))) return false;
+        if (selectedDiscipline === 'Law' && !(p.tags?.includes('Law') || p.id.includes('llb') || p.id.includes('llm'))) return false;
+        if (selectedDiscipline === 'Pharmacy & Healthcare' && !(p.tags?.includes('Pharmacy') || p.tags?.includes('Healthcare') || p.tags?.includes('Medical') || p.id.startsWith('bpharm') || p.id.startsWith('bpt') || p.id.startsWith('mpharm'))) return false;
+        if (selectedDiscipline === 'Agriculture & Science' && !(p.tags?.includes('Agriculture') || p.tags?.includes('Science') || p.id.startsWith('bsc-') || p.id.startsWith('msc-'))) return false;
+        if (selectedDiscipline === 'Design & Architecture' && !(p.tags?.includes('Design') || p.tags?.includes('Architecture') || p.id.startsWith('bdes') || p.id.startsWith('barch') || p.id.startsWith('bsc-animation'))) return false;
       }
       if (query) {
         const q = query.toLowerCase();
-        return p.name.toLowerCase().includes(q) || p.short.toLowerCase().includes(q);
+        return (
+          p.name.toLowerCase().includes(q) ||
+          p.short.toLowerCase().includes(q) ||
+          p.id.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q))
+        );
       }
       return true;
     });
@@ -241,10 +247,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
         </div>
 
         {/* ── Main Category Switcher (Pill Style) ── */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-2xl">
+        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-3xl">
           {[
-            { id: 'degree-planner', label: 'Tenure Fee Calculator', icon: Calculator, badge: 'New' },
-            { id: 'program-fees', label: 'Programme Tuition & Slabs', icon: Wallet },
+            { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet, badge: `${programs.length} Courses` },
+            { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator, badge: 'Interactive' },
             { id: 'residential-fees', label: 'Hostel, Mess & Laundry Rates', icon: BedDouble },
             { id: 'scholarships', label: 'Scholarship Policies', icon: Award },
           ].map(({ id, label, icon: Icon, badge }) => {
@@ -281,19 +287,25 @@ export default function Fees({ ask, onOpenCompare, go }) {
             <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
-                      Multi-Year Living &amp; Tuition Planner
+                      {activeCourse.degree} • {activeCourse.short}
                     </span>
                     <span className="text-xs text-slate-400 font-semibold">
                       Tenure: <strong>{activeCourse.duration}</strong>
                     </span>
+                    <button
+                      onClick={() => setActiveTab('program-fees')}
+                      className="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer ml-auto"
+                    >
+                      Browse All {programs.length} Programmes →
+                    </button>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1">
-                    Expected Fee Calculator ({tenureYears} Years Total Budget)
+                    {activeCourse.name}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                    Customize your accommodation, mess dining, and laundry services year-by-year (e.g. Year 1 with Mess, Year 2 Day Scholar or without Mess) to calculate your exact expected expenditure.
+                    {activeCourse.description}
                   </p>
                 </div>
 
@@ -305,11 +317,11 @@ export default function Fees({ ask, onOpenCompare, go }) {
                   <select
                     value={selectedCourseId}
                     onChange={(e) => setSelectedCourseId(e.target.value)}
-                    className="w-full md:w-72 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:border-orange-500"
+                    className="w-full md:w-80 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:border-orange-500"
                   >
                     {programs.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.short} ({p.duration})
+                        {p.name} ({p.short})
                       </option>
                     ))}
                   </select>
