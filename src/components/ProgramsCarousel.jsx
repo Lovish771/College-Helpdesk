@@ -160,14 +160,14 @@ export default function ProgramsCarousel({
     }
   }, [currentIndex, N, baseIndex]);
 
-  // Continuous Autoplay (moves right-to-left every 3.8s)
+  // Continuous Fast Autoplay (moves right-to-left every 2.0s)
   useEffect(() => {
     if (prefersReducedMotion || isHovered || isDragging || isPausedManually || N <= 1) {
       return;
     }
     const timer = setInterval(() => {
       handleNext();
-    }, 3800);
+    }, 2000);
     return () => clearInterval(timer);
   }, [prefersReducedMotion, isHovered, isDragging, isPausedManually, N, handleNext]);
 
@@ -364,7 +364,7 @@ export default function ProgramsCarousel({
             transition: isTransitioning
               ? prefersReducedMotion
                 ? 'transform 100ms ease'
-                : 'transform 550ms cubic-bezier(0.16, 1, 0.3, 1)'
+                : 'transform 400ms cubic-bezier(0.16, 1, 0.3, 1)'
               : 'none',
           }}
           className="flex items-center will-change-transform"
@@ -395,7 +395,7 @@ export default function ProgramsCarousel({
                   width: `${cardWidth}px`,
                   marginRight: `${gap}px`,
                 }}
-                className={`shrink-0 transform-gpu transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${scaleClass}`}
+                className={`shrink-0 transform-gpu transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${scaleClass}`}
                 aria-hidden={!isCenter}
               >
                 {isVisible && (
