@@ -154,23 +154,63 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
           {/* ========================================================================= */}
           {(isDedicatedTerms || (!isDedicatedMode && activeTab === 'terms')) && (
             <div className="space-y-6 text-xs sm:text-sm">
-              {/* Preamble Banner */}
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200">
-                <div className="flex items-start gap-3">
-                  <Scale className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-bold text-sm sm:text-base text-amber-900 dark:text-amber-100">
-                      User Agreement &amp; Campus Service Terms (Academic Batch 2026-27)
-                    </h3>
-                    <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 mt-1 leading-relaxed">
-                      Please read these Terms and Conditions carefully. By accessing this platform, requesting email OTP verification, submitting queries to the AI chatbot, or utilizing fee estimation calculators, you enter into an explicit peer agreement under the terms set forth below.
-                    </p>
+              {/* Official Verified Document Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent border border-amber-500/30 text-amber-900 dark:text-amber-200">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Scale className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white font-display">
+                          User Agreement &amp; Campus Service Terms
+                        </h3>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white font-extrabold text-[10px] uppercase tracking-wider">
+                          Session 2026-27
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                        Official terms governing student peer guidance, email OTP security, AI conversational assistance, and fee planning calculators.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 size={13} />
+                    <span>Legally Active</span>
                   </div>
                 </div>
               </div>
 
+              {/* Quick Jump Index Pills */}
+              <div className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-2 px-1">
+                  Articles Quick Navigation:
+                </span>
+                <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                  {[
+                    ['#art-1', 'Art. 1: Scope'],
+                    ['#art-2', 'Art. 2: Advisory'],
+                    ['#art-3', 'Art. 3: OTP Security'],
+                    ['#art-4', 'Art. 4: AI Rules'],
+                    ['#art-5', 'Art. 5: Conduct'],
+                    ['#art-6', 'Art. 6: Admissions'],
+                    ['#art-7', 'Art. 7: Liability'],
+                    ['#art-8', 'Art. 8: Jurisdiction'],
+                  ].map(([anchor, label]) => (
+                    <a
+                      key={anchor}
+                      href={anchor}
+                      className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-orange-600 hover:border-orange-300 transition-all cursor-pointer"
+                    >
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
               {/* Section 1 */}
-              <div className="space-y-2">
+              <div id="art-1" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     1
@@ -183,7 +223,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 2 */}
-              <div className="space-y-2">
+              <div id="art-2" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     2
@@ -233,7 +273,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 3 */}
-              <div className="space-y-2">
+              <div id="art-3" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     3
@@ -254,7 +294,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 4 */}
-              <div className="space-y-2">
+              <div id="art-4" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     4
@@ -276,7 +316,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 5 */}
-              <div className="space-y-2">
+              <div id="art-5" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     5
@@ -297,7 +337,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 6 */}
-              <div className="space-y-2">
+              <div id="art-6" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     6
@@ -310,7 +350,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 7 */}
-              <div className="space-y-2">
+              <div id="art-7" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     7
@@ -328,7 +368,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </div>
 
               {/* Section 8 */}
-              <div className="space-y-2">
+              <div id="art-8" className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2 transition-all hover:border-orange-300 dark:hover:border-slate-700">
                 <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
                   <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-black">
                     8

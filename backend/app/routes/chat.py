@@ -239,7 +239,7 @@ def delete_conversation(conversation_id):
     """Permanently delete a specific conversation from the database."""
     session = db.session.get(ConversationSession, conversation_id)
     if not session:
-        abort(404)
+        return jsonify({'success': True, 'message': 'Conversation does not exist or already deleted.'}), 200
     user = get_current_user()
     if session.user_id and user and session.user_id != user.id and getattr(user, 'role', '') != 'admin':
         return jsonify({'error': 'Unauthorized to delete this conversation.'}), 403

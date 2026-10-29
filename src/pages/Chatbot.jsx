@@ -188,7 +188,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
   );
 
   return (
-    <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
+    <div className="flex flex-col flex-1 h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
       {/* Error Toast if delete fails */}
       {chat.errorToast && (
         <div

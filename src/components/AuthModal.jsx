@@ -175,37 +175,25 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
           </div>
         </div>
 
-        {/* Mode Switcher Pills */}
-        <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800 mb-6 text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => {
-              setMode('otp');
-              setError('');
-            }}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              mode === 'otp'
-                ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Email OTP Sign-In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('admin');
-              setError('');
-            }}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              mode === 'admin'
-                ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Admin Sign-In
-          </button>
-        </div>
+        {/* Administrative Header Banner (Only shown if admin mode is activated) */}
+        {mode === 'admin' && (
+          <div className="flex items-center justify-between p-2.5 mb-5 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 animate-fade-in">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+              <span>Administrative Security Portal</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('otp');
+                setError('');
+              }}
+              className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+            >
+              ← Back to Student Sign-In
+            </button>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
@@ -469,10 +457,32 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
           </form>
         )}
 
-        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-          <p className="text-[11px] text-slate-400">
-            Student Helpdesk • Encrypted Session &amp; OWASP Zero-Trust Shield
-          </p>
+        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+          <span>Student Helpdesk • Encrypted Session</span>
+          {mode === 'otp' ? (
+            <button
+              type="button"
+              onClick={() => {
+                setMode('admin');
+                setError('');
+              }}
+              className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer text-[10px]"
+              title="Restricted Staff & Admin Portal"
+            >
+              Staff Portal →
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setMode('otp');
+                setError('');
+              }}
+              className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer text-[10px]"
+            >
+              ← Student Sign-In
+            </button>
+          )}
         </div>
       </div>
     </div>
