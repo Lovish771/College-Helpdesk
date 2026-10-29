@@ -188,7 +188,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
   );
 
   return (
-    <div className="flex flex-col flex-1 h-[calc(100dvh-4rem)] sm:h-[calc(100dvh-5rem)] w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
+    <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
       {/* Error Toast if delete fails */}
       {chat.errorToast && (
         <div
@@ -199,7 +199,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
           <span className="flex-1 leading-snug">{chat.errorToast}</span>
           <button
             onClick={chat.clearErrorToast}
-            className="p-1 rounded-lg hover:bg-rose-700 text-white"
+            className="p-1 rounded-lg hover:bg-rose-700 text-white cursor-pointer"
           >
             <X size={14} />
           </button>
@@ -226,7 +226,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
       </div>
 
       {/* Main Layout: Fixed-Height Decoupled Left Sidebar + Right Chat Window */}
-      <div className="flex flex-1 w-full h-full min-h-0 overflow-hidden">
+      <div className="flex flex-1 w-full min-h-0 overflow-hidden">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:block w-64 shrink-0 h-full overflow-hidden">
           {SidebarContent}
@@ -250,9 +250,9 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
         )}
 
         {/* Chat Conversation Main Panel */}
-        <main className="flex-1 flex flex-col h-full min-h-0 min-w-0 bg-[#F8FAFC] dark:bg-slate-950 overflow-hidden">
+        <section className="flex-1 flex flex-col h-full min-h-0 min-w-0 bg-[#F8FAFC] dark:bg-slate-950 overflow-hidden">
           <ChatWindow chat={chat} go={go} isAuthenticated={isAuthenticated} onOpenAuth={onOpenAuth} />
-        </main>
+        </section>
       </div>
 
       {/* ── ACCESSIBLE CONFIRMATION DIALOG (FOR CHAT DELETION) ── */}

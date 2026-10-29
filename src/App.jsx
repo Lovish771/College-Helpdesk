@@ -132,7 +132,7 @@ function AppContent() {
   const Page = pages[page] || Home;
 
   return (
-    <div className="flex min-h-screen flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+    <div className={`flex flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 ${page === 'chat' ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
       <CustomCursor />
       <a
         href="#main"
@@ -155,7 +155,7 @@ function AppContent() {
       <main
         id="main"
         key={page}
-        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : 'pt-16 sm:pt-20'}`}
+        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'h-full min-h-0 overflow-hidden' : 'pt-16 sm:pt-20'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>
