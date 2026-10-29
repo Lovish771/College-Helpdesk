@@ -35,9 +35,8 @@ function sanitizeInput(raw) {
  */
 function FormattedText({ text }) {
   if (!text) return null;
-
-  // Sanitize first
-  const sanitized = sanitizeInput(text);
+  const rawText = typeof text === "string" ? text : String(text || "");
+  const sanitized = sanitizeInput(rawText);
 
   // Split by newlines
   const lines = sanitized.split('\n');
@@ -138,11 +137,11 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
       )}
 
       {/* Bubble Container */}
-      <div className={`flex flex-col max-w-[90%] sm:max-w-[80%] ${isBot ? 'items-start' : 'items-end'}`}>
+      <div className={`flex flex-col ${isBot ? 'w-full max-w-full sm:max-w-[94%] items-start' : 'max-w-[85%] sm:max-w-[75%] items-end'}`}>
         <div
           className={`px-4 py-3.5 rounded-2xl shadow-xs transition-all ${
             isBot
-              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm'
+              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm w-full'
               : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-tr-sm font-medium shadow-orange-500/10'
           }`}
         >

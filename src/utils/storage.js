@@ -104,7 +104,7 @@ export function setStoredItem(key, value) {
       console.warn(`[storage] Attempted to store invalid payload for key "${key}"`);
       return;
     }
-    const serialized = typeof value === 'string' ? JSON.stringify(value) : JSON.stringify(value);
+    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
     localStorage.setItem(key, serialized);
   } catch (err) {
     // Silent fail if quota exceeded or private browsing restrictions

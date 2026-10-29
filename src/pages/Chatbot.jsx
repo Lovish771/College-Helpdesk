@@ -188,7 +188,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
   );
 
   return (
-    <div className="flex flex-col flex-1 h-full min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
+    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors relative">
       {/* Error Toast if delete fails */}
       {chat.errorToast && (
         <div
@@ -228,7 +228,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
       {/* Main Layout: Fixed-Height Decoupled Left Sidebar + Right Chat Window */}
       <div className="flex flex-1 w-full min-h-0 overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-64 shrink-0 h-full overflow-hidden">
+        <aside className="hidden lg:flex flex-col w-72 shrink-0 h-full overflow-hidden">
           {SidebarContent}
         </aside>
 

@@ -236,10 +236,11 @@ export default function useChat() {
 
   const open = useCallback((h) => {
     archiveCurrent();
+    if (!h) return;
     setCid(h.id);
     cidRef.current = h.id;
     setLoading(false);
-    setMessages(h.messages);
+    setMessages(Array.isArray(h.messages) ? h.messages : defaultWelcomeChat());
   }, [archiveCurrent]);
 
   useEffect(() => {

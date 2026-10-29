@@ -21,7 +21,8 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
     return () => clearTimeout(timer);
   }, [chat.messages, chat.loading]);
 
-  const lastBotMessage = [...chat.messages].reverse().find(m => m.role === 'bot');
+  const safeMessages = Array.isArray(chat?.messages) ? chat.messages : [];
+  const lastBotMessage = [...safeMessages].reverse().find(m => m?.role === 'bot');
 
   const handlePickSuggestion = (query) => {
     if (!isAuthenticated) {
@@ -48,8 +49,8 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
         role="log"
         aria-live="polite"
       >
-        <div className="mx-auto max-w-3xl space-y-4 pb-4">
-          {chat.messages.map((m) => (
+        <div className="mx-auto max-w-4xl space-y-4 pb-4">
+          {safeMessages.map((m) => (
             <ChatMessage
               key={m.id}
               m={m}
@@ -90,7 +91,7 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
       <div className="shrink-0 z-10 border-t border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg">
         {!isAuthenticated ? (
           <div className="p-3 sm:p-4">
-            <div className="mx-auto max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40">
+            <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-orange-600 text-white flex items-center justify-center shrink-0 shadow-sm">
                   <Lock size={16} />

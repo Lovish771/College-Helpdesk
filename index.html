@@ -14,6 +14,9 @@
       (function() {
         try {
           var t = localStorage.getItem('lpu_theme');
+          if (t && typeof t === 'string' && t.startsWith('"')) {
+            try { t = JSON.parse(t); } catch (e) {}
+          }
           var isDark = t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
           if (isDark) {
             document.documentElement.classList.add('dark');
