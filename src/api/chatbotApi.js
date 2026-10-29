@@ -150,6 +150,9 @@ export async function sendMessage(message, conversationId) {
     });
     return res || mockReply(message, conversationId);
   } catch (err) {
+    if (err.status === 401 || err.requires_login) {
+      throw err;
+    }
     console.warn('Backend fetch failed, smoothly falling back to local LPU engine:', err);
     await wait(300);
     return mockReply(message, conversationId);

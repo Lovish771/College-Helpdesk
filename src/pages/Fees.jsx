@@ -73,7 +73,16 @@ export default function Fees({ ask, onOpenCompare, go }) {
     }));
   };
 
-  const activeFee = mockFees[activeCourse.id] || {
+  const activeCourse = useMemo(() => {
+    return programs.find((p) => p.id === selectedCourseId) || programs[0];
+  }, [selectedCourseId]);
+
+  const tenureYears = useMemo(() => {
+    const parsed = parseInt(activeCourse?.duration?.replace(/[^0-9]/g, ''), 10);
+    return isNaN(parsed) || parsed < 1 ? 4 : Math.min(parsed, 6);
+  }, [activeCourse]);
+
+  const activeFee = mockFees[activeCourse?.id || 'btech-cse'] || {
     tuition: '₹1,60,000 / semester (Base)',
     other: '₹5,000 / semester (Examination Fee)',
     scholarship: 'Category I: up to 50% waiver',

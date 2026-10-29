@@ -307,7 +307,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
               onClick={() => handleLegal('terms')}
               className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline-offset-4 hover:underline"
             >
-              Terms of Use
+              Terms and Conditions
             </button>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
             <button

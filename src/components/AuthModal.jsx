@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Mail, Lock, KeyRound, ShieldCheck, ArrowRight,
-  RefreshCw, CheckCircle2, AlertCircle, Sparkles, User as UserIcon
+  RefreshCw, CheckCircle2, AlertCircle, Sparkles, User as UserIcon,
+  AlertTriangle
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
@@ -24,6 +25,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(0);
+  const [dispatchInfo, setDispatchInfo] = useState(null);
 
   const otpInputRef = useRef(null);
 
@@ -71,15 +73,19 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
       return;
     }
     if (!acceptedTerms) {
-      setError('Please accept the Terms of Use and Privacy Policy to continue.');
+      setError('Please accept the Terms and Conditions and Privacy Policy to continue.');
       return;
     }
 
     setLoading(true);
     try {
       const data = await sendOtp(email);
+      setDispatchInfo(data);
       setStep(2);
       setCooldown(data.cooldownSeconds || 30);
+      if (data.devOtp) {
+        setOtp(data.devOtp);
+      }
     } catch (err) {
       setError(err.message || 'Failed to send verification code. Please try again.');
     } finally {
@@ -268,7 +274,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                         onClick={() => onOpenLegal && onOpenLegal('terms')}
                         className="text-orange-600 dark:text-orange-400 underline font-medium hover:text-orange-700"
                       >
-                        Terms of Use
+                        Terms and Conditions
                       </button>{' '}
                       and{' '}
                       <button
@@ -303,11 +309,49 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} className="space-y-4 animate-fade-in">
-                <div className="p-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 text-xs text-orange-900 dark:text-orange-200">
-                  <p>
-                    Verification code sent to <strong>{email}</strong>.
-                  </p>
-                </div>
+                {dispatchInfo?.deliveredOnline ? (
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 flex items-start gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold">Real Online Email Dispatched!</p>
+                      <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 mt-0.5 leading-relaxed">
+                        Verification code successfully sent to <strong>{email}</strong> via {dispatchInfo.provider}. Please check your inbox and spam folder.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-bold">Online Email Service Not Configured</p>
+                        <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 mt-0.5 leading-snug">
+                          No SMTP or Resend credentials are added to <code className="px-1 py-0.5 bg-amber-200/60 dark:bg-amber-900/60 rounded font-mono">.env</code> yet.
+                        </p>
+                      </div>
+                    </div>
+                    {dispatchInfo?.devOtp && (
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700/60 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Test Verification Code:</span>
+                          <div className="font-mono text-lg font-black text-amber-600 dark:text-amber-400 tracking-widest">
+                            {dispatchInfo.devOtp}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setOtp(dispatchInfo.devOtp)}
+                          className="px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 font-bold text-[11px] hover:bg-amber-200 transition-colors"
+                        >
+                          Auto-Filled ✓
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      💡 To receive emails directly in your inbox, add <code className="font-mono">RESEND_API_KEY</code> or Gmail SMTP in <code className="font-mono">.env</code>.
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">

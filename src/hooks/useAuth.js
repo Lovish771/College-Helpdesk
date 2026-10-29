@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { getStoredItem, setStoredItem } from '../utils/storage';
+import { API_URL } from '../api/client';
+
+const resolveAuthUrl = (endpoint) => {
+  const base = (API_URL || '').replace(/\/+$/, '');
+  const clean = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  if (!base) return clean;
+  if (base.endsWith('/api') && clean.startsWith('/api/')) {
+    return `${base}${clean.substring(4)}`;
+  }
+  return `${base}${clean}`;
+};
 
 const AuthContext = createContext(null);
 
@@ -17,7 +28,7 @@ export function AuthProvider({ children }) {
         return;
       }
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch(resolveAuthUrl('/api/auth/me'), {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -47,7 +58,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const sendOtp = useCallback(async (email) => {
-    const res = await fetch('/api/auth/send-otp', {
+    const res = await fetch(resolveAuthUrl('/api/auth/send-otp'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -60,7 +71,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const verifyOtp = useCallback(async ({ email, otp, name, acceptedTerms }) => {
-    const res = await fetch('/api/auth/verify-otp', {
+    const res = await fetch(resolveAuthUrl('/api/auth/verify-otp'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp, name, acceptedTerms })
@@ -77,7 +88,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const adminLogin = useCallback(async (username, password) => {
-    const res = await fetch('/api/auth/admin-login', {
+    const res = await fetch(resolveAuthUrl('/api/auth/admin-login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -96,7 +107,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     try {
       if (token) {
-        await fetch('/api/auth/logout', {
+        await fetch(resolveAuthUrl('/api/auth/logout'), {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` }
         });

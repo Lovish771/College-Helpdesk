@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app, abort
 from app import db
 from app.models import ConversationSession, ConversationMessage, UnansweredQuery
 from app.services.rule_engine import RuleEngine
@@ -98,6 +98,13 @@ def chat():
         return jsonify({'error': 'Message length exceeds maximum limit of 500 characters'}), 400
     
     current_user = get_current_user()
+    if not current_user and not current_app.config.get('TESTING'):
+        return jsonify({
+            'success': False,
+            'error': 'Student login required. Please verify your email with a 6-digit OTP to chat with the LPU AI Assistant.',
+            'requires_login': True
+        }), 401
+
     user_id = getattr(current_user, 'id', None)
     conversation_id = data.get('conversation_id')
     
@@ -213,7 +220,9 @@ def clear_all_conversations():
 @bp.route('/conversations/<conversation_id>', methods=['GET'])
 def get_conversation(conversation_id):
     """Get conversation history for a specific session."""
-    session = ConversationSession.query.get_or_404(conversation_id)
+    session = db.session.get(ConversationSession, conversation_id)
+    if not session:
+        abort(404)
     user = get_current_user()
     if session.user_id and user and session.user_id != user.id and getattr(user, 'role', '') != 'admin':
         return jsonify({'error': 'Unauthorized to view this conversation.'}), 403
@@ -228,7 +237,9 @@ def get_conversation(conversation_id):
 @bp.route('/conversations/<conversation_id>', methods=['DELETE'])
 def delete_conversation(conversation_id):
     """Permanently delete a specific conversation from the database."""
-    session = ConversationSession.query.get_or_404(conversation_id)
+    session = db.session.get(ConversationSession, conversation_id)
+    if not session:
+        abort(404)
     user = get_current_user()
     if session.user_id and user and session.user_id != user.id and getattr(user, 'role', '') != 'admin':
         return jsonify({'error': 'Unauthorized to delete this conversation.'}), 403

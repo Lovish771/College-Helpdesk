@@ -223,7 +223,65 @@ class RuleEngine:
                 f"• **Top Recruiter Network:** 2,000+ recruiting companies including Google, Microsoft, Amazon, Cisco, Apple, Cognizant, and Deloitte.\n"
                 f"• **Super Dream Offers:** Over 1,000+ Fortune 500 companies actively hire LPU engineering and management graduates."
             )
-        
+
+        if intent == 'loan_query':
+            return (
+                "**Education Loan Facilitation at Lovely Professional University:**\n\n"
+                "LPU provides comprehensive institutional loan support with premier nationalized and private banking partners:\n\n"
+                "• **Tie-Up Banks:** State Bank of India (SBI), Punjab National Bank (PNB), Canara Bank, Union Bank of India, and HDFC Bank.\n"
+                "• **On-Campus Bank Branches:** SBI and PNB operate full-service branches and ATMs directly inside the Uni-Mall on campus.\n"
+                "• **Step 1 - Admission Offer:** Secure your provisional seat allotment at [admission.lpu.in](https://admission.lpu.in).\n"
+                "• **Step 2 - Loan Letter:** Download your official **Loan Estimation & Bonafide Letter** from your LPU UMS student portal.\n"
+                "• **Step 3 - National Vidya Lakshmi Portal:** Apply online through the Ministry of Education's [vidyalakshmi.co.in](https://www.vidyalakshmi.co.in) portal.\n"
+                "• **Disbursement:** Banks disburse tuition fees directly to the University and residential allowances to your student account."
+            )
+
+        if intent == 'hostel_tier_query':
+            return (
+                "**LPU Hostel Accommodation Tiers & Tariff Categories (Session 2026-27):**\n\n"
+                "Lovely Professional University offers three distinct residential tiers for a standard 10-month academic tenure:\n\n"
+                "1. **Standard Hostels (1, 2, 3, 4-Seater Rooms):**\n"
+                "   • Available in both AC and Air-Cooled formats with study tables, cupboards, and attached washrooms.\n"
+                "   • Tariffs range from ~₹80,000 to ₹1,60,000 / year (tenure of 10 months).\n\n"
+                "2. **Apartment Hostels:**\n"
+                "   • Modern multi-room apartment suites featuring air-conditioning, geysers, study lounge, and shared pantry access.\n"
+                "   • Designed for students seeking higher privacy and independent study spaces.\n\n"
+                "3. **Studio Apartments:**\n"
+                "   • Self-contained studio suites with private kitchenette space, personal refrigerator/microwave provision, attached washroom, and dedicated high-speed Wi-Fi.\n\n"
+                "⚡ **Electricity Policy:** Monthly kilowatt-hour quota is provided free of charge; excess units are billed at commercial Punjab State Power Corporation (PSPCL) slab rates (~₹10.50/unit)."
+            )
+
+        if intent == 'exam_fee_query':
+            return (
+                "**Official LPU Examination Fee Schedule:**\n\n"
+                "• **Fee Amount:** ₹4,500 per academic year.\n"
+                "• **Collection Schedule:** Billed strictly **once per year in the even (second) semester** of each respective academic year (i.e., Semester 2, Semester 4, Semester 6, Semester 8).\n"
+                "• **Odd Semesters:** No examination fee is assessed in odd semesters (1st, 3rd, 5th, 7th)."
+            )
+
+        if intent == 'laundry_query':
+            return (
+                "**LPU Laundry Services & Charges:**\n\n"
+                "• **Standard Package:** ₹5,400 per academic year.\n"
+                "• **Service Coverage:** Includes 40 washes/bundles per year with automated washing and professional steam ironing.\n"
+                "• **Collection & Delivery:** Convenient drop-off and pickup counters inside each residential hostel tower."
+            )
+
+        if intent == 'total_fee_query':
+            if program:
+                return self._format_total_fee_estimate(program)
+            return (
+                "To calculate your comprehensive 4-year degree fee (tuition, hostel, mess, laundry, and scholarships), "
+                "which programme at Lovely Professional University are you planning to pursue?"
+            )
+
+        if intent == 'compare_query':
+            return (
+                "**Compare Degree Programmes at LPU:**\n\n"
+                "You can compare academic disciplines, total credits, curriculum tracks, eligibility criteria, and fee structures side-by-side.\n\n"
+                "💡 Visit our **Compare Degrees** tool in the navigation bar to select and compare any programmes, or ask me e.g. *'Compare B.Tech CSE and B.Tech AI & ML'*."
+            )
+
         return self._handle_unknown()
     
     def _format_program_info(self, program):
@@ -295,16 +353,52 @@ class RuleEngine:
             f"You can view complete course descriptions, credits, and electives on the **Curriculum** page."
         )
     
+    def _format_total_fee_estimate(self, program):
+        f = lpu_fees.get(program.id, {'tuition': '₹1,60,000 / semester (Base)'})
+        import re
+        numbers = re.findall(r'[\d,]+', f['tuition'])
+        base_num = int(numbers[0].replace(',', '')) if numbers else 160000
+        duration_years = 4 if '4' in program.duration else (3 if '3' in program.duration else (2 if '2' in program.duration else 4))
+        total_semesters = duration_years * 2
+        total_tuition = base_num * total_semesters
+        exam_total = 4500 * duration_years
+
+        return (
+            f"**Estimated Comprehensive Degree Fee Breakdown for {program.name} ({program.short_name}):**\n\n"
+            f"• **Duration:** {program.duration} ({total_semesters} Semesters)\n"
+            f"• **Base Tuition:** ₹{base_num:,} / semester\n"
+            f"• **Total Base Tuition ({duration_years} Years):** ₹{total_tuition:,}\n"
+            f"• **Total Examination Fees ({duration_years} × ₹4,500 collected in even semesters):** ₹{exam_total:,}\n\n"
+            f"🏠 **Residential Options & Living Expenses (Per Year):**\n"
+            f"• **Standard Hostel (2/3 Seater):** ~₹90,000 - ₹1,20,000 / year (10-month tenure)\n"
+            f"• **Apartment / Studio Hostels:** ~₹1,50,000 - ₹2,10,000 / year (AC, attached bath, pantry access)\n"
+            f"• **Standard Mess Meal Plan:** ~₹40,000 / year (4 daily meals)\n"
+            f"• **Laundry Allowance:** ₹5,400 / year (40 bundles/washes)\n\n"
+            f"🎓 **Merit Scholarship Reductions (LPUNEST / 12th Board):**\n"
+            f"• **Category I (~30-48% Fee Waiver):** Saves up to ₹{(base_num * 0.48 * total_semesters):,.0f} across {duration_years} years!\n\n"
+            f"You can also use our interactive **Fees & Calculator** page to configure custom mess, laundry, and scholarship parameters."
+        )
+
     def _get_suggestions(self, intent, context=None):
         """Get relevant suggestions based on intent and context"""
         program = context.get('program') if context else None
         
         if intent == 'fee_query':
             return [f'Eligibility for {program.short_name}' if program else 'LPUNEST Scholarship', 'Hostel Facilities', 'Admission Process']
+        elif intent == 'total_fee_query':
+            return ['Hostel Tiers & Pricing', 'Education Loan Process', 'LPUNEST Scholarships', 'Admission Steps']
         elif intent == 'eligibility_query':
             return [f'Fee for {program.short_name}' if program else 'Fee Structure', 'Admission Process', 'Required Documents']
-        elif intent == 'hostel_query':
-            return ['1-Seater Room', '2-Seater Room', 'Mess Facilities', 'Uni-Hospital']
+        elif intent == 'hostel_query' or intent == 'hostel_tier_query':
+            return ['Apartment Hostels', 'Studio Apartments', 'Laundry Charges', 'Mess Meal Plans']
+        elif intent == 'exam_fee_query':
+            return ['Fee Structure', 'LPUNEST Dates', 'Admission Procedure', 'Total 4-Year Cost']
+        elif intent == 'laundry_query':
+            return ['Hostel Room Tiers', 'Mess Facilities', 'Campus Amenities', 'Fee Structure']
+        elif intent == 'loan_query':
+            return ['Admission Offer Steps', 'Vidya Lakshmi Portal', 'Campus Bank Branches', 'Total Fee Calculator']
+        elif intent == 'compare_query':
+            return ['B.Tech CSE vs AI & ML', 'Compare Degrees Tool', 'Placements Comparison', 'Curriculum Breakdown']
         elif intent == 'scholarship_query':
             return ['LPUNEST Category I', 'Sports Scholarship', 'Defense Concession', 'Eligibility Checker']
         elif intent == 'admission_query':

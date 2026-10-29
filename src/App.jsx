@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
@@ -132,6 +133,7 @@ function AppContent() {
 
   return (
     <div className="flex min-h-screen flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+      <CustomCursor />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:p-3 focus:bg-orange-600 focus:text-white focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-xl focus-visible:ring-2 focus-visible:ring-orange-500"
@@ -158,7 +160,7 @@ function AppContent() {
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>
             {page === 'chat' ? (
-              <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} />
+              <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} onOpenAuth={handleOpenAuth} />
             ) : (
               <Page {...props} />
             )}
@@ -198,17 +200,6 @@ function AppContent() {
         </Suspense>
       )}
 
-      {/* Legal & Unofficial Disclaimer Modal */}
-      {legalModalOpen && (
-        <Suspense fallback={null}>
-          <LegalModal
-            isOpen={legalModalOpen}
-            onClose={() => setLegalModalOpen(false)}
-            initialTab={legalInitialTab}
-          />
-        </Suspense>
-      )}
-
       {/* Authentication & Email OTP Modal */}
       {authModalOpen && (
         <Suspense fallback={null}>
@@ -221,6 +212,17 @@ function AppContent() {
                 window.location.reload();
               }
             }}
+          />
+        </Suspense>
+      )}
+
+      {/* Legal & Unofficial Disclaimer / Terms Modal - Placed after AuthModal with z-[80] to layer on top */}
+      {legalModalOpen && (
+        <Suspense fallback={null}>
+          <LegalModal
+            isOpen={legalModalOpen}
+            onClose={() => setLegalModalOpen(false)}
+            initialTab={legalInitialTab}
           />
         </Suspense>
       )}

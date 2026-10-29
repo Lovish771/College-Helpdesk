@@ -47,8 +47,10 @@ export default function Navbar({
     ['curriculum', 'Curriculum & Syllabi', BookOpen, 'Semester courses & lab outlines'],
     ['knowledge', 'Knowledge Base & FAQs', HelpCircle, 'UMS, 75% attendance rule & guidelines'],
     ['contact', 'DSR & Admissions Desk', PhoneCall, 'Official Block 29 & Block 30 contacts'],
-    ['analytics', 'Telemetry & Audits', BarChart3, 'Query trends & resolution stats'],
-    ...(isAdmin ? [['admin', 'Admin Dashboard', ShieldCheck, 'Real-time metrics, users & security logs']] : []),
+    ...(isAdmin ? [
+      ['analytics', 'Telemetry & Audits', BarChart3, 'Query trends & resolution stats'],
+      ['admin', 'Admin Dashboard', ShieldCheck, 'Real-time metrics, users & security logs']
+    ] : []),
   ];
 
   // Auto-hide navbar on scroll down on standard pages with rAF throttling for 60fps smoothness
@@ -148,7 +150,7 @@ export default function Navbar({
           </button>
 
           {/* Primary Navigation Menu (Desktop) */}
-          <ul className="hidden lg:flex items-center gap-0.5 sm:gap-1 shrink-0" role="list">
+          <ul className="hidden xl:flex items-center gap-1 shrink-0" role="list">
             {PRIMARY_NAV.map(([id, label, Icon]) => {
               const active = page === id;
               return (
@@ -156,7 +158,7 @@ export default function Navbar({
                   <button
                     onClick={() => to(id)}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer group active:scale-95 ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer group active:scale-95 ${
                       active
                         ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
@@ -181,7 +183,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => setMoreOpen(!moreOpen)}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
                   isMoreActive
                     ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
@@ -252,8 +254,8 @@ export default function Navbar({
               title="Search programmes, fees, hostels & rules (Ctrl+K)"
             >
               <Search size={14} className="text-orange-500 shrink-0" />
-              <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden xl:inline text-[9px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-400 bg-slate-200/80 dark:bg-slate-700">
+              <span className="hidden md:inline">Search</span>
+              <kbd className="hidden 2xl:inline text-[9px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-400 bg-slate-200/80 dark:bg-slate-700">
                 ⌘K
               </kbd>
             </button>
@@ -263,14 +265,20 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border-slate-200 dark:border-slate-700"
+                className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border-slate-200 dark:border-slate-700"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               >
                 {isDark ? (
-                  <Sun size={15} className="text-amber-400 shrink-0" />
+                  <>
+                    <Sun size={15} className="text-amber-400 shrink-0" />
+                    <span className="hidden sm:inline text-xs font-bold text-amber-300">Light</span>
+                  </>
                 ) : (
-                  <Moon size={15} className="text-slate-700 shrink-0" />
+                  <>
+                    <Moon size={15} className="text-slate-700 shrink-0" />
+                    <span className="hidden sm:inline text-xs font-bold text-slate-800">Dark</span>
+                  </>
                 )}
               </button>
             )}
@@ -366,7 +374,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => to('chat')}
-              className={`hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 sm:py-2 text-xs font-bold text-white shadow-xs transition-all duration-200 active:scale-95 cursor-pointer shrink-0 ${
+              className={`hidden md:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all duration-200 active:scale-95 cursor-pointer shrink-0 ${
                 page === 'chat'
                   ? 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-slate-900 brightness-105'
                   : 'hover:shadow-md hover:shadow-orange-500/20 hover:brightness-105'
@@ -382,7 +390,7 @@ export default function Navbar({
             {/* Mobile Menu Toggle */}
             <button
               type="button"
-              className="p-1.5 sm:p-2 rounded-full lg:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label={open ? 'Close navigation' : 'Open navigation'}
               onClick={() => setOpen(!open)}
             >
@@ -393,7 +401,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="lg:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
+          <div className="xl:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu

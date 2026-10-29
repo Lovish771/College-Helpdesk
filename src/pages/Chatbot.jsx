@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Plus, Menu, X, Trash2, HelpCircle,
   MessageSquare, Sparkles, PhoneCall, Clock,
-  AlertTriangle, CheckCircle2, ShieldAlert
+  AlertTriangle, CheckCircle2, ShieldAlert, Lock
 } from 'lucide-react';
 import ChatWindow from '../components/ChatWindow';
+import useAuth from '../hooks/useAuth';
 
 const COMMON_TOPICS = [
   { id: 't1', title: 'B.Tech CSE Fees & Cutoff', query: 'What are the eligibility criteria and fees for B.Tech CSE at LPU?' },
@@ -13,7 +14,8 @@ const COMMON_TOPICS = [
   { id: 't4', title: 'MBA Mittal School Cutoff', query: 'What is the MBA admission process and cutoff at Mittal School of Business?' },
 ];
 
-export default function Chatbot({ chat, go, pending, clearPending }) {
+export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth }) {
+  const { isAuthenticated, user } = useAuth();
   const [drawer, setDrawer] = useState(false);
   const done = useRef(null);
 
@@ -27,15 +29,35 @@ export default function Chatbot({ chat, go, pending, clearPending }) {
       done.current = null;
       return;
     }
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
     if (done.current === pending) return;
     done.current = pending;
     chat.startNewChat(pending);
     clearPending();
-  }, [pending, chat, clearPending]);
+  }, [pending, chat, clearPending, isAuthenticated, onOpenAuth]);
 
   const act = (fn) => () => {
     setDrawer(false);
     fn();
+  };
+
+  const handleNewChat = () => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+    chat.startNewChat();
+  };
+
+  const handleTopicSelect = (query) => {
+    if (!isAuthenticated) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
+    chat.startNewChat(query);
   };
 
   const handleConfirmDelete = async () => {
@@ -59,7 +81,7 @@ export default function Chatbot({ chat, go, pending, clearPending }) {
         {/* + New Chat Button in LPU Orange */}
         <div className="p-3.5 shrink-0">
           <button
-            onClick={act(() => chat.startNewChat())}
+            onClick={act(handleNewChat)}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold text-white shadow-md transition-all hover:brightness-105 active:scale-95 cursor-pointer"
             style={{
               background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
@@ -81,7 +103,7 @@ export default function Chatbot({ chat, go, pending, clearPending }) {
               {COMMON_TOPICS.map((item) => (
                 <button
                   key={item.id}
-                  onClick={act(() => chat.startNewChat(item.query))}
+                  onClick={act(() => handleTopicSelect(item.query))}
                   className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs transition-colors hover:bg-orange-50 dark:hover:bg-slate-800 group cursor-pointer"
                 >
                   <MessageSquare size={13} className="text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 shrink-0" />
@@ -229,7 +251,7 @@ export default function Chatbot({ chat, go, pending, clearPending }) {
 
         {/* Chat Conversation Main Panel */}
         <main className="flex-1 flex flex-col h-full min-h-0 min-w-0 bg-[#F8FAFC] dark:bg-slate-950 overflow-hidden">
-          <ChatWindow chat={chat} go={go} />
+          <ChatWindow chat={chat} go={go} isAuthenticated={isAuthenticated} onOpenAuth={onOpenAuth} />
         </main>
       </div>
 

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from app import db
 from app.models import ConversationSession, Program
+from app.models.user import utc_now
 
 class SlotFilling:
     """Manages conversation context and slot filling for LPU Helpdesk"""
@@ -27,7 +28,7 @@ class SlotFilling:
             'fee_type': None,
             'qualification': None,
             'pending_intent': None,
-            'last_update': session.last_activity if session else datetime.utcnow(),
+            'last_update': session.last_activity if session else utc_now(),
         }
         self.context_cache[conversation_id] = context
         return context
@@ -36,7 +37,7 @@ class SlotFilling:
         """Update a specific slot in the conversation context"""
         context = self.get_context(conversation_id)
         context[slot] = value
-        context['last_update'] = datetime.utcnow()
+        context['last_update'] = utc_now()
         self.context_cache[conversation_id] = context
         return context
     
@@ -48,10 +49,11 @@ class SlotFilling:
     def get_missing_slots(self, intent, context):
         """
         Determine which slots are missing for a given intent.
-        For fee and eligibility queries, the essential slot is 'program'.
+        For fee, total fee, and eligibility queries, the essential slot is 'program'.
         """
         required_slots = {
             'fee_query': ['program'],
+            'total_fee_query': ['program'],
             'eligibility_query': ['program'],
             'curriculum_query': ['program'],
         }
@@ -70,6 +72,8 @@ class SlotFilling:
         """Generate a question and suggestions to fill a missing slot"""
         if slot == 'program':
             suggestions = ['B.Tech CSE', 'B.Tech AI & ML', 'MBA', 'BCA', 'MCA', 'BBA']
+            if context.get('pending_intent') == 'total_fee_query':
+                return "Which programme would you like to calculate total degree fees for?", suggestions
             return "Sure! Which programme at Lovely Professional University are you asking about?", suggestions
         elif slot == 'semester':
             return "Which semester would you like to view the curriculum for?", ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4']
@@ -86,4 +90,4 @@ class SlotFilling:
         
         expiry_minutes = 60
         expiry_time = context['last_update'] + timedelta(minutes=expiry_minutes)
-        return datetime.utcnow() > expiry_time
+        return utc_now() > expiry_time

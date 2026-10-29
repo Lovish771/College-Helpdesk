@@ -24,6 +24,25 @@ def test_health_check(client):
     assert data['status'] == 'healthy'
     assert 'Lovely Professional University' in data['university']
 
+    # Root health
+    res_root_health = client.get('/health')
+    assert res_root_health.status_code == 200
+    assert res_root_health.get_json()['status'] == 'healthy'
+
+def test_api_root_endpoints(client):
+    # Test JSON response for root
+    res_json = client.get('/', headers={'Accept': 'application/json'})
+    assert res_json.status_code == 200
+    data = res_json.get_json()
+    assert data['status'] == 'operational'
+    assert '/api/programs' in data['endpoints']
+
+    # Test HTML response for browser navigation
+    res_html = client.get('/', headers={'Accept': 'text/html'})
+    assert res_html.status_code == 200
+    assert 'text/html' in res_html.content_type
+    assert 'Lovely Professional University' in res_html.get_data(as_text=True)
+
 def test_get_programs(client):
     res = client.get('/api/programs')
     assert res.status_code == 200
@@ -188,6 +207,52 @@ def test_chat_aiml_fee_query(client):
     assert data['intent'] == 'fee_query'
     assert 'Artificial Intelligence' in data['reply'] or 'AI & ML' in data['reply']
     assert '₹2,00,000' in data['reply']
+
+def test_education_loan_query(client):
+    res = client.post('/api/chat', json={'message': 'How can I apply for an education loan for LPU?'})
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['intent'] == 'loan_query'
+    assert 'Vidya Lakshmi' in data['reply']
+    assert 'State Bank of India' in data['reply'] or 'SBI' in data['reply']
+
+def test_hostel_apartment_and_exam_fee_queries(client):
+    # Apartment hostel query
+    res_hostel = client.post('/api/chat', json={'message': 'Tell me about apartment hostel and studio rooms'})
+    assert res_hostel.status_code == 200
+    data_hostel = res_hostel.get_json()
+    assert data_hostel['intent'] == 'hostel_tier_query'
+    assert 'Apartment Hostels' in data_hostel['reply']
+    assert 'Studio Apartments' in data_hostel['reply']
+
+    # Examination fee query
+    res_exam = client.post('/api/chat', json={'message': 'When is the exam fee taken and how much?'})
+    assert res_exam.status_code == 200
+    data_exam = res_exam.get_json()
+    assert data_exam['intent'] == 'exam_fee_query'
+    assert '₹4,500' in data_exam['reply']
+    assert 'even (second) semester' in data_exam['reply']
+
+    # Laundry query
+    res_laundry = client.post('/api/chat', json={'message': 'What are the laundry charges at LPU?'})
+    assert res_laundry.status_code == 200
+    data_laundry = res_laundry.get_json()
+    assert data_laundry['intent'] == 'laundry_query'
+    assert '₹5,400' in data_laundry['reply']
+
+def test_fallback_unanswered_logging(client):
+    # A question outside known curriculum and fees triggers fallback & logging
+    res = client.post('/api/chat', json={'message': 'Can I bring my personal electric submarine to Mars orbital station?'})
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['intent'] == 'unknown'
+    assert 'couldn\'t identify' in data['reply'] or 'rephrase' in data['reply']
+
+    # Verify query logged in UnansweredQuery table
+    from app.models.feedback import UnansweredQuery
+    unanswered = UnansweredQuery.query.filter(UnansweredQuery.query_text.ilike('%submarine%')).first()
+    assert unanswered is not None
+    assert unanswered.occurrence_count >= 1
 
 def test_chat_hostel_query(client):
     res = client.post('/api/chat', json={'message': 'Tell me about hostel rooms and mess'})

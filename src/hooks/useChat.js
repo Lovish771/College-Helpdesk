@@ -90,7 +90,21 @@ export default function useChat() {
         meta: { intent: r.intent, confidence: r.confidence, requires_slot: r.requires_slot, slot: r.slot }
       }]);
     } catch (e) {
-      if (cidRef.current === my) patch('failed');
+      if (cidRef.current === my) {
+        patch('failed');
+        if (e.status === 401 || e.requires_login) {
+          setMessages((m) => [
+            ...m,
+            {
+              id: uid(),
+              role: 'bot',
+              text: '🔒 **Student Verification Required**\n\nPlease verify your student email with a 6-digit OTP code to continue chatting with the LPU AI Assistant and keep track of your enquiries.',
+              time: new Date(),
+              suggestions: [],
+            },
+          ]);
+        }
+      }
     } finally {
       if (cidRef.current === my) setLoading(false);
     }

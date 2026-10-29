@@ -40,12 +40,22 @@ export async function request(path, mock, options = {}) {
   try {
     const res = await fetch(fullUrl, { ...options, headers });
     if (!res.ok) {
+      if (res.status === 401) {
+        const errorData = await res.json().catch(() => ({}));
+        const err = new Error(errorData.error || 'Login required. Please verify your email.');
+        err.status = 401;
+        err.requires_login = true;
+        throw err;
+      }
       console.warn(`[API] Endpoint ${path} returned status ${res.status}. Falling back to cached client knowledge.`);
       if (typeof mock === 'function') return mock();
       throw new Error(`Request failed (${res.status})`);
     }
     return await res.json();
   } catch (err) {
+    if (err.status === 401 || err.requires_login) {
+      throw err;
+    }
     console.warn(`[API] Backend unreachable for ${path}. Gracefully degrading to client-side knowledge cache.`);
     if (typeof mock === 'function') {
       await wait(150);
