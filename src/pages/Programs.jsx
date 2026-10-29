@@ -400,11 +400,6 @@ export default function Programs({ ask, onOpenCompare }) {
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-[#F8FAFC] dark:to-slate-950 transition-colors" />
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/20 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-3">
-            <Building2 size={13} />
-            <span>Academic Faculties &amp; Schools • 2026-27</span>
-          </div>
-
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white">
             Programmes &amp; Specializations
           </h1>

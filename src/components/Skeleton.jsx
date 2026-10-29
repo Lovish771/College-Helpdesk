@@ -17,26 +17,33 @@ export function SkeletonBlock({ className = '' }) {
  */
 export function CourseCardSkeleton() {
   return (
-    <div className="flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-xs p-0">
-      {/* Top Banner Image Placeholder */}
-      <SkeletonBlock className="h-48 w-full rounded-none" />
+    <div className="flex flex-col justify-between rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4">
+      {/* Top Badges Row Placeholder */}
+      <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-6 w-24 rounded-lg" />
+          <SkeletonBlock className="h-6 w-20 rounded-lg" />
+        </div>
+        <SkeletonBlock className="h-4 w-16" />
+      </div>
 
       {/* Card Body */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+      <div className="flex-1 flex flex-col justify-between space-y-4">
         <div className="space-y-3">
-          {/* Title Placeholder */}
-          <SkeletonBlock className="h-5 w-3/4 rounded-md" />
-          <SkeletonBlock className="h-4 w-1/2 rounded-md" />
+          {/* Code & Title Placeholder */}
+          <SkeletonBlock className="h-4 w-16 rounded" />
+          <SkeletonBlock className="h-6 w-3/4 rounded-md" />
+          <SkeletonBlock className="h-4 w-full rounded-md" />
 
           {/* Quick info grid */}
-          <div className="space-y-2 pt-2">
-            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
               <SkeletonBlock className="h-3 w-20" />
               <SkeletonBlock className="h-3 w-24" />
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
               <SkeletonBlock className="h-3 w-28" />
-              <SkeletonBlock className="h-3 w-16" />
+              <SkeletonBlock className="h-3 w-20" />
             </div>
             <div className="flex justify-between py-1">
               <SkeletonBlock className="h-3 w-24" />
