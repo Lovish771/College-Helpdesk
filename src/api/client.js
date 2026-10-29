@@ -1,7 +1,18 @@
 // Switch to the Flask backend by setting VITE_USE_MOCK=false and VITE_API_URL in .env
-export const API_URL = import.meta.env.VITE_API_URL !== undefined
-  ? import.meta.env.VITE_API_URL
-  : (import.meta.env.PROD ? '' : 'http://localhost:5000');
+export const API_URL = (() => {
+  // If running in browser and not on localhost, always use relative path '' so requests hit the live serverless backend (/api/...)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '';
+  }
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl !== undefined && envUrl !== '') {
+    if (import.meta.env.PROD && (envUrl.includes('localhost') || envUrl.includes('127.0.0.1'))) {
+      return '';
+    }
+    return envUrl;
+  }
+  return import.meta.env.PROD ? '' : 'http://localhost:5000';
+})();
 
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 export const wait = (ms = 400) => new Promise((r) => setTimeout(r, ms));
@@ -48,19 +59,12 @@ export async function request(path, mock, options = {}) {
         throw err;
       }
       console.warn(`[API] Endpoint ${path} returned status ${res.status}. Falling back to cached client knowledge.`);
-      if (typeof mock === 'function') return mock();
-      throw new Error(`Request failed (${res.status})`);
+      return typeof mock === 'function' ? mock() : mock;
     }
     return await res.json();
-  } catch (err) {
-    if (err.status === 401 || err.requires_login) {
-      throw err;
-    }
-    console.warn(`[API] Backend unreachable for ${path}. Gracefully degrading to client-side knowledge cache.`);
-    if (typeof mock === 'function') {
-      await wait(150);
-      return mock();
-    }
-    throw err;
+  } catch (e) {
+    if (e.requires_login) throw e;
+    console.warn(`[API] Network failure on ${path}:`, e.message, 'Using client knowledge base.');
+    return typeof mock === 'function' ? mock() : mock;
   }
 }

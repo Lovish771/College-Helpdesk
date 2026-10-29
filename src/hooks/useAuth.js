@@ -58,73 +58,36 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const sendOtp = useCallback(async (email) => {
-    try {
-      const res = await fetch(resolveAuthUrl('/api/auth/send-otp'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error(data?.error || data?.message || `Server returned ${res.status}`);
-      }
-      return data;
-    } catch (err) {
-      // If error is an explicit rejection from backend, propagate it
-      if (err.message && !err.message.includes('Server returned') && !err.message.includes('Failed to fetch') && !err.message.includes('NetworkError')) {
-        throw err;
-      }
-      console.warn('[Auth] Backend OTP endpoint unavailable, falling back to local demo OTP:', err);
-      // Demo fallback so student is never blocked from using the platform
-      return {
-        success: true,
-        devOtp: '123456',
-        notice: 'Demo mode active. Your verification code is 123456.',
-        deliveredOnline: false,
-        cooldownSeconds: 30
-      };
+    const res = await fetch(resolveAuthUrl('/api/auth/send-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      throw new Error(data?.error || data?.message || `Server returned ${res.status}`);
     }
+    return data;
   }, []);
 
   const verifyOtp = useCallback(async ({ email, otp, name, acceptedTerms }) => {
-    try {
-      const res = await fetch(resolveAuthUrl('/api/auth/verify-otp'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp, name, acceptedTerms })
-      });
-      const data = await res.json().catch(() => null);
-      if (res.ok && data) {
-        setToken(data.token);
-        setUser(data.user);
-        setStoredItem('lpu_auth_token', data.token);
-        setStoredItem('lpu_auth_user', data.user);
-        return data;
-      }
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-      throw new Error(`Verification failed (${res.status})`);
-    } catch (err) {
-      if (err.message && (err.message.toLowerCase().includes('code') || err.message.toLowerCase().includes('expired') || err.message.toLowerCase().includes('invalid'))) {
-        throw err;
-      }
-      console.warn('[Auth] Backend verify endpoint unreachable, authenticating locally:', err);
-      const mockUser = {
-        id: 9999,
-        email,
-        name: name || email.split('@')[0],
-        role: email.includes('admin') ? 'admin' : 'student',
-        is_verified: true,
-        created_at: new Date().toISOString()
-      };
-      const mockToken = 'mock_jwt_' + btoa(JSON.stringify(mockUser));
-      setToken(mockToken);
-      setUser(mockUser);
-      setStoredItem('lpu_auth_token', mockToken);
-      setStoredItem('lpu_auth_user', mockUser);
-      return { success: true, user: mockUser, token: mockToken };
+    const res = await fetch(resolveAuthUrl('/api/auth/verify-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, name, acceptedTerms })
+    });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.success) {
+      setToken(data.token);
+      setUser(data.user);
+      setStoredItem('lpu_auth_token', data.token);
+      setStoredItem('lpu_auth_user', data.user);
+      return data;
     }
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+    throw new Error(`Verification failed (${res.status})`);
   }, []);
 
   const adminLogin = useCallback(async (username, password) => {
@@ -144,26 +107,18 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  const logout = useCallback(async () => {
-    try {
-      if (token) {
-        await fetch(resolveAuthUrl('/api/auth/logout'), {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
-    } catch {}
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     setStoredItem('lpu_auth_token', null);
     setStoredItem('lpu_auth_user', null);
-  }, [token]);
+  }, []);
 
   const value = {
     user,
     token,
     loading,
-    isAuthenticated: Boolean(user && token),
+    isAuthenticated: Boolean(token),
     isAdmin: Boolean(user && (user.role === 'admin' || user.username === 'admin')),
     sendOtp,
     verifyOtp,
@@ -177,22 +132,18 @@ export function AuthProvider({ children }) {
 export default function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    const token = getStoredItem('lpu_auth_token') || null;
-    const user = getStoredItem('lpu_auth_user') || null;
+    const rawToken = getStoredItem('lpu_auth_token');
+    const rawUser = getStoredItem('lpu_auth_user');
     return {
-      user,
-      token,
+      user: rawUser,
+      token: rawToken,
       loading: false,
-      isAuthenticated: Boolean(user && token),
-      isAdmin: Boolean(user && (user.role === 'admin' || user.username === 'admin')),
+      isAuthenticated: Boolean(rawToken),
+      isAdmin: Boolean(rawUser && (rawUser.role === 'admin' || rawUser.username === 'admin')),
       sendOtp: async () => {},
       verifyOtp: async () => {},
       adminLogin: async () => {},
-      logout: () => {
-        setStoredItem('lpu_auth_token', null);
-        setStoredItem('lpu_auth_user', null);
-        window.location.reload();
-      }
+      logout: () => {}
     };
   }
   return context;

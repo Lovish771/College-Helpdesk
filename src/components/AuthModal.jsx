@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Mail, KeyRound, ArrowRight,
   RefreshCw, CheckCircle2, AlertCircle, User as UserIcon,
-  ShieldCheck, Lock, Sparkles, Send
+  ShieldCheck, Lock, Send
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
@@ -23,7 +23,6 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedSuccess, setVerifiedSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [devOtpNotice, setDevOtpNotice] = useState('');
   const [timer, setTimer] = useState(30);
 
   const otpInputRef = useRef(null);
@@ -79,15 +78,10 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
 
     setLoading(true);
     try {
-      const result = await sendOtp(cleanEmail);
+      await sendOtp(cleanEmail);
       setStep(2);
       setTimer(30); // 30 seconds timer
       setOtp(''); // Keep input blank for the user to enter
-      if (result?.devOtp && !result?.deliveredOnline) {
-        setDevOtpNotice(`Test Mode Notice: Email service not yet connected in Vercel. Verification code: ${result.devOtp}`);
-      } else {
-        setDevOtpNotice('');
-      }
     } catch (err) {
       setError(err.message || 'Failed to dispatch verification code. Please try again.');
     } finally {
@@ -100,14 +94,9 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
     setError('');
     setLoading(true);
     try {
-      const result = await sendOtp(email.trim().toLowerCase());
+      await sendOtp(email.trim().toLowerCase());
       setTimer(30);
       setOtp('');
-      if (result?.devOtp && !result?.deliveredOnline) {
-        setDevOtpNotice(`Test Mode Notice: Email service not yet connected in Vercel. Verification code: ${result.devOtp}`);
-      } else {
-        setDevOtpNotice('');
-      }
     } catch (err) {
       setError(err.message || 'Unable to resend OTP at this time.');
     } finally {
@@ -146,13 +135,13 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xl animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="auth-modal-title"
     >
       <div
-        className="bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-7 relative overflow-hidden animate-scale-up shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-all duration-300"
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle decorative glow */}
@@ -333,12 +322,6 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                 </p>
               </div>
             </div>
-
-            {devOtpNotice && (
-              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-[11px] text-amber-800 dark:text-amber-300 text-center">
-                {devOtpNotice}
-              </div>
-            )}
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
