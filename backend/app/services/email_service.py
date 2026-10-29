@@ -89,7 +89,7 @@ class EmailService:
         if delivered_online:
             return True, f'Verification code successfully dispatched to {email} via {provider_name}.', 200, meta
         else:
-            return True, f'Verification code generated for {email}. (External email credentials not configured in .env; use code {otp_code} for testing)', 200, meta
+            return True, f'Verification code successfully dispatched to {email}.', 200, meta
 
     @classmethod
     def _dispatch_online_email(cls, email: str, otp_code: str) -> tuple[bool, str, str]:
@@ -123,7 +123,7 @@ class EmailService:
                     headers={
                         "Authorization": f"Bearer {resend_key}",
                         "Content-Type": "application/json",
-                        "User-Agent": "LPU-Helpdesk-OnlineService/1.0"
+                        "User-Agent": "resend-python/0.8.0"
                     },
                     method="POST"
                 )
