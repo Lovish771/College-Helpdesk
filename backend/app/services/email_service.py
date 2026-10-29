@@ -24,9 +24,10 @@ class EmailService:
         """Dynamically reload .env to detect any newly added API keys or SMTP settings without needing server restart."""
         try:
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-            env_path = os.path.join(project_root, '.env')
-            if os.path.exists(env_path):
-                load_dotenv(env_path, override=True)
+            for fname in ['.env', 'env', os.path.join('backend', '.env'), os.path.join('backend', 'env')]:
+                p = os.path.join(project_root, fname)
+                if os.path.exists(p):
+                    load_dotenv(p, override=True)
         except Exception as e:
             logger.debug(f"Failed to reload .env dynamically: {e}")
 
@@ -263,13 +264,10 @@ class EmailService:
         smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or os.environ.get('MAIL_PORT') or 587)
 
         if smtp_server and smtp_user and smtp_pass:
-            # For Gmail, port 465 (Direct SSL) is 10x faster and never hangs on serverless compared to STARTTLS (587)
-            if smtp_server == 'smtp.gmail.com':
+            if smtp_port == 465:
                 ports_to_try = [465, 587]
             else:
-                ports_to_try = [smtp_port]
-                if smtp_port != 465 and smtp_port != 587:
-                    ports_to_try.append(465)
+                ports_to_try = [587, 465]
 
             for p in ports_to_try:
                 try:
