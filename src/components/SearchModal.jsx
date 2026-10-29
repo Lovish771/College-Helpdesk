@@ -179,11 +179,11 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/60 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-xl animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-up transition-colors"
+        className="w-full max-w-2xl rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-white/10 overflow-hidden animate-scale-up transition-colors shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header Input */}

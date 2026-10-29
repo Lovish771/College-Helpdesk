@@ -5,6 +5,7 @@ import {
   Building2, CheckCircle2, ChevronRight, Award, Compass, HelpCircle
 } from 'lucide-react';
 import LpuLogo from '../components/LpuLogo';
+import SpotlightCard from '../components/SpotlightCard';
 
 const CAMPUS_HIGHLIGHTS = [
   {
@@ -102,7 +103,10 @@ export default function Home({ go, ask, onOpenCompare }) {
           SECTION 1: PRODUCTION HERO SECTION
       ────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-14">
+        {/* Ambient mesh background glow */}
+        <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent blur-3xl pointer-events-none rounded-full" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-14 relative z-10">
           <div className="grid lg:grid-cols-12 gap-10 items-center">
             {/* Left Content (7 Cols) */}
             <div className="lg:col-span-7 space-y-6">
@@ -277,7 +281,7 @@ export default function Home({ go, ask, onOpenCompare }) {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 text-left"
+                className="p-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_20px_rgba(15,23,42,0.03),inset_0_1px_0_0_rgba(255,255,255,0.7)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.05)] text-left hover:-translate-y-0.5 transition-transform duration-200"
               >
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   {stat.label}
@@ -376,10 +380,10 @@ export default function Home({ go, ask, onOpenCompare }) {
             ].map((card) => {
               const Icon = card.icon;
               return (
-                <div
+                <SpotlightCard
                   key={card.title}
                   onClick={card.action}
-                  className="rounded-3xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-orange-300 dark:hover:border-orange-700 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
+                  className="rounded-3xl p-6 flex flex-col justify-between group cursor-pointer"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
@@ -403,7 +407,7 @@ export default function Home({ go, ask, onOpenCompare }) {
                     <span>{card.btnText}</span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
-                </div>
+                </SpotlightCard>
               );
             })}
           </div>
@@ -429,9 +433,9 @@ export default function Home({ go, ask, onOpenCompare }) {
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {CAMPUS_HIGHLIGHTS.map((item) => (
-              <div
+              <SpotlightCard
                 key={item.id}
-                className="group rounded-3xl overflow-hidden bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                className="group rounded-3xl overflow-hidden flex flex-col justify-between"
               >
                 <div>
                   <div className="relative h-48 w-full overflow-hidden bg-slate-900">
@@ -469,7 +473,7 @@ export default function Home({ go, ask, onOpenCompare }) {
                     <ArrowRight size={13} />
                   </button>
                 </div>
-              </div>
+              </SpotlightCard>
             ))}
           </div>
         </div>

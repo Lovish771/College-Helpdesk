@@ -1,12 +1,12 @@
 import React from 'react';
 
 /**
- * Base shimmering block
+ * Base shimmering block with fluid diagonal light sheen
  */
 export function SkeletonBlock({ className = '' }) {
   return (
     <div
-      className={`animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-800 dark:via-slate-700/60 dark:to-slate-800 rounded-lg ${className}`}
+      className={`relative overflow-hidden bg-slate-200/80 dark:bg-slate-800/80 rounded-lg before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/30 dark:before:via-white/10 before:to-transparent ${className}`}
       aria-hidden="true"
     />
   );

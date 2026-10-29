@@ -26,13 +26,13 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xl animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="legal-modal-title"
     >
       <div
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up"
+        className="bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-white/10 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-scale-up shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

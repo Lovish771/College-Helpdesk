@@ -120,12 +120,12 @@ export default function Navbar({
       >
         <nav
           aria-label="Main Navigation"
-          className={`mx-auto max-w-7xl flex items-center justify-between gap-2 px-3.5 sm:px-5 py-2 rounded-full border transition-all duration-300 backdrop-blur-xl ${
+          className={`mx-auto max-w-7xl flex items-center justify-between gap-2 px-3.5 sm:px-5 py-2 rounded-full border transition-all duration-300 backdrop-blur-2xl ${
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)]'
-              : 'bg-white/90 dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
+              ? 'bg-white/85 dark:bg-slate-900/85 border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.08)]'
+              : 'bg-white/75 dark:bg-slate-900/75 border-slate-200/60 dark:border-white/[0.06] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.05),inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.06)]'
           }`}
         >
           {/* Brand: Real LPU Logo + Stacked Title */}

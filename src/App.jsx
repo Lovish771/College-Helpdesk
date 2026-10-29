@@ -153,7 +153,7 @@ function AppContent() {
       <main
         id="main"
         key={page}
-        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : 'pt-16 sm:pt-20'}`}
+        className={`flex flex-1 flex-col animate-page-enter ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : 'pt-16 sm:pt-20'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>

@@ -12,12 +12,16 @@ export function useAsync(fn, deps = []) {
   return { ...s, reload: load };
 }
 
-/** Skeleton loader row */
+/** Skeleton loader row with diagonal shimmer */
 export function SkeletonRow({ rows = 3 }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-5 rounded-lg bg-slate-200/80 animate-pulse" style={{ width: `${70 + (i % 3) * 10}%` }} />
+        <div
+          key={i}
+          className="relative overflow-hidden h-5 rounded-lg bg-slate-200/80 dark:bg-slate-800/80 before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/30 dark:before:via-white/10 before:to-transparent"
+          style={{ width: `${70 + (i % 3) * 10}%` }}
+        />
       ))}
     </div>
   );
