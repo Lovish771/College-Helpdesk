@@ -15,7 +15,7 @@ const SEARCHABLE_ITEMS = [
     target: 'programs',
     targetData: p,
     icon: GraduationCap,
-    badgeColor: 'bg-orange-50 text-orange-600 border-orange-200',
+    badgeColor: 'bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-950/60 dark:text-orange-400 dark:border-orange-800',
     queryKeywords: `${p.name} ${p.short} ${p.degree} ${p.tags?.join(' ')} ${p.description}`,
   })),
 
@@ -27,7 +27,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹1,60,000 / sem (Base) · Up to 50% waiver with LPUNEST',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'cse btech fees scholarship 160000 1.6 lakh discount lpunest tuition',
   },
   {
@@ -37,7 +37,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹2,00,000 / sem (Base) · Up to 50% waiver with LPUNEST',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'aiml artificial intelligence data science cyber security cloud devops full stack fees 200000 2 lakh',
   },
   {
@@ -47,7 +47,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹2,00,000 / sem (Base) · CAT/MAT/LPUNEST scholarship slabs',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'mba business management fees cat mat lpunest mittal',
   },
 
@@ -59,7 +59,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '1-Seater to 4-Seater options: ₹83,000 to ₹1,53,000 / academic year',
     target: 'hostel',
     icon: BedDouble,
-    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800',
     queryKeywords: 'hostel room ac air cooled 1 seater 2 seater 3 seater 4 seater accommodation living',
   },
   {
@@ -69,7 +69,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Standard 4-Meal ₹50k/yr (Early: ₹45k) · Standard 3-Meal ₹46k · Laundry ₹5,400/yr',
     target: 'hostel',
     icon: BedDouble,
-    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800',
     queryKeywords: 'mess food meal dining vegetarian south indian non veg laundry clothes wash',
   },
 
@@ -81,7 +81,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Block 29, Room 102 · dsr@lpu.co.in · Ext: 2901/2902',
     target: 'contact',
     icon: Building2,
-    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200',
+    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/60 dark:text-purple-400 dark:border-purple-800',
     queryKeywords: 'dsr division student relations block 29 grievances identity card hostel permission leave complaints',
   },
   {
@@ -91,7 +91,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Toll-Free 1800 102 4431 / 1800 274 0615 · WhatsApp: +91-98762-98762',
     target: 'contact',
     icon: Building2,
-    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200',
+    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/60 dark:text-purple-400 dark:border-purple-800',
     queryKeywords: 'admissions block 30 counselling contact phone toll free helpline whatsapp chancellery',
   },
 
@@ -103,7 +103,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Biometric tracking; mandatory for appearing in End-Term Examinations',
     target: 'knowledge',
     icon: HelpCircle,
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800',
     queryKeywords: 'attendance 75 percent duty leave medical leave rules exams detention condonation',
   },
   {
@@ -113,7 +113,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'UMS registration, timetable, grade points, fee receipts & notices',
     target: 'knowledge',
     icon: HelpCircle,
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800',
     queryKeywords: 'ums portal login lpu touch app marks grades results fee payment registration password',
   },
 ];

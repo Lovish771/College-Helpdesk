@@ -102,7 +102,7 @@ export default function Home({ go, ask, onOpenCompare }) {
           SECTION 1: PRODUCTION HERO SECTION
       ────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-14">
           <div className="grid lg:grid-cols-12 gap-10 items-center">
             {/* Left Content (7 Cols) */}
             <div className="lg:col-span-7 space-y-6">

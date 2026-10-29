@@ -40,9 +40,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Imprima', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['"Fjalla One"', 'Impact', 'sans-serif'],
-        accent: ['Delius', 'cursive'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        accent: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
       },
       boxShadow: {
         'lpu-card': '0 2px 12px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',

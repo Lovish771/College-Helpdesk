@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
@@ -133,7 +132,6 @@ function AppContent() {
 
   return (
     <div className="flex min-h-screen flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
-      <CustomCursor />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:p-3 focus:bg-orange-600 focus:text-white focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-xl focus-visible:ring-2 focus-visible:ring-orange-500"
@@ -155,7 +153,7 @@ function AppContent() {
       <main
         id="main"
         key={page}
-        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : ''}`}
+        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : 'pt-16 sm:pt-20'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>

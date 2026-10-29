@@ -2,6 +2,7 @@ import React, { useState, memo } from 'react';
 import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, Sparkles } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
+import { request } from '../api/client';
 
 const fmt = (d) => {
   if (!d) return 'Just now';
@@ -100,17 +101,19 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
 
   const handleFeedback = (type) => {
     setFeedback(type);
-    // Optionally submit feedback to backend
     try {
-      fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: 'chat_turn',
-          is_helpful: type === 'like',
-          comment: type === 'like' ? 'Helpful answer' : 'Needs improvement',
-        }),
-      }).catch(() => {});
+      request(
+        '/api/feedback',
+        () => ({ status: 'success', recorded: true }),
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            session_id: 'chat_turn',
+            is_helpful: type === 'like',
+            comment: type === 'like' ? 'Helpful answer' : 'Needs improvement',
+          }),
+        }
+      ).catch(() => {});
     } catch {}
   };
 

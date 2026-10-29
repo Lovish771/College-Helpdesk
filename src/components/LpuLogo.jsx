@@ -4,23 +4,25 @@ export default function LpuLogo({
   className = '',
   showText = false,
 }) {
-  const isDark = variant === 'dark';
-
   return (
     <div className={`inline-flex items-center gap-2 select-none ${className}`}>
-      {/* Real Official LPU University Logo */}
-      <img
-        src="/images/lpu-logo.png"
-        alt="Lovely Professional University Logo"
-        width={size}
-        height={size}
-        className="shrink-0 object-contain drop-shadow-2xs transition-transform duration-200 group-hover:scale-105 rounded-md"
+      {/* Real Official LPU University Logo with adaptive contrast container */}
+      <div
+        className="shrink-0 flex items-center justify-center rounded-lg bg-white/90 dark:bg-white p-0.5 shadow-2xs transition-transform duration-200 group-hover:scale-105"
         style={{
           width: `${size}px`,
           height: `${size}px`,
         }}
-        loading="eager"
-      />
+      >
+        <img
+          src="/images/lpu-logo.png"
+          alt="Lovely Professional University Logo"
+          width={size - 4}
+          height={size - 4}
+          className="w-full h-full object-contain"
+          loading="eager"
+        />
+      </div>
 
       {showText && (
         <div className="flex flex-col justify-center leading-none">
