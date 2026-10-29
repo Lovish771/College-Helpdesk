@@ -102,7 +102,10 @@ def send_otp():
     }
     if meta.get('dev_otp'):
         resp['devOtp'] = meta['dev_otp']
-        resp['notice'] = f"Notice: External email credentials are not configured in .env. For testing, your verification code is {meta['dev_otp']}."
+        if 'Resend HTTP 403' in meta.get('dispatch_detail', ''):
+            resp['notice'] = "Notice: Your Resend account is in sandbox mode and only sends to its registered owner. For testing, your verification code is " + str(meta['dev_otp']) + ". To send to any student email, configure Gmail SMTP in Vercel."
+        else:
+            resp['notice'] = f"Notice: External email credentials are not configured in .env. For testing, your verification code is {meta['dev_otp']}."
     if not success:
         resp['error'] = msg
 
