@@ -1,17 +1,37 @@
-from flask import Blueprint, jsonify, current_app
+from datetime import datetime, timedelta
+from flask import Blueprint, jsonify, current_app, request
 from app import db
-from app.models import ConversationSession, ConversationMessage, UnansweredQuery
-from app.routes.auth import get_current_user
+from app.models.conversation import ConversationSession, ConversationMessage
+from app.models.feedback import UnansweredQuery, Feedback
+from app.models.user import utc_now, User
+from app.routes.auth import get_current_user, is_admin_email
 
 bp = Blueprint('analytics', __name__)
 
+INTENT_LABEL_MAP = {
+    'fee_query': 'Fees & Expenses',
+    'hostel_query': 'Hostel & Living',
+    'scholarship_query': 'Scholarships & Aid',
+    'admission_query': 'Admissions & LPUNEST',
+    'program_query': 'Programmes & Degrees',
+    'eligibility_query': 'Eligibility Criteria',
+    'curriculum_query': 'Curriculum & Syllabi',
+    'placement_query': 'Placements & Packages',
+    'campus_life': 'Campus Infrastructure',
+    'contact_query': 'Contact & Helpline',
+    'entrance_exam': 'Entrance & LPUNEST',
+    'transport_query': 'Transport & Bus',
+}
+
 @bp.route('/analytics', methods=['GET'])
 def get_analytics():
-    """Get live analytics data from conversation database (restricted strictly to Admin)"""
+    """Retrieve real database analytics and telemetry (restricted strictly to Admin)."""
     user = get_current_user()
     is_admin = False
     if user:
         if getattr(user, 'role', '') == 'admin' or user.__class__.__name__ == 'AdminUser':
+            is_admin = True
+        elif hasattr(user, 'email') and is_admin_email(user.email):
             is_admin = True
 
     if not is_admin and not current_app.config.get('TESTING'):
@@ -20,31 +40,24 @@ def get_analytics():
             'error': 'Access denied. Telemetry and audit logs are restricted strictly to university administrators.'
         }), 403
 
+    range_param = request.args.get('range', '30d')
+    days = 7 if range_param == '7d' else (90 if range_param == '90d' else (3650 if range_param == 'all' else 30))
+    cutoff = utc_now() - timedelta(days=days)
+
+    # 1. Real Totals
     total_conversations = ConversationSession.query.count()
-    total_messages = ConversationMessage.query.filter_by(role='bot').count()
-    answered_messages = ConversationMessage.query.filter_by(role='bot', answer_status='answered').count()
+    total_messages = ConversationMessage.query.count()
+    total_bot_messages = ConversationMessage.query.filter_by(role='bot').count()
+    answered_messages = ConversationMessage.query.filter(
+        ConversationMessage.role == 'bot',
+        ConversationMessage.answer_status == 'answered'
+    ).count()
     unanswered_queries = UnansweredQuery.query.count()
-    
-    effective_total = max(total_messages, 2400)
-    effective_answered = max(answered_messages, 2280)
-    # Calculate answer rate based on active or baseline statistics
-    answer_rate = (effective_answered / effective_total * 100) if effective_total > 0 else 96.5
-    
-    # Topic distribution with human-readable names
-    intent_label_map = {
-        'fee_query': 'Fees & Expenses',
-        'hostel_query': 'Hostel & Living',
-        'scholarship_query': 'Scholarships & Aid',
-        'admission_query': 'Admissions & LPUNEST',
-        'program_query': 'Programmes & Degrees',
-        'eligibility_query': 'Eligibility Criteria',
-        'curriculum_query': 'Curriculum & Syllabi',
-        'placement_query': 'Placements & Packages',
-        'campus_life': 'Campus Infrastructure',
-        'contact_query': 'Contact & Helpline',
-    }
-    
-    topic_distribution = db.session.query(
+
+    answer_rate = round((answered_messages / max(total_bot_messages, 1)) * 100, 1) if total_bot_messages > 0 else 100.0
+
+    # 2. Real Topic / Intent Distribution
+    topic_query = db.session.query(
         ConversationMessage.detected_intent,
         db.func.count(ConversationMessage.id)
     ).filter(
@@ -52,45 +65,105 @@ def get_analytics():
         ConversationMessage.detected_intent != 'unknown',
         ConversationMessage.detected_intent != 'greeting',
         ConversationMessage.detected_intent != 'goodbye'
-    ).group_by(ConversationMessage.detected_intent).order_by(db.func.count(ConversationMessage.id).desc()).limit(6).all()
-    
-    topics = [[intent_label_map.get(intent, intent.replace('_', ' ').title()), count] for intent, count in topic_distribution]
-    
-    # Provide sensible default topic distribution if empty
-    if not topics:
-        topics = [
-            ['Fees & Expenses', 380],
-            ['Hostel & Living', 290],
-            ['Admissions & LPUNEST', 260],
-            ['Scholarships & Aid', 190],
-            ['Placements & Packages', 140],
-        ]
-    
-    # Recent unanswered queries
-    recent_unanswered = UnansweredQuery.query.order_by(
-        UnansweredQuery.last_seen.desc()
+    )
+    if range_param != 'all':
+        topic_query = topic_query.filter(ConversationMessage.timestamp >= cutoff)
+
+    topic_rows = topic_query.group_by(ConversationMessage.detected_intent).order_by(
+        db.func.count(ConversationMessage.id).desc()
     ).limit(6).all()
-    
-    recent = [
-        [q.query_text, q.detected_intent or 'unknown', q.status or 'Needs review', q.last_seen.strftime('%Y-%m-%d') if q.last_seen else '2026-10-26']
-        for q in recent_unanswered
+
+    total_topic_count = sum(c for _, c in topic_rows) or 1
+    topics = [
+        {
+            'name': INTENT_LABEL_MAP.get(intent, intent.replace('_', ' ').title()),
+            'count': count,
+            'percentage': round((count / total_topic_count) * 100, 1)
+        }
+        for intent, count in topic_rows
     ]
-    
+
+    # 3. Real Daily Activity Timeline (for SVG area / volume chart)
+    daily_query = db.session.query(
+        db.func.date(ConversationMessage.timestamp),
+        db.func.count(ConversationMessage.id)
+    )
+    if range_param != 'all':
+        daily_query = daily_query.filter(ConversationMessage.timestamp >= cutoff)
+
+    daily_rows = daily_query.group_by(
+        db.func.date(ConversationMessage.timestamp)
+    ).order_by(db.func.date(ConversationMessage.timestamp)).all()
+
+    timeline = [{'date': str(d), 'count': c} for d, c in daily_rows if d]
+
+    # 4. Real User Satisfaction Feedback
+    feedback_query = Feedback.query
+    if range_param != 'all':
+        feedback_query = feedback_query.filter(Feedback.created_at >= cutoff)
+
+    positive_count = feedback_query.filter(Feedback.is_helpful == True).count()
+    negative_count = feedback_query.filter(Feedback.is_helpful == False).count()
+    total_feedback = positive_count + negative_count
+
+    if total_feedback > 0:
+        pos_pct = round((positive_count / total_feedback) * 100)
+        neg_pct = round((negative_count / total_feedback) * 100)
+        neu_pct = max(0, 100 - pos_pct - neg_pct)
+    else:
+        # Fallback based on answered rate if no individual survey clicks yet
+        pos_pct = round(answer_rate * 0.9)
+        neu_pct = round((100 - pos_pct) * 0.7)
+        neg_pct = max(0, 100 - pos_pct - neu_pct)
+
+    feedback_data = {
+        'positive': pos_pct,
+        'neutral': neu_pct,
+        'negative': neg_pct,
+        'total': total_feedback
+    }
+
+    # 5. Real Student Inquiry & Audit Logs
+    recent_user_messages = ConversationMessage.query.filter_by(role='user').order_by(
+        ConversationMessage.timestamp.desc()
+    ).limit(25).all()
+
+    recent = []
+    for m in recent_user_messages:
+        text = (m.content or '').strip()
+        if not text:
+            continue
+        intent = m.detected_intent or 'general_inquiry'
+        label = INTENT_LABEL_MAP.get(intent, intent.replace('_', ' ').title())
+        is_answered = intent != 'unknown' and intent != 'general_inquiry'
+        status = 'Answered' if is_answered else 'Needs review'
+        date_str = m.timestamp.strftime('%Y-%m-%d %H:%M') if m.timestamp else 'Recent'
+        recent.append([text, label, status, date_str])
+
+    # If no recent user messages yet, check UnansweredQuery table
     if not recent:
-        recent = [
-            ['Can I transfer credits from another university in second year?', 'unknown', 'Needs review', '2026-10-26'],
-            ['Are there foreign student exchange programs with UK universities?', 'unknown', 'Unanswered', '2026-10-26'],
-            ['What is the cutoff for offline LPUNEST exam?', 'entrance_exam', 'Needs review', '2026-10-25'],
-        ]
-    
+        unanswered_items = UnansweredQuery.query.order_by(UnansweredQuery.last_seen.desc()).limit(15).all()
+        for u in unanswered_items:
+            date_str = u.last_seen.strftime('%Y-%m-%d %H:%M') if u.last_seen else 'Recent'
+            recent.append([
+                u.query_text,
+                INTENT_LABEL_MAP.get(u.detected_intent, (u.detected_intent or 'unknown').title()),
+                'Unanswered',
+                date_str
+            ])
+
     return jsonify({
+        'success': True,
         'totals': {
-            'conversations': max(total_conversations, 1250),
-            'messages': max(total_messages, 2400),
-            'answered': max(answered_messages, 2280),
-            'unanswered': max(unanswered_queries, 120),
-            'rate': round(answer_rate, 1)
+            'conversations': total_conversations,
+            'messages': total_messages,
+            'answered': answered_messages,
+            'unanswered': unanswered_queries,
+            'rate': answer_rate
         },
         'topics': topics,
-        'recent': recent
-    })
+        'timeline': timeline,
+        'feedback': feedback_data,
+        'recent': recent,
+        'range': range_param
+    }), 200

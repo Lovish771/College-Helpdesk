@@ -1,3 +1,3 @@
-import { analytics } from '../data/mockData';
 import { request } from './client';
-export const getAnalytics = () => request('/api/analytics', () => analytics);
+
+export const getAnalytics = (range = '30d') => request(`/api/analytics?range=${range}`);

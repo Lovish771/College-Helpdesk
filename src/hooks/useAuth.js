@@ -14,6 +14,20 @@ const resolveAuthUrl = (endpoint) => {
 
 const AuthContext = createContext(null);
 
+const ADMIN_EMAILS = [
+  'anshulbadmosh2007@gmail.com',
+  'lovishwork003@gmail.com',
+  'admin@lpu.in',
+  'admissions@lpu.co.in'
+];
+
+const checkIsAdmin = (u) => {
+  if (!u) return false;
+  if (u.role === 'admin' || u.username === 'admin') return true;
+  if (u.email && ADMIN_EMAILS.includes(u.email.toLowerCase())) return true;
+  return false;
+};
+
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => getStoredItem('lpu_auth_token') || null);
   const [user, setUser] = useState(() => getStoredItem('lpu_auth_user') || null);
@@ -119,7 +133,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     isAuthenticated: Boolean(token),
-    isAdmin: Boolean(user && (user.role === 'admin' || user.username === 'admin')),
+    isAdmin: checkIsAdmin(user),
     sendOtp,
     verifyOtp,
     adminLogin,
@@ -139,7 +153,7 @@ export default function useAuth() {
       token: rawToken,
       loading: false,
       isAuthenticated: Boolean(rawToken),
-      isAdmin: Boolean(rawUser && (rawUser.role === 'admin' || rawUser.username === 'admin')),
+      isAdmin: checkIsAdmin(rawUser),
       sendOtp: async () => {},
       verifyOtp: async () => {},
       adminLogin: async () => {},

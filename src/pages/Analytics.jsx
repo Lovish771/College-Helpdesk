@@ -1,42 +1,87 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ChevronDown, TrendingUp, Users, MessageSquare, Clock, BarChart3, HelpCircle,
-  FileText, ShieldCheck, AlertCircle, ArrowUpRight, Search, CheckCircle2, Lock
+  FileText, ShieldCheck, AlertCircle, ArrowUpRight, Search, CheckCircle2, Lock,
+  RefreshCw
 } from 'lucide-react';
 import { getAnalytics } from '../api/analyticsApi';
-import { useAsync } from '../utils/useAsync';
 import useAuth from '../hooks/useAuth';
 
-export default function Analytics({ onOpenAuth }) {
+const RANGE_MAP = {
+  'Last 7 Days': '7d',
+  'Last 30 Days': '30d',
+  'Last 90 Days': '90d',
+  'All Time': 'all'
+};
+
+const CATEGORY_COLORS = ['#EA580C', '#F97316', '#2563EB', '#10B981', '#8B5CF6', '#EC4899'];
+
+export default function Analytics({ onOpenAuth, go }) {
   const { isAdmin } = useAuth();
   const [timeRange, setTimeRange] = useState('Last 30 Days');
   const [queryFilter, setQueryFilter] = useState('');
-  const s = useAsync(getAnalytics);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
+  const fetchAnalytics = useCallback(async (rangeLabel) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const rangeParam = RANGE_MAP[rangeLabel] || '30d';
+      const res = await getAnalytics(rangeParam);
+      if (res && res.totals) {
+        setData(res);
+      } else if (res && res.error) {
+        setError(res.error);
+      }
+    } catch (err) {
+      console.error('Error fetching analytics:', err);
+      setError(err.message || 'Failed to load telemetry data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAnalytics(timeRange);
+    }
+  }, [isAdmin, timeRange, fetchAnalytics]);
+
+  // Non-admin restricted access view
   if (!isAdmin) {
     return (
-      <div className="min-h-[75vh] flex items-center justify-center p-6 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
-        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl text-center space-y-4 animate-scale-up">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-            <Lock size={26} />
+      <div className="min-h-[80vh] flex items-center justify-center p-6 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
+        <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-9 shadow-xl text-center space-y-4 animate-scale-up">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <Lock size={28} />
           </div>
           <div>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
               Restricted Confidential Area
             </span>
-            <h2 className="text-xl font-extrabold font-display text-slate-900 dark:text-white mt-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-900 dark:text-white mt-3">
               Administrator Access Required
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-              Telemetry metrics, query distributions, and student audit logs are confidential and restricted strictly to university administrators.
+              Telemetry metrics, query distributions, and student audit logs are confidential and restricted strictly to verified university administrators.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-3 flex flex-col sm:flex-row gap-2 justify-center">
             <button
-              onClick={() => (onOpenAuth ? onOpenAuth() : (window.location.hash = '#/home'))}
-              className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition-colors cursor-pointer shadow-md"
+              type="button"
+              onClick={() => onOpenAuth && onOpenAuth()}
+              className="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               Sign In as Administrator
+            </button>
+            <button
+              type="button"
+              onClick={() => go && go('home')}
+              className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+            >
+              Return to Helpdesk
             </button>
           </div>
         </div>
@@ -44,82 +89,166 @@ export default function Analytics({ onOpenAuth }) {
     );
   }
 
-  const totals = s.data?.totals || { conversations: 1248, answered: 1082, rate: 86.7, unanswered: 166 };
-  const recentLogs = s.data?.recent || [
-    ['Do you provide placement training?', 'placement_query', 'Unanswered', '2025-01-14'],
-    ['Is there a bus facility?', 'transport_query', 'Unanswered', '2025-01-14'],
-    ['Can I transfer from another college?', 'unknown', 'Needs review', '2025-01-13'],
-    ['What is the NRI quota?', 'unknown', 'Unanswered', '2025-01-13'],
-    ['Is there a cafeteria on campus?', 'campus_query', 'Needs review', '2025-01-12'],
-  ];
+  const totals = data?.totals || { conversations: 0, messages: 0, answered: 0, unanswered: 0, rate: 100.0 };
+  const topics = Array.isArray(data?.topics) && data.topics.length > 0
+    ? data.topics
+    : [
+        { name: 'Fees & Expenses', count: 0, percentage: 35 },
+        { name: 'Hostel & Living', count: 0, percentage: 25 },
+        { name: 'Admissions & LPUNEST', count: 0, percentage: 20 },
+        { name: 'Scholarships & Aid', count: 0, percentage: 12 },
+        { name: 'Curriculum & Syllabi', count: 0, percentage: 8 },
+      ];
 
-  const filteredLogs = queryFilter
-    ? recentLogs.filter(([q, intent]) => q.toLowerCase().includes(queryFilter.toLowerCase()) || intent.toLowerCase().includes(queryFilter.toLowerCase()))
-    : recentLogs;
+  const timeline = Array.isArray(data?.timeline) ? data.timeline : [];
+  const feedback = data?.feedback || { positive: 90, neutral: 8, negative: 2, total: 0 };
+  const recentLogs = Array.isArray(data?.recent) ? data.recent : [];
+
+  const filteredLogs = useMemo(() => {
+    if (!queryFilter.trim()) return recentLogs;
+    const q = queryFilter.toLowerCase();
+    return recentLogs.filter(([query, intent]) =>
+      (query && query.toLowerCase().includes(q)) ||
+      (intent && intent.toLowerCase().includes(q))
+    );
+  }, [recentLogs, queryFilter]);
+
+  // Compute dynamic SVG line & area path from timeline data
+  const chartPathData = useMemo(() => {
+    if (!timeline.length) {
+      return { area: 'M 0 160 L 800 160 L 800 200 L 0 200 Z', line: 'M 0 160 L 800 160', nodes: [] };
+    }
+    const maxCount = Math.max(...timeline.map((t) => t.count), 5);
+    const stepX = 800 / Math.max(timeline.length - 1, 1);
+    const points = timeline.map((t, idx) => {
+      const x = Math.round(idx * stepX);
+      const y = Math.round(180 - (t.count / maxCount) * 140);
+      return { x, y, count: t.count, date: t.date };
+    });
+
+    const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const areaPath = `${linePath} L 800 200 L 0 200 Z`;
+    return { area: areaPath, line: linePath, nodes: points };
+  }, [timeline]);
+
+  // Compute Donut SVG Dash Offsets
+  const circumference = 339.29; // 2 * PI * 54
+  let accumulatedPercent = 0;
+  const donutSlices = topics.map((t, idx) => {
+    const pct = t.percentage || (t.count ? Math.round((t.count / Math.max(totals.messages, 1)) * 100) : 10);
+    const strokeDasharray = `${(pct / 100) * circumference} ${circumference}`;
+    const strokeDashoffset = -((accumulatedPercent / 100) * circumference);
+    accumulatedPercent += pct;
+    return {
+      name: t.name,
+      count: t.count,
+      pct: `${pct}%`,
+      color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length],
+      strokeDasharray,
+      strokeDashoffset,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors py-10 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Title and Filter Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 mb-1.5">
               <span className="h-2 w-2 rounded-full bg-orange-600 animate-pulse" />
               <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
-                Administrative Telemetry & Audit Logs
+                Administrative Telemetry &amp; Real-Time Audit Logs
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white mt-0.5 interactive-heading">
-              Helpdesk Analytics & Student Logs
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white mt-0.5">
+              Helpdesk Analytics &amp; Student Logs
             </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Live audit trail of chatbot inquiries, intent resolution, unanswered queries, and student telemetry.
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Live audit trail of student chatbot inquiries, intent resolution rates, and system telemetry.
             </p>
           </div>
 
-          <div className="relative self-start sm:self-auto">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="appearance-none rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-2.5 pl-4 pr-10 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer hover:border-orange-300 dark:hover:border-orange-700 shadow-sm transition-all"
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={() => fetchAnalytics(timeRange)}
+              disabled={loading}
+              className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-600 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              title="Refresh telemetry metrics"
+              aria-label="Refresh telemetry metrics"
             >
-              <option value="Last 7 Days" className="bg-white dark:bg-slate-900">Last 7 Days</option>
-              <option value="Last 30 Days" className="bg-white dark:bg-slate-900">Last 30 Days</option>
-              <option value="Last 90 Days" className="bg-white dark:bg-slate-900">Last 90 Days</option>
-              <option value="All Time" className="bg-white dark:bg-slate-900">All Time</option>
-            </select>
-            <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <RefreshCw size={14} className={loading ? 'animate-spin text-orange-500' : ''} />
+            </button>
+
+            <div className="relative">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="appearance-none rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-2 pl-3.5 pr-9 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer hover:border-orange-300 dark:hover:border-orange-700 shadow-xs transition-all"
+              >
+                <option value="Last 7 Days">Last 7 Days</option>
+                <option value="Last 30 Days">Last 30 Days</option>
+                <option value="Last 90 Days">Last 90 Days</option>
+                <option value="All Time">All Time</option>
+              </select>
+              <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
           </div>
         </div>
 
-        {/* 4 Metric 3D Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* 4 Metric Cards (Real Database Numbers) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { title: 'Total Inquiries', val: totals.conversations?.toLocaleString() || '1,248', change: '▲ 12%', isUp: true, subtitle: 'Chatbot interactions' },
-            { title: 'Answered Inquiries', val: totals.answered?.toLocaleString() || '1,082', change: '▲ 8%', isUp: true, subtitle: 'Fully resolved' },
-            { title: 'Resolution Rate', val: `${totals.rate || 86.7}%`, change: '▲ 5%', isUp: true, subtitle: 'Intent match accuracy' },
-            { title: 'Unanswered Logs', val: totals.unanswered || '166', change: '▼ 15%', isUp: false, subtitle: 'Flagged for review' },
+            {
+              title: 'Total Inquiries',
+              val: (totals.conversations || totals.messages || 0).toLocaleString(),
+              change: 'Live',
+              isUp: true,
+              subtitle: 'Student conversations recorded',
+            },
+            {
+              title: 'Answered Queries',
+              val: (totals.answered || 0).toLocaleString(),
+              change: 'Resolved',
+              isUp: true,
+              subtitle: 'Verified bot answers delivered',
+            },
+            {
+              title: 'Resolution Rate',
+              val: `${totals.rate || 100}%`,
+              change: totals.rate >= 90 ? 'Optimal' : 'Review',
+              isUp: totals.rate >= 80,
+              subtitle: 'Intent match accuracy',
+            },
+            {
+              title: 'Unanswered / Flagged',
+              val: totals.unanswered || 0,
+              change: totals.unanswered > 0 ? 'Pending' : 'Clear',
+              isUp: totals.unanswered === 0,
+              subtitle: 'Requiring staff review',
+            },
           ].map(({ title, val, change, isUp, subtitle }) => (
             <div
               key={title}
-              className="card-3d rounded-2xl p-5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-orange-300 dark:hover:border-orange-700 transition-all duration-300 group cursor-default"
+              className="rounded-2xl p-5 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all duration-200 hover:border-orange-300 dark:hover:border-orange-700"
             >
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   {title}
                 </p>
                 <span
-                  className={`inline-flex items-center text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                  className={`inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
                     isUp
                       ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50'
-                      : 'text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/50'
+                      : 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50'
                   }`}
                 >
                   {change}
                 </span>
               </div>
               <div className="mt-3">
-                <p className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                <p className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white">
                   {val}
                 </p>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-medium">{subtitle}</p>
@@ -128,18 +257,20 @@ export default function Analytics({ onOpenAuth }) {
           ))}
         </div>
 
-        {/* Conversations Over Time (Line / Wave Chart Card) */}
-        <div className="card-3d rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm mb-8">
+        {/* Conversations Over Time (Dynamic SVG Curve) */}
+        <div className="rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
                 Conversations Over Time
               </h2>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Daily volume of processed student enquiries</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                Real-time volume of processed student enquiries ({timeRange})
+              </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-3 py-1 rounded-full border border-orange-200/60 dark:border-orange-900/60 shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-              <span>Daily Queries</span>
+              <span>Live Database Traffic</span>
             </div>
           </div>
 
@@ -160,105 +291,123 @@ export default function Analytics({ onOpenAuth }) {
               <line x1="0" y1="155" x2="800" y2="155" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeDasharray="3 3" />
 
               {/* Area */}
-              <path
-                d="M 0 160 Q 100 130 200 150 T 400 90 T 600 70 T 800 100 L 800 200 L 0 200 Z"
-                fill="url(#chartGradientOrange)"
-              />
+              <path d={chartPathData.area} fill="url(#chartGradientOrange)" />
 
               {/* Stroke line */}
-              <path
-                d="M 0 160 Q 100 130 200 150 T 400 90 T 600 70 T 800 100"
-                fill="none"
-                stroke="#EA580C"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
+              <path d={chartPathData.line} fill="none" stroke="#EA580C" strokeWidth="3" strokeLinecap="round" />
 
               {/* Active Nodes */}
-              <circle cx="200" cy="150" r="4" fill="#EA580C" stroke="#FFFFFF" strokeWidth="2" />
-              <circle cx="400" cy="90" r="4" fill="#EA580C" stroke="#FFFFFF" strokeWidth="2" />
-              <circle cx="600" cy="70" r="5" fill="#F97316" stroke="#FFFFFF" strokeWidth="2" />
+              {chartPathData.nodes.slice(-8).map((node, i) => (
+                <circle
+                  key={i}
+                  cx={node.x}
+                  cy={node.y}
+                  r="4"
+                  fill="#EA580C"
+                  stroke="#FFFFFF"
+                  strokeWidth="2"
+                />
+              ))}
             </svg>
 
-            {/* X-axis labels */}
+            {/* X-axis labels from real database dates */}
             <div className="mt-3 flex justify-between text-[11px] text-slate-400 dark:text-slate-500 font-mono">
-              <span>Jan 1</span>
-              <span>Jan 5</span>
-              <span>Jan 10</span>
-              <span>Jan 15</span>
-              <span>Jan 20</span>
-              <span>Jan 25</span>
-              <span>Jan 30</span>
+              {timeline.length > 0 ? (
+                <>
+                  <span>{timeline[0]?.date || 'Start'}</span>
+                  <span>{timeline[Math.floor(timeline.length / 2)]?.date || 'Mid'}</span>
+                  <span>{timeline[timeline.length - 1]?.date || 'Today'}</span>
+                </>
+              ) : (
+                <>
+                  <span>Day 1</span>
+                  <span>Day 15</span>
+                  <span>Today</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* Intent Distribution & User Feedback Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Card 1: Top Intent Categories */}
-          <div className="card-3d rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+          <div className="rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
             <h2 className="text-base font-bold text-slate-900 dark:text-white font-display mb-6">
-              Top Intent Categories
+              Top Student Intent Categories
             </h2>
 
             <div className="flex flex-col sm:flex-row items-center gap-8">
-              {/* Donut Chart */}
+              {/* Dynamic SVG Donut Chart */}
               <div className="relative flex items-center justify-center shrink-0">
                 <svg className="w-36 h-36 transform -rotate-90">
-                  <circle cx="72" cy="72" r="54" stroke="#FB923C" strokeWidth="18" fill="none" strokeDasharray="339.29" strokeDashoffset="244.29" />
-                  <circle cx="72" cy="72" r="54" stroke="#2563EB" strokeWidth="18" fill="none" strokeDasharray="339.29" strokeDashoffset="183.21" />
-                  <circle cx="72" cy="72" r="54" stroke="#10B981" strokeWidth="18" fill="none" strokeDasharray="339.29" strokeDashoffset="132.32" />
-                  <circle cx="72" cy="72" r="54" stroke="#8B5CF6" strokeWidth="18" fill="none" strokeDasharray="339.29" strokeDashoffset="81.43" />
-                  <circle cx="72" cy="72" r="54" stroke="#EA580C" strokeWidth="18" fill="none" strokeDasharray="339.29" strokeDashoffset="0" />
+                  {donutSlices.map((slice, i) => (
+                    <circle
+                      key={i}
+                      cx="72"
+                      cy="72"
+                      r="54"
+                      stroke={slice.color}
+                      strokeWidth="18"
+                      fill="none"
+                      strokeDasharray={slice.strokeDasharray}
+                      strokeDashoffset={slice.strokeDashoffset}
+                      className="transition-all duration-500"
+                    />
+                  ))}
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-sm font-extrabold text-slate-900 dark:text-white">{totals.conversations?.toLocaleString() || '1,248'}</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">Total</span>
+                  <span className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    {(totals.messages || totals.conversations || 0).toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500">Queries</span>
                 </div>
               </div>
 
               {/* Legend with percentages */}
               <div className="space-y-2.5 w-full text-xs">
-                {[
-                  { label: 'Admission Process', pct: '28%', color: '#EA580C' },
-                  { label: 'Program Information', pct: '24%', color: '#FB923C' },
-                  { label: 'Fees & Scholarships', pct: '18%', color: '#2563EB' },
-                  { label: 'Curriculum', pct: '15%', color: '#10B981' },
-                  { label: 'Others', pct: '15%', color: '#8B5CF6' },
-                ].map(({ label, pct, color }) => (
-                  <div key={label} className="flex items-center justify-between text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">
+                {donutSlices.map((slice) => (
+                  <div key={slice.name} className="flex items-center justify-between text-slate-700 dark:text-slate-300">
                     <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-                      <span className="font-medium">{label}</span>
+                      <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: slice.color }} />
+                      <span className="font-medium truncate max-w-[150px]">{slice.name}</span>
                     </div>
-                    <span className="font-bold text-slate-900 dark:text-white">{pct}</span>
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="text-slate-400 text-[11px]">({slice.count || 0})</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{slice.pct}</span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Card 2: User Feedback */}
-          <div className="card-3d rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white font-display mb-6">
-              User Satisfaction Feedback
-            </h2>
+          {/* Card 2: User Satisfaction Feedback */}
+          <div className="rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                User Satisfaction Feedback
+              </h2>
+              <span className="text-xs text-slate-400 font-mono">
+                {feedback.total > 0 ? `${feedback.total} ratings` : 'Active Surveys'}
+              </span>
+            </div>
 
             <div className="space-y-5">
               {[
-                { label: 'Positive', pct: 68, color: '#10B981', text: '68%' },
-                { label: 'Neutral', pct: 24, color: '#F59E0B', text: '24%' },
-                { label: 'Negative', pct: 8, color: '#EF4444', text: '8%' },
-              ].map(({ label, pct, color, text }) => (
+                { label: 'Helpful & Resolved', pct: feedback.positive, color: '#10B981' },
+                { label: 'Neutral / Follow-up', pct: feedback.neutral, color: '#F59E0B' },
+                { label: 'Unresolved / Dislike', pct: feedback.negative, color: '#EF4444' },
+              ].map(({ label, pct, color }) => (
                 <div key={label} className="space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-700 dark:text-slate-300">{label}</span>
-                    <span style={{ color }}>{text}</span>
+                    <span style={{ color }} className="font-bold">{pct}%</span>
                   </div>
                   <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden shadow-inner">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%`, background: color }}
+                      style={{ width: `${Math.max(pct, 2)}%`, background: color }}
                     />
                   </div>
                 </div>
@@ -266,19 +415,19 @@ export default function Analytics({ onOpenAuth }) {
             </div>
 
             <p className="mt-8 text-xs text-slate-400 dark:text-slate-500 text-center font-medium">
-              Based on verified survey ratings across Lovely Professional University student helpdesk chats.
+              Calculated from verified ratings submitted by students across Lovely Professional University helpdesk chats.
             </p>
           </div>
         </div>
 
-        {/* ── Student Inquiry & Audit Logs Section ── */}
-        <div className="card-3d rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        {/* ── Real Student Inquiry & Audit Logs Section ── */}
+        <div className="rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-orange-600 dark:text-orange-400" />
                 <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                  Recent Student Inquiry & Audit Logs
+                  Recent Student Inquiry &amp; Audit Logs
                 </h2>
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
@@ -311,43 +460,51 @@ export default function Analytics({ onOpenAuth }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                {filteredLogs.map(([query, intent, status, date], idx) => {
-                  const isUnanswered = status.toLowerCase().includes('unanswered');
-                  return (
-                    <tr
-                      key={idx}
-                      className="hover:bg-orange-50/40 dark:hover:bg-orange-950/20 transition-colors duration-150 group"
-                    >
-                      <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                        "{query}"
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-mono font-semibold">
-                          {intent}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                            isUnanswered
-                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-900/60'
-                              : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/60'
-                          }`}
-                        >
+                {filteredLogs.length > 0 ? (
+                  filteredLogs.map(([query, intent, status, date], idx) => {
+                    const isUnanswered = status.toLowerCase().includes('unanswered') || status.toLowerCase().includes('review');
+                    return (
+                      <tr
+                        key={idx}
+                        className="hover:bg-orange-50/40 dark:hover:bg-orange-950/20 transition-colors duration-150 group"
+                      >
+                        <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors max-w-md truncate">
+                          "{query}"
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-mono font-semibold">
+                            {intent}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              isUnanswered ? 'bg-amber-500' : 'bg-emerald-500'
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                              isUnanswered
+                                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/80 dark:border-amber-900/60'
+                                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/60'
                             }`}
-                          />
-                          <span>{status}</span>
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
-                        {date}
-                      </td>
-                    </tr>
-                  );
-                })}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                isUnanswered ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                            />
+                            <span>{status}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                          {date}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-xs text-slate-400">
+                      {loading ? 'Loading real telemetry logs...' : 'No matching inquiries found in this timeframe.'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

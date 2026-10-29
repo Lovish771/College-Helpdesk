@@ -54,13 +54,7 @@ def admin_metrics():
     ).group_by(ConversationMessage.detected_intent).order_by(db.func.count(ConversationMessage.id).desc()).limit(8).all()
 
     chat_volume = [{'category': intent.replace('_', ' ').title(), 'count': count} for intent, count in category_counts]
-    if not chat_volume:
-        chat_volume = [
-            {'category': 'Fees & Slabs', 'count': 420},
-            {'category': 'Hostel & Living', 'count': 340},
-            {'category': 'Admissions & LPUNEST', 'count': 290},
-            {'category': 'Placements', 'count': 180},
-        ]
+    # Chat volume is 100% real database distribution
 
     return jsonify({
         'success': True,

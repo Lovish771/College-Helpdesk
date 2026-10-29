@@ -10,6 +10,21 @@ from app.services.jwt_service import JWTService
 
 auth_bp = Blueprint('auth', __name__)
 
+DEFAULT_ADMIN_EMAILS = [
+    'anshulbadmosh2007@gmail.com',
+    'lovishwork003@gmail.com',
+    'admin@lpu.in',
+    'admissions@lpu.co.in'
+]
+
+def is_admin_email(email: str) -> bool:
+    """Check if an email address is designated as an administrator."""
+    if not email or not isinstance(email, str):
+        return False
+    clean = email.strip().lower()
+    env_admins = [e.strip().lower() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
+    return clean in DEFAULT_ADMIN_EMAILS or clean in env_admins
+
 def get_current_user():
     """Extract and authenticate current user from Bearer token."""
     auth_header = request.headers.get('Authorization', '')
@@ -27,10 +42,12 @@ def get_current_user():
     if user_id:
         user = db.session.get(User, user_id)
         if user:
+            if user.email and is_admin_email(user.email):
+                user.role = 'admin'
             return user
             
     # Check AdminUser table if role is admin
-    if payload.get('role') == 'admin' and email:
+    if (payload.get('role') == 'admin' or (email and is_admin_email(email))) and email:
         admin_user = AdminUser.query.filter_by(email=email).first()
         if admin_user:
             return admin_user
@@ -62,6 +79,8 @@ def admin_required(f):
             
         is_admin = False
         if isinstance(user, AdminUser):
+            is_admin = True
+        elif hasattr(user, 'email') and is_admin_email(user.email):
             is_admin = True
         elif hasattr(user, 'role') and user.role == 'admin':
             is_admin = True
@@ -136,8 +155,7 @@ def verify_otp():
         }), status_code
 
     # Check if this email is designated as an admin
-    admin_emails = [e.strip().lower() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
-    role = 'admin' if email in admin_emails else 'student'
+    role = 'admin' if is_admin_email(email) else 'student'
 
     # Find or create User
     user = User.query.filter_by(email=email).first()
