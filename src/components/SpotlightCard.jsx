@@ -25,7 +25,7 @@ export default function SpotlightCard({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onClick={onClick}
-      className={`spotlight-card border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl dark:shadow-none hover:-translate-y-1 transition-all duration-300 ${className}`}
+      className={`spotlight-card border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 ${className}`}
       {...props}
     >
       {children}

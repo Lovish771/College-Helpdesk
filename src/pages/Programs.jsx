@@ -633,7 +633,7 @@ export default function Programs({ ask, onOpenCompare }) {
                 </div>
 
                 {/* Programmes Grid for this School */}
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pr-2 sm:pr-4">
                   {schoolProgs.map((p) => (
                     <ProgramCard
                       key={p.id}
@@ -664,7 +664,7 @@ export default function Programs({ ask, onOpenCompare }) {
               )}
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pr-2 sm:pr-4">
               {filtered.map((p) => (
                 <ProgramCard
                   key={p.id}

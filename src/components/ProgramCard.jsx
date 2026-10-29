@@ -18,11 +18,49 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
   };
 
   return (
-    <SpotlightCard
-      className="group relative flex flex-col justify-between p-6 rounded-3xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(234,88,12,0.18)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] active:scale-[0.985] cursor-default"
-      tabIndex={0}
-      aria-label={`${p.name} program card`}
-    >
+    <div className="group relative w-full isolate">
+      {/* ── Background Layer 3 (Deepest card in stack) ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none select-none absolute inset-0 rounded-3xl bg-slate-100/80 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/60 shadow-xs
+          transform-gpu transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]
+          translate-x-2.5 sm:translate-x-3.5 translate-y-1.5 scale-[0.985] opacity-40 dark:opacity-30
+          group-hover:translate-x-5 sm:group-hover:translate-x-6 group-hover:-translate-y-0.5 group-hover:scale-[0.99] group-hover:opacity-70 dark:group-hover:opacity-50
+          group-hover:border-orange-500/25 dark:group-hover:border-orange-500/20 group-hover:shadow-[0_8px_20px_-6px_rgba(234,88,12,0.12)]
+          z-0"
+      >
+        {/* Subtle top header replica */}
+        <div className="h-9 w-full rounded-t-3xl bg-slate-200/40 dark:bg-slate-800/40 border-b border-slate-200/40 dark:border-slate-800/40" />
+      </div>
+
+      {/* ── Background Layer 2 (Middle card in stack) ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none select-none absolute inset-0 rounded-3xl bg-white/90 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-800/80 shadow-sm
+          transform-gpu transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]
+          translate-x-1.5 sm:translate-x-2 translate-y-0.5 scale-[0.992] opacity-75 dark:opacity-60
+          group-hover:translate-x-3 sm:group-hover:translate-x-3.5 group-hover:-translate-y-1 group-hover:opacity-95 dark:group-hover:opacity-85
+          group-hover:border-orange-500/40 dark:group-hover:border-orange-500/35 group-hover:shadow-[0_12px_28px_-8px_rgba(234,88,12,0.16)]
+          z-[1]"
+      >
+        {/* Subtle top badge mimic */}
+        <div className="h-10 w-full rounded-t-3xl bg-slate-100/60 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center px-4 gap-2">
+          <div className="w-14 h-2.5 rounded-md bg-orange-100/70 dark:bg-orange-950/40 border border-orange-200/40 dark:border-orange-900/30" />
+          <div className="w-16 h-2.5 rounded-md bg-slate-200/70 dark:bg-slate-700/50" />
+        </div>
+      </div>
+
+      {/* ── Active Degree Card (Front layer) ── */}
+      <SpotlightCard
+        className="relative z-10 flex flex-col justify-between p-6 rounded-3xl
+          transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
+          group-hover:-translate-y-2 group-hover:-translate-x-1
+          group-hover:border-orange-500/60 dark:group-hover:border-orange-500/50
+          group-hover:shadow-[0_20px_45px_-12px_rgba(234,88,12,0.22)] dark:group-hover:shadow-[0_22px_45px_-12px_rgba(0,0,0,0.85),0_0_20px_-2px_rgba(249,115,22,0.2)]
+          active:scale-[0.985] cursor-default"
+        tabIndex={0}
+        aria-label={`${p.name} program card`}
+      >
       <div>
         {/* Top Badges Row */}
         <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800/80">
@@ -201,5 +239,6 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
         </div>
       </div>
     </SpotlightCard>
+    </div>
   );
 }
