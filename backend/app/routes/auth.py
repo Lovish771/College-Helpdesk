@@ -113,20 +113,23 @@ def send_otp():
     success, msg, status_code, meta = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
     resp = {
         'success': success,
-        'message': msg,
+        'message': msg if success else None,
+        'error': msg if not success else None,
         'cooldownSeconds': meta.get('cooldown_seconds', EmailService.COOLDOWN_SECONDS),
         'deliveredOnline': meta.get('delivered_online', False),
         'provider': meta.get('provider', ''),
-        'dispatchDetail': meta.get('dispatch_detail', '')
     }
-    if meta.get('dev_otp'):
+    # In local/dev mode only: expose OTP in response so dev can test without real email
+    if meta.get('dev_otp') and not meta.get('delivered_online'):
         resp['devOtp'] = meta['dev_otp']
-        if 'Resend HTTP 403' in meta.get('dispatch_detail', ''):
-            resp['notice'] = "Notice: Your Resend account is in sandbox mode and only sends to its registered owner. For testing, your verification code is " + str(meta['dev_otp']) + ". To send to any student email, configure Gmail SMTP in Vercel."
-        else:
-            resp['notice'] = f"Notice: External email credentials are not configured in .env. For testing, your verification code is {meta['dev_otp']}."
-    if not success:
-        resp['error'] = msg
+        resp['notice'] = (
+            f"[Dev Mode] No email provider configured. "
+            f"Your verification code is: {meta['dev_otp']}. "
+            f"Configure SMTP_USER and SMTP_PASSWORD (Gmail App Password) in Vercel environment variables to enable real email delivery."
+        )
+        # In dev mode, we allow proceeding even though email wasn't actually sent
+        resp['success'] = True
+        status_code = 200
 
     return jsonify(resp), status_code
 

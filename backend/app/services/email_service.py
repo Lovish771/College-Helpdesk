@@ -64,16 +64,17 @@ class EmailService:
         )
         db.session.add(new_otp)
 
-        # Dispatch via configured online email service (Resend / Brevo / SendGrid / SMTP)
+        # Dispatch OTP email via Gmail SMTP
         delivered_online, provider_name, dispatch_detail = cls._dispatch_online_email(email, otp_code)
 
         # Log security audit with dispatch outcome
+        event_type = 'otp_sent' if delivered_online else 'otp_dispatch_failed'
         sec_log = SecurityLog(
-            event_type='otp_sent',
+            event_type=event_type,
             email=email,
             ip_address=ip_address,
             user_agent=user_agent,
-            details=f'OTP generated via {provider_name} ({dispatch_detail})'
+            details=f'OTP dispatch via {provider_name}: {dispatch_detail}'
         )
         db.session.add(sec_log)
         db.session.commit()
@@ -82,144 +83,35 @@ class EmailService:
             'delivered_online': delivered_online,
             'provider': provider_name,
             'dispatch_detail': dispatch_detail,
-            'dev_otp': otp_code if not delivered_online else None,
             'cooldown_seconds': cls.COOLDOWN_SECONDS
         }
 
         if delivered_online:
-            return True, f'Verification code successfully dispatched to {email} via {provider_name}.', 200, meta
+            return True, f'Verification code sent to {email}. Please check your inbox.', 200, meta
         else:
-            return True, f'Verification code successfully dispatched to {email}.', 200, meta
+            # Email delivery failed — don't pretend success
+            # Include dev_otp only if truly no provider is configured at all
+            no_provider_configured = 'No online email provider' in dispatch_detail
+            if no_provider_configured:
+                meta['dev_otp'] = otp_code
+            return False, (
+                'Email delivery failed. The server email credentials are not properly configured. '
+                'Please contact the site administrator to set up SMTP/email credentials, or try again later.'
+            ), 503, meta
 
     @classmethod
     def _dispatch_online_email(cls, email: str, otp_code: str) -> tuple[bool, str, str]:
         """
-        Dispatches OTP email via cloud REST API or SMTP:
-        1. Resend API (RESEND_API_KEY) - Recommended for cloud/serverless deployments
-        2. Brevo API (BREVO_API_KEY)
-        3. SendGrid API (SENDGRID_API_KEY)
-        4. Standard SMTP (Gmail, Outlook, Amazon SES)
+        Dispatches OTP email via Google Gmail SMTP using an App Password.
+        Set SMTP_USER (gmail address) and SMTP_PASSWORD (16-char App Password) in env.
         """
         subject = f"Lovely Professional University – Verification Code: {otp_code}"
         text_content, html_content = cls._build_email_templates(email, otp_code)
-        from_email = os.environ.get('EMAIL_FROM') or os.environ.get('SMTP_USER') or 'LPU Helpdesk <onboarding@resend.dev>'
 
-        last_error = ""
-
-        # ── 1. Resend Online REST API ──
-        resend_key = (
-            os.environ.get('RESEND_API_KEY') or
-            os.environ.get('RESEND_KEY') or
-            os.environ.get('RESEND_TOKEN') or
-            os.environ.get('VITE_RESEND_API_KEY') or
-            ''
-        ).strip()
-        if resend_key:
-            try:
-                payload = {
-                    "from": from_email,
-                    "to": [email],
-                    "subject": subject,
-                    "html": html_content,
-                    "text": text_content
-                }
-                req = urllib.request.Request(
-                    "https://api.resend.com/emails",
-                    data=json.dumps(payload).encode('utf-8'),
-                    headers={
-                        "Authorization": f"Bearer {resend_key}",
-                        "Content-Type": "application/json",
-                        "User-Agent": "resend-python/0.8.0"
-                    },
-                    method="POST"
-                )
-                with urllib.request.urlopen(req, timeout=12) as response:
-                    res_body = json.loads(response.read().decode('utf-8'))
-                    email_id = res_body.get('id', 'ok')
-                    logger.info(f"[Resend] Dispatched OTP to {email}: id={email_id}")
-                    return True, "Resend Cloud API", f"id={email_id}"
-            except urllib.error.HTTPError as e:
-                err_content = e.read().decode('utf-8', errors='ignore')
-                last_error = f"Resend HTTP {e.code}: {err_content}"
-                logger.error(f"[Resend] Failed: {last_error}")
-            except Exception as e:
-                last_error = f"Resend connection failed: {e}"
-                logger.error(f"[Resend] Failed: {e}")
-
-        # ── 2. Brevo (Sendinblue) Online REST API ──
-        brevo_key = (
-            os.environ.get('BREVO_API_KEY') or
-            os.environ.get('SENDINBLUE_API_KEY') or
-            os.environ.get('BREVO_KEY') or
-            ''
-        ).strip()
-        if brevo_key:
-            try:
-                brevo_sender = os.environ.get('BREVO_FROM_EMAIL') or os.environ.get('EMAIL_FROM') or 'admissions@lpu.co.in'
-                payload = {
-                    "sender": {"name": "LPU Student Helpdesk", "email": brevo_sender},
-                    "to": [{"email": email}],
-                    "subject": subject,
-                    "htmlContent": html_content,
-                    "textContent": text_content
-                }
-                req = urllib.request.Request(
-                    "https://api.brevo.com/v3/smtp/email",
-                    data=json.dumps(payload).encode('utf-8'),
-                    headers={
-                        "api-key": brevo_key,
-                        "Content-Type": "application/json"
-                    },
-                    method="POST"
-                )
-                with urllib.request.urlopen(req, timeout=12) as response:
-                    logger.info(f"[Brevo] Dispatched OTP to {email}")
-                    return True, "Brevo Online API", "delivered"
-            except Exception as e:
-                last_error = f"Brevo API error: {e}"
-                logger.error(f"[Brevo] Failed: {e}")
-
-        # ── 3. SendGrid Online REST API ──
-        sendgrid_key = (
-            os.environ.get('SENDGRID_API_KEY') or
-            os.environ.get('SENDGRID_KEY') or
-            ''
-        ).strip()
-        if sendgrid_key:
-            try:
-                payload = {
-                    "personalizations": [{"to": [{"email": email}]}],
-                    "from": {"email": os.environ.get('SENDGRID_FROM_EMAIL', 'helpdesk@lpu.co.in'), "name": "LPU Student Helpdesk"},
-                    "subject": subject,
-                    "content": [
-                        {"type": "text/plain", "value": text_content},
-                        {"type": "text/html", "value": html_content}
-                    ]
-                }
-                req = urllib.request.Request(
-                    "https://api.sendgrid.com/v3/mail/send",
-                    data=json.dumps(payload).encode('utf-8'),
-                    headers={
-                        "Authorization": f"Bearer {sendgrid_key}",
-                        "Content-Type": "application/json"
-                    },
-                    method="POST"
-                )
-                with urllib.request.urlopen(req, timeout=12) as response:
-                    logger.info(f"[SendGrid] Dispatched OTP to {email}")
-                    return True, "SendGrid API", "delivered"
-            except Exception as e:
-                last_error = f"SendGrid error: {e}"
-                logger.error(f"[SendGrid] Failed: {e}")
-
-        # ── 4. Standard SMTP Online Service (Gmail, Outlook, Amazon SES) ──
         smtp_user = (
             os.environ.get('SMTP_USER') or
             os.environ.get('SMTP_USERNAME') or
             os.environ.get('EMAIL_USER') or
-            os.environ.get('EMAIL_USERNAME') or
-            os.environ.get('MAIL_USERNAME') or
-            os.environ.get('MAIL_USER') or
             os.environ.get('GMAIL_USER') or
             ''
         ).strip()
@@ -227,11 +119,8 @@ class EmailService:
         smtp_pass = (
             os.environ.get('SMTP_PASSWORD') or
             os.environ.get('SMTP_PASS') or
-            os.environ.get('EMAIL_PASS') or
             os.environ.get('EMAIL_PASSWORD') or
-            os.environ.get('MAIL_PASSWORD') or
-            os.environ.get('MAIL_PASS') or
-            os.environ.get('GMAIL_PASSWORD') or
+            os.environ.get('EMAIL_PASS') or
             os.environ.get('GMAIL_APP_PASSWORD') or
             os.environ.get('APP_PASSWORD') or
             ''
@@ -240,59 +129,61 @@ class EmailService:
         smtp_server = (
             os.environ.get('SMTP_SERVER') or
             os.environ.get('SMTP_HOST') or
-            os.environ.get('EMAIL_HOST') or
-            os.environ.get('MAIL_HOST') or
-            os.environ.get('MAIL_SERVER') or
-            ''
+            'smtp.gmail.com'
         ).strip()
 
-        if not smtp_server and smtp_user and ('@gmail.com' in smtp_user.lower() or '@googlemail.com' in smtp_user.lower()):
-            smtp_server = 'smtp.gmail.com'
+        smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or 587)
 
-        smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or os.environ.get('MAIL_PORT') or 587)
+        if not smtp_user or not smtp_pass:
+            detail = 'SMTP_USER or SMTP_PASSWORD not configured in environment variables'
+            logger.error(f'[Gmail SMTP] {detail}')
+            print(f'\n=======================================================')
+            print(f'[AUTH EMAIL SERVICE] Verification Code for: {email}')
+            print(f'OTP CODE: >>> {otp_code} <<< (Valid for {cls.EXPIRATION_MINUTES} minutes)')
+            print(f'Status: {detail}')
+            print(f'=======================================================\n')
+            return False, 'Gmail SMTP', detail
 
-        if smtp_server and smtp_user and smtp_pass:
-            ports_to_try = [smtp_port]
-            if smtp_port == 587 and smtp_server == 'smtp.gmail.com':
-                ports_to_try.append(465)
+        # Try STARTTLS port 587 first, SSL port 465 as fallback
+        ports_to_try = [smtp_port]
+        if smtp_server == 'smtp.gmail.com' and smtp_port == 587:
+            ports_to_try.append(465)
 
-            for p in ports_to_try:
-                try:
-                    msg = MIMEMultipart('alternative')
-                    msg['Subject'] = subject
-                    msg['From'] = f"LPU Student Helpdesk <{smtp_user}>"
-                    msg['To'] = email
+        last_error = ''
+        for p in ports_to_try:
+            try:
+                msg = MIMEMultipart('alternative')
+                msg['Subject'] = subject
+                msg['From'] = f'LPU Student Helpdesk <{smtp_user}>'
+                msg['To'] = email
+                msg.attach(MIMEText(text_content, 'plain'))
+                msg.attach(MIMEText(html_content, 'html'))
 
-                    msg.attach(MIMEText(text_content, 'plain'))
-                    msg.attach(MIMEText(html_content, 'html'))
+                if p == 465:
+                    server = smtplib.SMTP_SSL(smtp_server, p, timeout=25)
+                else:
+                    server = smtplib.SMTP(smtp_server, p, timeout=25)
+                    server.ehlo()
+                    server.starttls()
+                    server.ehlo()
 
-                    if p == 465:
-                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=10)
-                    else:
-                        server = smtplib.SMTP(smtp_server, p, timeout=10)
-                        server.ehlo()
-                        server.starttls()
-                        server.ehlo()
+                server.login(smtp_user, smtp_pass)
+                server.sendmail(smtp_user, [email], msg.as_string())
+                server.quit()
+                logger.info(f'[Gmail SMTP] OTP dispatched to {email} via {smtp_server}:{p}')
+                return True, 'Gmail SMTP', f'delivered via port {p}'
+            except Exception as e:
+                last_error = f'SMTP error ({smtp_server}:{p}): {e}'
+                logger.error(f'[Gmail SMTP] Failed on port {p}: {e}')
 
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(smtp_user, [email], msg.as_string())
-                    server.quit()
-                    logger.info(f"[SMTP] Successfully dispatched OTP email to {email} via {smtp_server}:{p}")
-                    return True, f"SMTP ({smtp_server})", "delivered"
-                except Exception as e:
-                    last_error = f"SMTP error ({smtp_server}:{p}): {e}"
-                    logger.error(f"[SMTP] Failed on port {p}: {e}")
-
-        # ── Fallback Notice for Developer & Local Testing ──
-        detail_msg = last_error if last_error else "No online email provider (RESEND_API_KEY or SMTP_USER/SMTP_PASSWORD) configured in .env"
-        print(f"\n=======================================================")
-        print(f"[AUTH EMAIL SERVICE] Verification Code for: {email}")
-        print(f"OTP CODE: >>> {otp_code} <<< (Valid for {cls.EXPIRATION_MINUTES} minutes)")
-        print(f"Status: {detail_msg}")
-        print(f"=======================================================\n")
-        logger.info(f"[DEV AUTH] Verification OTP for {email}: {otp_code}")
-
-        return False, "Local Fallback", detail_msg
+        # All ports failed
+        print(f'\n=======================================================')
+        print(f'[AUTH EMAIL SERVICE] Verification Code for: {email}')
+        print(f'OTP CODE: >>> {otp_code} <<< (Valid for {cls.EXPIRATION_MINUTES} minutes)')
+        print(f'Status: {last_error}')
+        print(f'=======================================================\n')
+        logger.error(f'[Gmail SMTP] All delivery attempts failed for {email}: {last_error}')
+        return False, 'Gmail SMTP', last_error
 
     @classmethod
     def _extract_display_name(cls, email: str) -> str:
