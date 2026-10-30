@@ -8,7 +8,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from app import create_app, db
 from app.models import Program, CurriculumCourse, IntentPattern, KnowledgeEntry, KnowledgeSource, AdminUser
-import bcrypt
+try:
+    import bcrypt
+except ImportError:
+    bcrypt = None
 
 try:
     from backend.data.lpu_data import programs as lpu_programs

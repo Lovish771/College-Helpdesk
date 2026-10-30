@@ -58,6 +58,7 @@ def create_app(config_name=None, **kwargs):
         "http://localhost:5000",
         "http://127.0.0.1:5000",
         "https://college-std-helpdesk.vercel.app",
+        "https://college-helpdesk-topaz.vercel.app",
         re.compile(r"^https://.*\.vercel\.app$"),
     ]
     if os.getenv('FRONTEND_URL'):
@@ -195,12 +196,15 @@ def create_app(config_name=None, **kwargs):
     
     # Create tables
     with app.app_context():
-        db.create_all()
         try:
+            db.create_all()
             from sqlalchemy import text
             db.session.execute(text("ALTER TABLE conversation_sessions ADD COLUMN user_id INTEGER"))
             db.session.commit()
         except Exception:
-            db.session.rollback()
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
     
     return app
