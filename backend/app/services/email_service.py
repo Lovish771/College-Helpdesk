@@ -166,7 +166,7 @@ class EmailService:
 
     @classmethod
     def _dispatch_online_email_impl(cls, email: str, otp_code: str) -> tuple[bool, str, str]:
-        subject = f"Lovely Professional University – Verification Code: {otp_code}"
+        subject = f"Your sign-in code: {otp_code} · Student Helpdesk"
         text_content, html_content = cls._build_email_templates(email, otp_code)
 
         smtp_user = (
@@ -215,7 +215,7 @@ class EmailService:
             try:
                 msg = MIMEMultipart('alternative')
                 msg['Subject'] = subject
-                msg['From'] = f'LPU Student Helpdesk <{smtp_user}>'
+                msg['From'] = f'Student Helpdesk <{smtp_user}>'
                 msg['To'] = email
                 msg.attach(MIMEText(text_content, 'plain'))
                 msg.attach(MIMEText(html_content, 'html'))
@@ -261,154 +261,133 @@ class EmailService:
 
     @classmethod
     def _build_email_templates(cls, email: str, otp_code: str) -> tuple[str, str]:
+        """Plain, transactional sign-in code email.
+
+        Deliberately matches the website's design system: Inter for text, Plus
+        Jakarta Sans for the one heading, a single orange accent, 1px borders and
+        small radii. The word "Unofficial" does not appear; the site carries the
+        disclaimer. Set SUPPORT_EMAIL to change the reply address.
+        """
         display_name = cls._extract_display_name(email)
-        report_url = "https://admission.lpu.in/security/report-unauthorized"
+        support_email = os.environ.get('SUPPORT_EMAIL', 'hlobin3@gmail.com')
+        logo_url = 'https://college-helpdesk-topaz.vercel.app/images/lpu-mascot-logo.png'
 
-        text_content = f"""Dear {display_name},
+        text_content = f"""Hi {display_name},
 
-The one-time verification code (OTP) for your Lovely Professional University (LPU) Student Helpdesk login is:
+Enter this code to sign in to Student Helpdesk. It can be used once and expires in {cls.EXPIRATION_MINUTES} minutes.
 
-    [{otp_code}]
+    {otp_code}
 
-This code is valid for 10 minutes and can only be used once. For your security, never share this code or your credentials with anyone. LPU counselors, academic staff, or technical administrators will NEVER ask for your verification code.
+Keep this code private. We will never ask for it by email, chat, or phone.
 
-If this wasn't you, kindly report here:
-{report_url}?email={email}&action=report_unauthorized
+Didn't try to sign in?
+You can ignore this email. Nobody can access your account without the code. If these keep arriving, write to {support_email}.
 
----
-Lovely Professional University (LPU)
-Jalandhar - Delhi G.T. Road, Phagwara, Punjab 144411 • India
-NAAC A++ Accredited University • Academic Session 2026-27
-Student Helpdesk Support: Block 29, Room 104 | admissions@lpu.co.in
+Student Helpdesk
 """
 
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LPU Student Helpdesk – Verification Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Your sign-in code</title>
 </head>
-<body style="margin: 0; padding: 32px 16px; background-color: #0F172A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1E293B;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<body style="margin:0;padding:24px 12px;background-color:#F1F5F9;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#334155;-webkit-font-smoothing:antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
     <tr>
       <td align="center">
-        <!-- Main Card Container -->
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 540px; background-color: #FFFFFF; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #E2E8F0;">
-          
-          <!-- Premium University Header Banner -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background-color:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;border-collapse:separate;">
+
+          <!-- Header: logo + product name -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #C2410C 100%); padding: 36px 32px 28px 32px; text-align: left; border-bottom: 3px solid #EA580C;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <td style="padding:18px 24px;border-bottom:1px solid #E2E8F0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
                 <tr>
-                  <td>
-                    <!-- Accreditation Pill -->
-                    <span style="display: inline-block; background-color: rgba(234, 88, 12, 0.25); border: 1px solid rgba(251, 146, 60, 0.4); color: #FDBA74; font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 9999px; margin-bottom: 12px;">
-                      Academic Session 2026-27 • NAAC A++ (3.68/4)
-                    </span>
-                    <h1 style="margin: 0; color: #FFFFFF; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25;">
-                      Lovely Professional University
-                    </h1>
-                    <p style="margin: 6px 0 0 0; color: #CBD5E1; font-size: 13px; font-weight: 500;">
-                      Student Admission &amp; Information Helpdesk • Security Dispatch
-                    </p>
+                  <td style="padding-right:10px;vertical-align:middle;">
+                    <img src="{logo_url}" alt="Student Helpdesk" width="28" height="28" style="display:block;width:28px;height:28px;border:0;outline:none;text-decoration:none;">
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="font-family:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;font-weight:600;color:#0F172A;letter-spacing:-0.01em;">Student Helpdesk</span>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Body Content -->
+          <!-- Heading and lead -->
           <tr>
-            <td style="padding: 36px 32px 28px 32px;">
-              
-              <!-- Salutation -->
-              <p style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0F172A;">
-                Dear {display_name},
+            <td style="padding:28px 24px 0 24px;">
+              <h1 style="margin:0 0 12px 0;font-family:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:24px;line-height:1.25;font-weight:600;color:#0F172A;letter-spacing:-0.02em;">Your sign-in code</h1>
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#475569;">
+                Hi {display_name}, enter this code to sign in to Student Helpdesk. It can be used once and expires in {cls.EXPIRATION_MINUTES} minutes.
               </p>
-
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.65; color: #475569;">
-                We received a request to verify your identity and sign in to the <strong>LPU Student Helpdesk</strong>. Please use the one-time verification code below to authenticate your session:
-              </p>
-
-              <!-- Luxury OTP Box -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 26px 0;">
-                <tr>
-                  <td align="center" style="background: linear-gradient(180deg, #FFF7ED 0%, #FFEDD5 100%); border: 2px dashed #EA580C; border-radius: 20px; padding: 26px 20px; text-align: center;">
-                    <span style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #C2410C; margin-bottom: 8px;">
-                      The OTP for your login is:
-                    </span>
-                    <div style="font-family: 'SF Pro Display', ui-monospace, 'Courier New', monospace; font-size: 40px; font-weight: 900; letter-spacing: 0.35em; color: #9A3412; line-height: 1; padding: 4px 0 8px 0.35em;">
-                      {otp_code}
-                    </div>
-                    <div style="display: inline-block; background-color: #FFFFFF; border: 1px solid #FDBA74; border-radius: 9999px; padding: 4px 12px; margin-top: 8px;">
-                      <span style="font-size: 11px; font-weight: 700; color: #C2410C;">
-                        ⏳ Valid for 10 minutes • Single-use only
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Security Notice -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px 18px; margin: 0 0 26px 0;">
-                <tr>
-                  <td style="font-size: 12px; line-height: 1.6; color: #64748B;">
-                    <strong style="color: #0F172A;">Security Advisory:</strong> For your protection, never share this code with anyone. LPU counselors, academic advisors, or technical administrators will <em>never</em> ask you for your verification code.
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Reporting Section -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #E2E8F0; padding-top: 24px;">
-                <tr>
-                  <td>
-                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #0F172A;">
-                      Didn't request this login?
-                    </p>
-                    <p style="margin: 0 0 16px 0; font-size: 12px; line-height: 1.6; color: #64748B;">
-                      If this wasn't you, kindly report here so our security desk can safeguard your account:
-                    </p>
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td align="center" style="border-radius: 12px; background-color: #FEF2F2; border: 1px solid #FCA5A5;">
-                          <a href="{report_url}?email={email}&action=report_unauthorized" target="_blank" style="display: inline-block; padding: 10px 18px; font-size: 12px; font-weight: 700; color: #B91C1C; text-decoration: none; border-radius: 12px;">
-                            🛡️ Report Suspicious Activity Here →
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
             </td>
           </tr>
 
-          <!-- Official University Footer -->
+          <!-- Code -->
           <tr>
-            <td style="background-color: #F8FAFC; border-top: 1px solid #E2E8F0; padding: 24px 32px; text-align: center;">
-              <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">
-                Lovely Professional University (LPU)
+            <td style="padding:20px 24px 0 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">
+                <tr>
+                  <td align="center" style="border:1px solid #E2E8F0;border-radius:8px;background-color:#F8FAFC;padding:18px 12px;">
+                    <span style="display:block;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:34px;line-height:1;font-weight:600;letter-spacing:0.28em;color:#0F172A;padding-left:0.28em;">{otp_code}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:14px 24px 24px 24px;">
+              <p style="margin:0;font-size:13px;line-height:1.6;color:#64748B;">
+                Keep this code private. We will never ask for it by email, chat, or phone.
               </p>
-              <p style="margin: 0 0 10px 0; font-size: 11px; line-height: 1.5; color: #94A3B8;">
-                Jalandhar - Delhi G.T. Road, Phagwara, Punjab 144411 • India<br>
-                Admissions Desk: Block 29, Room 104 • Support: <a href="mailto:admissions@lpu.co.in" style="color: #EA580C; text-decoration: none;">admissions@lpu.co.in</a>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 24px;">
+              <div style="border-top:1px solid #E2E8F0;height:1px;line-height:1px;font-size:0;">&nbsp;</div>
+            </td>
+          </tr>
+
+          <!-- Didn't try to sign in -->
+          <tr>
+            <td style="padding:20px 24px 26px 24px;">
+              <p style="margin:0 0 6px 0;font-size:14px;font-weight:600;color:#0F172A;">Didn&rsquo;t try to sign in?</p>
+              <p style="margin:0;font-size:13px;line-height:1.6;color:#64748B;">
+                You can ignore this email. Nobody can access your account without the code. If these keep arriving, write to
+                <a href="mailto:{support_email}" style="color:#C2410C;text-decoration:underline;">{support_email}</a>.
               </p>
-              <p style="margin: 0; font-size: 10px; color: #CBD5E1;">
-                &copy; 2026 Lovely Professional University. All rights reserved.
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 24px;border-top:1px solid #E2E8F0;background-color:#F8FAFC;">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:#94A3B8;">
+                Student Helpdesk &middot; sign-in code requested for {email}
               </p>
             </td>
           </tr>
 
         </table>
+
+        <p style="margin:12px 0 0 0;font-size:11px;line-height:1.5;color:#94A3B8;">
+          Sent automatically &mdash; replies to this address are not monitored.
+        </p>
       </td>
     </tr>
   </table>
 </body>
 </html>
 """
+
         return text_content, html_content
+
 
 
     @classmethod

@@ -12,6 +12,8 @@ export default {
     },
     extend: {
       colors: {
+        // One primary colour, drawn from the university's own palette.
+        // Everything else is a neutral slate or a status colour.
         lpu: {
           orange: '#EA580C',
           'orange-light': '#F97316',
@@ -33,46 +35,81 @@ export default {
           600: '#475569',
           500: '#64748B',
         },
-        royal: {
-          DEFAULT: '#2563EB',
-          light: '#3B82F6',
-          dark: '#1D4ED8',
-        },
       },
+
       fontFamily: {
+        // Deliberate pairing: Inter for text, Plus Jakarta Sans for headings.
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
         accent: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
       },
+
+      // A fixed scale: 14 / 16 / 20 / 28 / 40.
+      fontSize: {
+        small: ['0.875rem', { lineHeight: '1.5' }],
+        body: ['1rem', { lineHeight: '1.6' }],
+        h3: ['1.25rem', { lineHeight: '1.4', letterSpacing: '-0.01em' }],
+        h2: ['1.5rem', { lineHeight: '1.3', letterSpacing: '-0.015em' }],
+        h1: ['1.75rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
+        display: ['2.5rem', { lineHeight: '1.1', letterSpacing: '-0.025em' }],
+      },
+
+      // 8px spacing grid; the container caps at 1200px.
+      spacing: {
+        18: '4.5rem',
+        22: '5.5rem',
+      },
+      maxWidth: {
+        content: '1200px',
+      },
+
+      // Radii sit in the 6-10px band. The old 2xl/3xl utilities are mapped
+      // down so older markup cannot reintroduce pill-shaped bubbles.
+      borderRadius: {
+        sm: '4px',
+        DEFAULT: '6px',
+        md: '8px',
+        lg: '10px',
+        xl: '10px',
+        '2xl': '10px',
+        '3xl': '10px',
+      },
+
+      // Shadows are barely-there. Depth comes from a 1px border instead.
       boxShadow: {
-        'lpu-card': '0 2px 12px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',
-        'lpu-hover': '0 12px 30px -4px rgba(15, 23, 42, 0.1), 0 4px 8px -2px rgba(15, 23, 42, 0.04)',
-        'lpu-orange': '0 8px 24px -4px rgba(234, 88, 12, 0.35)',
-        'glass': '0 8px 32px 0 rgba(15, 23, 42, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)',
-        'glass-dark': '0 16px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.08)',
-        'glow-orange': '0 0 50px -10px rgba(234, 88, 12, 0.3)',
+        none: 'none',
+        xs: '0 1px 2px rgba(15, 23, 42, 0.04)',
+        sm: '0 1px 2px rgba(15, 23, 42, 0.05)',
+        DEFAULT: '0 1px 3px rgba(15, 23, 42, 0.06)',
+        md: '0 2px 6px rgba(15, 23, 42, 0.06)',
+        lg: '0 4px 12px rgba(15, 23, 42, 0.07)',
+        xl: '0 6px 16px rgba(15, 23, 42, 0.08)',
+        '2xl': '0 8px 24px rgba(15, 23, 42, 0.10)',
+        inner: 'inset 0 1px 2px rgba(15, 23, 42, 0.05)',
+        'lpu-card': '0 1px 2px rgba(15, 23, 42, 0.04)',
+        'lpu-hover': '0 2px 8px rgba(15, 23, 42, 0.07)',
+        'lpu-orange': '0 2px 6px rgba(234, 88, 12, 0.18)',
       },
+
       transitionTimingFunction: {
-        'spring': 'cubic-bezier(0.16, 1, 0.3, 1)',
-        'smooth': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+        smooth: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+        spring: 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
+
+      // Motion is limited to opacity and small offsets. No bouncing, no lifts.
       animation: {
-        'fade-up': 'fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'fade-in': 'fadeIn 0.25s ease-out both',
-        'slide-in': 'slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'page-enter': 'pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'scale-up': 'scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both',
-        'shimmer': 'shimmer 2.2s infinite linear',
-        'pulse-subtle': 'pulseSubtle 4s infinite ease-in-out',
+        'fade-in': 'fadeIn 0.2s ease-out both',
+        'fade-up': 'fadeUp 0.2s ease-out both',
+        'slide-in': 'slideIn 0.2s ease-out both',
+        'page-enter': 'fadeIn 0.2s ease-out both',
+        'scale-up': 'fadeIn 0.18s ease-out both',
+        shimmer: 'shimmer 2.2s infinite linear',
       },
       keyframes: {
-        fadeUp: { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'none' } },
+        fadeUp: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'none' } },
         fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
-        slideIn: { from: { opacity: '0', transform: 'translateX(-8px)' }, to: { opacity: '1', transform: 'none' } },
-        pageEnter: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
-        scaleUp: { from: { opacity: '0', transform: 'scale(0.97)' }, to: { opacity: '1', transform: 'scale(1)' } },
+        slideIn: { from: { opacity: '0', transform: 'translateX(-6px)' }, to: { opacity: '1', transform: 'none' } },
         shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } },
-        pulseSubtle: { '0%, 100%': { opacity: '0.4' }, '50%': { opacity: '0.8' } },
       },
     },
   },

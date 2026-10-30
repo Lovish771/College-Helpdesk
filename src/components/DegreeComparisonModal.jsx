@@ -139,10 +139,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
             {selectedPrograms.length > 0 && (
               <button
                 onClick={handleDeepAIAnalysis}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition-all hover:brightness-105 active:scale-95 cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                }}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer"
               >
                 <Sparkles size={13} />
                 <span>Analyse All with AI</span>
@@ -627,10 +624,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
           {selectedPrograms.length > 0 && (
             <button
               onClick={handleDeepAIAnalysis}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition-all hover:brightness-110 active:scale-95 cursor-pointer shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer shrink-0"
             >
               <span>Analyse Them with AI ({selectedPrograms.length})</span>
               <ArrowRight size={13} />

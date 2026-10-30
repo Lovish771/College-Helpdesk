@@ -23,9 +23,10 @@ const ADMIN_EMAILS = [
 
 const checkIsAdmin = (u) => {
   if (!u) return false;
+  if (u.isAdmin === true) return true;
   if (u.role === 'admin' || u.username === 'admin') return true;
-  if (u.email && ADMIN_EMAILS.includes(u.email.toLowerCase())) return true;
-  return false;
+  const email = (u.email || '').trim().toLowerCase();
+  return Boolean(email) && ADMIN_EMAILS.includes(email);
 };
 
 export function AuthProvider({ children }) {
@@ -47,19 +48,23 @@ export function AuthProvider({ children }) {
             Authorization: `Bearer ${token}`
           }
         });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.user && isMounted) {
+        const data = await res.json().catch(() => null);
+        if (data && data.success && data.user) {
+          if (isMounted) {
             setUser(data.user);
             setStoredItem('lpu_auth_user', data.user);
-          } else if (isMounted) {
-            // Token expired or invalid
+          }
+        } else if (res.status === 401 && data && data.token_invalid) {
+          // Only a token the server actively rejects ends the session.
+          if (isMounted) {
             setToken(null);
             setUser(null);
             setStoredItem('lpu_auth_token', null);
             setStoredItem('lpu_auth_user', null);
           }
         }
+        // Anything else (503, cold start, network) keeps the stored session;
+        // signing the user out here was the refresh-loses-login bug.
       } catch (err) {
         console.error('Failed to verify session token:', err);
       } finally {

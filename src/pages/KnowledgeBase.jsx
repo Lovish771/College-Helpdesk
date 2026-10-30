@@ -252,7 +252,7 @@ export default function KnowledgeBase({ ask }) {
         </div>
 
         {/* Direct Contacts Notice */}
-        <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-orange-600 text-white rounded-lg p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-1 max-w-xl">
             <h3 className="text-lg sm:text-xl font-extrabold font-display">
               Can't find what you are looking for?

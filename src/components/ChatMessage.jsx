@@ -142,7 +142,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
           className={`px-4 py-3.5 rounded-2xl shadow-xs transition-all ${
             isBot
               ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm w-full'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-tr-sm font-medium shadow-orange-500/10'
+              : 'bg-orange-600 text-white rounded-tr-sm font-medium'
           }`}
         >
           {/* Formatted body */}
@@ -159,7 +159,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
               onClick={() => onContact && onContact()}
               className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 px-3.5 py-1.5 text-xs font-bold text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/60 transition-colors shadow-2xs cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
             >
-              <span>Connect with LPU Admission Helpdesk</span>
+              <span>Admissions contact details</span>
               <ArrowRight size={13} />
             </button>
           )}
@@ -167,8 +167,8 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
           {/* Message Footer Utilities for Bot (Copy + Helpful Thumbs) */}
           {isBot && (
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 gap-2">
-              <span className="text-[11px] font-semibold text-orange-600 dark:text-orange-400">
-                Official LPU Verified
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                From this site's LPU reference data
               </span>
 
               <div className="flex items-center gap-2">

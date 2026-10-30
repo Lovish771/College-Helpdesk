@@ -33,7 +33,7 @@ function answer(intent, p, semester) {
       hostel: 'Air-Cooled: ₹83,000 - ₹1,13,000 / yr | AC: ₹93,000 - ₹1,53,000 / yr',
       scholarship: 'Category I: up to 50% off | Cat II: up to 40% off | Cat III: up to 30% off',
     };
-    return `Here is the official fee structure for **${p.name} (${p.short})** at Lovely Professional University:\n\n${list([
+    return `Here is the fee structure for **${p.name} (${p.short})** at Lovely Professional University:\n\n${list([
       `Base Tuition Fee: ${f.tuition}`,
       `Examination Fee: ${f.other}`,
       `Hostel Accommodation: ${f.hostel}`,
@@ -44,7 +44,7 @@ function answer(intent, p, semester) {
     return `Eligibility Criteria for **${p.name} (${p.short})** at Lovely Professional University:\n\n${list([
       `Accepted Qualifications: ${p.accepts.join(', ')}`,
       `Minimum Aggregate Marks: ${p.minPercent}%`,
-      `Official Requirement: ${p.eligibility}`,
+      `Requirement: ${p.eligibility}`,
     ])}\n\nYou can also test your exact marks on the interactive Eligibility Checker page.`;
   }
   if (intent === 'curriculum_query') {
@@ -66,7 +66,7 @@ function mockReply(message, cid) {
   if (!intent) {
     return {
       ...base,
-      reply: "I'm sorry, I couldn't identify that enquiry.\n\nI can assist you with official Lovely Professional University (LPU) information on:\n• Programmes & Specializations\n• LPUNEST & Admissions\n• Fee Structure & Slabs\n• Scholarships up to 50%\n• Hostel & Campus Facilities\n• Placement Statistics\n• Eligibility & Documents\n\nCould you please rephrase your question?",
+      reply: "I'm sorry, I couldn't identify that enquiry.\n\nI can help with Lovely Professional University (LPU) information on:\n• Programmes & Specializations\n• LPUNEST & Admissions\n• Fee Structure & Slabs\n• Scholarships up to 50%\n• Hostel & Campus Facilities\n• Placement Statistics\n• Eligibility & Documents\n\nCould you please rephrase your question?",
       intent: 'fallback',
       confidence: 0.2,
       action: 'contact',

@@ -21,7 +21,7 @@ export default function Contact({ go, ask }) {
       contacts: [
         { label: 'Toll-Free Helpline', value: '1800 102 4431', href: 'tel:18001024431', isCall: true },
         { label: 'Alternate Helpline', value: '1800 274 0615', href: 'tel:18002740615', isCall: true },
-        { label: 'Official Email', value: 'admissions@lpu.co.in', href: 'mailto:admissions@lpu.co.in', isMail: true },
+        { label: 'Email', value: 'admissions@lpu.co.in', href: 'mailto:admissions@lpu.co.in', isMail: true },
         { label: 'WhatsApp Query', value: '+91 98762 98762', href: 'https://wa.me/919876298762', isExt: true },
       ],
       tag: 'Admissions & Scholarships',
@@ -39,7 +39,7 @@ export default function Contact({ go, ask }) {
       contacts: [
         { label: 'Direct Helpline', value: '+91 1824 517000', href: 'tel:01824517000', isCall: true },
         { label: 'Internal Extension', value: 'Ext 2901 / 2902 / 2915', href: 'tel:01824517000', isCall: true },
-        { label: 'Official Email', value: 'dsr@lpu.co.in', href: 'mailto:dsr@lpu.co.in', isMail: true },
+        { label: 'Email', value: 'dsr@lpu.co.in', href: 'mailto:dsr@lpu.co.in', isMail: true },
         { label: 'Student Welfare Cell', value: 'welfare@lpu.co.in', href: 'mailto:welfare@lpu.co.in', isMail: true },
       ],
       tag: 'Student Affairs & Mentorship',
@@ -75,7 +75,7 @@ export default function Contact({ go, ask }) {
       contacts: [
         { label: 'Controller of Examination', value: '+91 1824 517040', href: 'tel:01824517040', isCall: true },
         { label: 'Transcripts Desk', value: '+91 1824 517041', href: 'tel:01824517041', isCall: true },
-        { label: 'Official Email', value: 'exam@lpu.co.in', href: 'mailto:exam@lpu.co.in', isMail: true },
+        { label: 'Email', value: 'exam@lpu.co.in', href: 'mailto:exam@lpu.co.in', isMail: true },
         { label: 'UMS Dispute Portal', value: 'ums.lpu.in', href: 'https://ums.lpu.in', isExt: true },
       ],
       tag: 'Controller of Examinations',
@@ -154,11 +154,8 @@ export default function Contact({ go, ask }) {
           badge="University Helpdesk Directory"
         >
           <button
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 transition-all hover:brightness-105 active:scale-95 cursor-pointer"
+            className="btn-primary"
             onClick={() => ask('How do I contact Admissions Block 30 or DSR for urgent assistance?')}
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-            }}
           >
             <Sparkles size={14} />
             Ask AI Assistant

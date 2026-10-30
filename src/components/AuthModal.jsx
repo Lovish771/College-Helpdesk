@@ -170,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
 
         {/* Header Icon + University Title */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/20">
+          <div className="p-2.5 rounded-lg bg-orange-600 text-white">
             <KeyRound className="w-5 h-5" />
           </div>
           <div>
@@ -304,7 +304,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-md shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              className="btn-primary w-full"
             >
               {loading ? (
                 <>
@@ -385,7 +385,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
             <button
               type="submit"
               disabled={isVerifying || otp.length !== 6 || verifiedSuccess}
-              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-md shadow-orange-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              className="btn-primary w-full"
             >
               {verifiedSuccess ? (
                 <>
@@ -410,7 +410,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
         {/* Professional Encrypted Security Footer */}
         <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
           <Lock className="w-3.5 h-3.5 text-slate-400" />
-          <span>256-Bit SSL Encrypted Verification • Official Academic Gateway</span>
+          <span>Email verification • Student access</span>
         </div>
       </div>
     </div>

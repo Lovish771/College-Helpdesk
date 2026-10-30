@@ -15,7 +15,7 @@ I can assist you with:
 • Per-semester tuition fees & LPUNEST merit scholarship slabs (up to 50% waiver)
 • Residential room categories (AC/Air-Cooled), mess plans & laundry
 • Curriculum, examination regulations & 75% attendance policy
-• Official contact channels for Block 30 (Admissions) & Block 29 (DSR)
+• Contact channels for Block 30 (Admissions) & Block 29 (DSR)
 
 What programme or query would you like to explore today?`,
     time: new Date(),

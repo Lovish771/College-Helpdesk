@@ -81,7 +81,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {isDedicatedTerms
-                  ? 'Lovely Professional University Student Helpdesk • Official User Agreement (Session 2026-27)'
+                  ? 'Student Helpdesk • User Agreement (Session 2026-27)'
                   : isDedicatedPrivacy
                   ? 'Lovely Professional University Student Helpdesk • Data Protection & Rights (Session 2026-27)'
                   : 'Lovely Professional University Student Helpdesk • Student-Developed Unofficial Project'}
@@ -154,8 +154,8 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
           {/* ========================================================================= */}
           {(isDedicatedTerms || (!isDedicatedMode && activeTab === 'terms')) && (
             <div className="space-y-6 text-xs sm:text-sm">
-              {/* Official Verified Document Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent border border-amber-500/30 text-amber-900 dark:text-amber-200">
+              {/* Terms banner */}
+              <div className="p-4 sm:p-5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-500/30 text-amber-900 dark:text-amber-200">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <div className="h-9 w-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
@@ -171,7 +171,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'disclaimer' 
                         </span>
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                        Official terms governing student peer guidance, email OTP security, AI conversational assistance, and fee planning calculators.
+                        Terms governing student peer guidance, email OTP security, conversational assistance, and fee calculators.
                       </p>
                     </div>
                   </div>

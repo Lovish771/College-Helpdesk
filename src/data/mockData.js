@@ -3,7 +3,7 @@ export const college = {
   name: 'Lovely Professional University',
   short: 'LPU',
   location: 'Phagwara, Punjab',
-  note: 'Official Admission & Information Helpdesk for Lovely Professional University',
+  note: 'Admission and campus information for Lovely Professional University',
   campus_size: '600+ Acres',
   naac_grade: 'A++ Grade (3.68/4)',
   nirf_rank: 'Top 30 in India (NIRF)',

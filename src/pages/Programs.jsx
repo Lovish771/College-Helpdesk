@@ -111,7 +111,7 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
               backgroundImage: `url(${PROGRAM_IMAGES[p.id] || PROGRAM_IMAGES['btech-cse']})`,
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-900/60" />
+          <div className="absolute inset-0 bg-slate-950/80" />
 
           <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-3xl">
@@ -398,7 +398,7 @@ export default function Programs({ ask, onOpenCompare }) {
             backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&auto=format&fit=crop&q=80')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-[#F8FAFC] dark:to-slate-950 transition-colors" />
+        <div className="absolute inset-0 bg-slate-950/85 transition-colors" />
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white">

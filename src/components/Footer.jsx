@@ -86,7 +86,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
             <div className="flex flex-wrap gap-2.5 mt-5">
               <button
                 onClick={() => go && go('chat')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white text-xs font-bold shadow-sm transition-transform active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>Ask AI Assistant</span>
@@ -205,7 +205,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
             </ul>
           </div>
 
-          {/* Column 4: Official Contacts (4 Cols) */}
+          {/* Column 4: Campus contacts (4 Cols) */}
           <div className="lg:col-span-4">
             <h3 className="font-display font-bold text-xs uppercase tracking-wider text-slate-900 dark:text-white mb-3.5">
               Verified Contacts

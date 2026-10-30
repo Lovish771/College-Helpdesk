@@ -174,7 +174,7 @@ class RuleEngine:
     def _handle_unknown(self):
         return (
             "I'm sorry, I couldn't identify the exact information you requested.\n\n"
-            "I can assist you with official Lovely Professional University details on:\n"
+            "I can help with Lovely Professional University details on:\n"
             "• **Programmes & Specializations** (B.Tech CSE, AI & ML, MBA, BCA, MCA, B.Sc Agri)\n"
             "• **LPUNEST & Admissions** (Dates, Steps, Proctored Exam)\n"
             "• **Fee Structure & Expenses**\n"
@@ -269,7 +269,7 @@ class RuleEngine:
                 f"• **Email:** {lpu_contact['email']}\n"
                 f"• **Office Hours:** {lpu_contact['hours']}\n"
                 f"• **Campus Address:** {lpu_contact['address']}\n"
-                f"• **Official Website:** {lpu_contact['website']}"
+                f"• **Website:** {lpu_contact['website']}"
             )
         
         if intent == 'entrance_exam':
@@ -307,7 +307,7 @@ class RuleEngine:
                 "• **Tie-Up Banks:** State Bank of India (SBI), Punjab National Bank (PNB), Canara Bank, Union Bank of India, and HDFC Bank.\n"
                 "• **On-Campus Bank Branches:** SBI and PNB operate full-service branches and ATMs directly inside the Uni-Mall on campus.\n"
                 "• **Step 1 - Admission Offer:** Secure your provisional seat allotment at [admission.lpu.in](https://admission.lpu.in).\n"
-                "• **Step 2 - Loan Letter:** Download your official **Loan Estimation & Bonafide Letter** from your LPU UMS student portal.\n"
+                "• **Step 2 - Loan Letter:** Download your **Loan Estimation & Bonafide Letter** from your LPU UMS student portal.\n"
                 "• **Step 3 - National Vidya Lakshmi Portal:** Apply online through the Ministry of Education's [vidyalakshmi.co.in](https://www.vidyalakshmi.co.in) portal.\n"
                 "• **Disbursement:** Banks disburse tuition fees directly to the University and residential allowances to your student account."
             )
@@ -329,7 +329,7 @@ class RuleEngine:
 
         if intent == 'exam_fee_query':
             return (
-                "**Official LPU Examination Fee Schedule:**\n\n"
+                "**LPU examination fee schedule:**\n\n"
                 "• **Fee Amount:** ₹4,500 per academic year.\n"
                 "• **Collection Schedule:** Billed strictly **once per year in the even (second) semester** of each respective academic year (i.e., Semester 2, Semester 4, Semester 6, Semester 8).\n"
                 "• **Odd Semesters:** No examination fee is assessed in odd semesters (1st, 3rd, 5th, 7th)."

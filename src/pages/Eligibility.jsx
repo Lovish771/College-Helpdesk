@@ -119,10 +119,7 @@ export default function Eligibility({ ask }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition-all hover:bg-orange-700 cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                }}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-orange-600 hover:bg-orange-700 py-3 text-sm font-medium text-white transition-colors cursor-pointer disabled:opacity-60"
               >
                 {busy ? 'Evaluating Eligibility…' : 'Check Eligibility Now'}
               </button>

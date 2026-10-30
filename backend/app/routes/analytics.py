@@ -44,17 +44,32 @@ def get_analytics():
     days = 7 if range_param == '7d' else (90 if range_param == '90d' else (3650 if range_param == 'all' else 30))
     cutoff = utc_now() - timedelta(days=days)
 
-    # 1. Real Totals
-    total_conversations = ConversationSession.query.count()
-    total_messages = ConversationMessage.query.count()
-    total_bot_messages = ConversationMessage.query.filter_by(role='bot').count()
-    answered_messages = ConversationMessage.query.filter(
+    # 1. Real totals, scoped to the selected range like every other panel.
+    sessions_query = ConversationSession.query
+    messages_query = ConversationMessage.query
+    if range_param != 'all':
+        sessions_query = sessions_query.filter(ConversationSession.started_at >= cutoff)
+        messages_query = messages_query.filter(ConversationMessage.timestamp >= cutoff)
+
+    total_conversations = sessions_query.count()
+    total_messages = messages_query.count()
+    total_bot_messages = messages_query.filter(ConversationMessage.role == 'bot').count()
+    answered_messages = messages_query.filter(
         ConversationMessage.role == 'bot',
         ConversationMessage.answer_status == 'answered'
     ).count()
-    unanswered_queries = UnansweredQuery.query.count()
 
-    answer_rate = round((answered_messages / max(total_bot_messages, 1)) * 100, 1) if total_bot_messages > 0 else 100.0
+    unanswered_query = UnansweredQuery.query
+    if range_param != 'all':
+        unanswered_query = unanswered_query.filter(UnansweredQuery.last_seen >= cutoff)
+    unanswered_queries = unanswered_query.count()
+
+    # No bot replies in range means there is no rate to report. Reporting 100%
+    # here is what made an empty dashboard look healthy.
+    answer_rate = (
+        round((answered_messages / total_bot_messages) * 100, 1)
+        if total_bot_messages > 0 else None
+    )
 
     # 2. Real Topic / Intent Distribution
     topic_query = db.session.query(
@@ -106,25 +121,31 @@ def get_analytics():
     negative_count = feedback_query.filter(Feedback.is_helpful == False).count()
     total_feedback = positive_count + negative_count
 
+    # Only ever report what was actually submitted. An earlier version derived a
+    # satisfaction split from the answer rate when nobody had voted, which put
+    # invented percentages on the dashboard.
     if total_feedback > 0:
         pos_pct = round((positive_count / total_feedback) * 100)
         neg_pct = round((negative_count / total_feedback) * 100)
         neu_pct = max(0, 100 - pos_pct - neg_pct)
     else:
-        # Fallback based on answered rate if no individual survey clicks yet
-        pos_pct = round(answer_rate * 0.9)
-        neu_pct = round((100 - pos_pct) * 0.7)
-        neg_pct = max(0, 100 - pos_pct - neu_pct)
+        pos_pct = neg_pct = neu_pct = 0
 
     feedback_data = {
         'positive': pos_pct,
         'neutral': neu_pct,
         'negative': neg_pct,
-        'total': total_feedback
+        'total': total_feedback,
+        'upvotes': positive_count,
+        'downvotes': negative_count,
+        'has_data': total_feedback > 0
     }
 
-    # 5. Real Student Inquiry & Audit Logs
-    recent_user_messages = ConversationMessage.query.filter_by(role='user').order_by(
+    # 5. Real Student Inquiry & Audit Logs (same window as the rest of the page)
+    recent_query = ConversationMessage.query.filter_by(role='user')
+    if range_param != 'all':
+        recent_query = recent_query.filter(ConversationMessage.timestamp >= cutoff)
+    recent_user_messages = recent_query.order_by(
         ConversationMessage.timestamp.desc()
     ).limit(25).all()
 
@@ -157,13 +178,16 @@ def get_analytics():
         'totals': {
             'conversations': total_conversations,
             'messages': total_messages,
+            'bot_messages': total_bot_messages,
             'answered': answered_messages,
             'unanswered': unanswered_queries,
-            'rate': answer_rate
+            'rate': answer_rate,  # null when there is nothing to measure
+            'has_data': total_messages > 0
         },
         'topics': topics,
         'timeline': timeline,
         'feedback': feedback_data,
         'recent': recent,
-        'range': range_param
+        'range': range_param,
+        'generated_at': utc_now().isoformat()
     }), 200

@@ -706,7 +706,7 @@ export default function Hostel({ go, ask }) {
         ═══════════════════════════════════════════════════════════════════ */}
         {activeSection === 'studio' && (
           <div className="space-y-8 animate-fade-in">
-            <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white p-6 sm:p-8 border border-slate-800 shadow-xl relative overflow-hidden">
+            <div className="rounded-lg bg-slate-900 text-white p-6 sm:p-8 border border-slate-800 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="relative z-10 space-y-4 max-w-3xl">
@@ -1084,7 +1084,7 @@ export default function Hostel({ go, ask }) {
         ═══════════════════════════════════════════════════════════════════ */}
         {activeSection === 'dining' && (
           <div className="space-y-8 animate-fade-in">
-            <div className="rounded-3xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 text-white p-6 sm:p-8 border border-emerald-900/30 shadow-xl relative overflow-hidden">
+            <div className="rounded-lg bg-slate-900 text-white p-6 sm:p-8 border border-emerald-900/30 relative overflow-hidden">
               <div className="space-y-3 max-w-3xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                   <Utensils size={14} />

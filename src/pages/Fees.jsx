@@ -219,7 +219,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
         <PageHead
           title="Tuition, Scholarships & Living Fee Planner"
           text="Complete financial transparency across 44 LPU degree programmes with customizable multi-year living calculators, scholarship fee concessions, and education loan assistance."
-          badge="Official LPU Structure 2026-27"
+          badge="LPU fee structure · 2026-27"
         >
           <button
             onClick={() => ask(`Can you help me calculate the total ${tenureYears}-year expenditure and hostel fees for ${activeCourse.short}?`)}
@@ -231,7 +231,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
         </PageHead>
 
                 {/* ── Official Estimation Notice Banner (Session 2026-27) ── */}
-        <div className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent dark:from-amber-950/30 dark:via-orange-950/20 border border-amber-500/30 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-500/30 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <div className="h-7 w-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Info size={15} />
@@ -591,7 +591,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
               </div>
 
               {/* Overall Total Tenure Expenditure Banner */}
-              <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 sm:p-7 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="rounded-lg bg-slate-900 text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-orange-600 text-white uppercase tracking-wider">

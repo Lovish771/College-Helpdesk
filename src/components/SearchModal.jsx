@@ -284,7 +284,7 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
         </div>
 
         {/* AI Instant Question Footer Banner */}
-        <div className="p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-t border-orange-100 dark:border-slate-800 flex items-center justify-between gap-3">
+        <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 min-w-0">
             <span className="p-1.5 rounded-lg bg-orange-600 text-white shrink-0">
               <Sparkles size={14} />
@@ -296,10 +296,7 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
 
           <button
             onClick={() => handleAskAI(query ? `Tell me in detail about: ${query}` : '')}
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition-all hover:brightness-105 cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-            }}
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer"
           >
             <span>Ask AI Assistant</span>
             <ArrowRight size={13} />

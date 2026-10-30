@@ -100,7 +100,7 @@ export default function Curriculum({ ask, go }) {
               Curriculum &amp; Course Structure
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
-              Official semester-wise curriculum partitioned into <strong>Autumn Term</strong> (Odd Semesters) and <strong>Spring Term</strong> (Even Semesters), compliant with AICTE / UGC academic standards.
+              Semester-wise curriculum partitioned into <strong>Autumn Term</strong> (Odd Semesters) and <strong>Spring Term</strong> (Even Semesters), compliant with AICTE / UGC academic standards.
             </p>
           </div>
 
@@ -172,7 +172,7 @@ export default function Curriculum({ ask, go }) {
         </div>
 
         {/* Academic Calendar Notice Banner */}
-        <div className="rounded-2xl p-4 bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-blue-500/10 border border-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div className="rounded-lg p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
             <span className="p-2 rounded-xl bg-orange-500 text-white shadow-xs shrink-0">
               <Calendar size={18} />
@@ -222,7 +222,7 @@ export default function Curriculum({ ask, go }) {
                     onClick={() => setSelectedSemester(s)}
                     className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 active:scale-98 cursor-pointer ${
                       active
-                        ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md'
+                        ? 'bg-orange-600 text-white'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:translate-x-1'
                     }`}
                   >
@@ -419,7 +419,7 @@ export default function Curriculum({ ask, go }) {
             </div>
 
             {/* Bottom Helpful Card */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-5">
+            <div className="bg-slate-900 text-white rounded-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
               <div className="space-y-1">
                 <h4 className="text-base font-extrabold font-display">Need subject-wise course handouts or previous papers?</h4>
                 <p className="text-xs text-slate-300 max-w-xl">

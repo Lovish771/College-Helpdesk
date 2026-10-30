@@ -135,7 +135,7 @@ export default function Admissions({ ask, go }) {
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
                       <Landmark size={14} />
-                      <span>Official University Financial Aid &amp; Loans</span>
+                      <span>Financial aid &amp; loans at LPU</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display">
                       Education Loan Application Process
@@ -302,7 +302,7 @@ export default function Admissions({ ask, go }) {
               </div>
 
               {/* Eligibility Check Callout Footer */}
-              <div className="rounded-2xl p-6 sm:p-8 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-200 dark:border-orange-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="rounded-lg p-6 sm:p-8 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-white font-display">
                     Ready to verify your marks and eligibility?

@@ -82,10 +82,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
         <div className="p-3.5 shrink-0">
           <button
             onClick={act(handleNewChat)}
-            className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold text-white shadow-md transition-all hover:brightness-105 active:scale-95 cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-            }}
+            className="w-full flex items-center justify-center gap-2 rounded-md bg-orange-600 hover:bg-orange-700 py-3 text-xs font-medium text-white transition-colors cursor-pointer"
           >
             <Plus size={15} />
             <span>New Enquiry</span>
@@ -181,7 +178,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
           className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
         >
           <PhoneCall size={13} />
-          <span>Official LPU Helplines</span>
+          <span>LPU helplines</span>
         </button>
       </div>
     </div>

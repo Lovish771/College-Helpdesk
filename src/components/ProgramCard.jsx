@@ -197,10 +197,7 @@ export default function ProgramCard({ p, onView, onAsk, onCompare, isCenter = tr
           <button
             type="button"
             onClick={() => onView(p)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-bold text-white shadow-sm transition-all duration-200 hover:brightness-105 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500"
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-            }}
+            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-orange-600 hover:bg-orange-700 py-2.5 px-3 text-xs font-medium text-white transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500"
             aria-label={`View full details for ${p.name}`}
           >
             <span>View Details</span>

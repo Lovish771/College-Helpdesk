@@ -1,31 +1,15 @@
-import React, { useRef, useCallback } from 'react';
+import React from 'react';
 
 /**
- * SpotlightCard: High-performance card container with Linear/Raycast style dynamic spotlight border glow.
+ * Card container. Kept as a named component because several screens import it;
+ * the mouse-tracking spotlight border it used to draw is gone - a 1px border and
+ * a border-colour hover read more cleanly and cost nothing on every mousemove.
  */
-export default function SpotlightCard({
-  children,
-  className = '',
-  onClick,
-  ...props
-}) {
-  const cardRef = useRef(null);
-
-  const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    cardRef.current.style.setProperty('--mouse-x', `${x}px`);
-    cardRef.current.style.setProperty('--mouse-y', `${y}px`);
-  }, []);
-
+export default function SpotlightCard({ children, className = '', onClick, ...props }) {
   return (
     <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
       onClick={onClick}
-      className={`spotlight-card border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 ${className}`}
+      className={`card ${className}`}
       {...props}
     >
       {children}

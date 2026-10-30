@@ -28,33 +28,100 @@ def is_admin_email(email: str) -> bool:
     env_admins = [e.strip().lower() for e in os.environ.get('ADMIN_EMAILS', '').split(',') if e.strip()]
     return clean in DEFAULT_ADMIN_EMAILS or clean in env_admins
 
+def _restore_user_from_claims(payload):
+    """Rebuild a session user from a valid JWT.
+
+    The deployment stores SQLite in /tmp, which is per-instance: after a cold
+    start the user row can be gone even though the signed token is still valid.
+    Without this, every protected endpoint (including /api/auth/me) answered
+    "not logged in" on the next page load and the browser threw the session away.
+    """
+    email = (payload.get('email') or '').strip().lower()
+    if not email:
+        return None
+
+    role = 'admin' if is_admin_email(email) else (payload.get('role') or 'student')
+    user = User.query.filter_by(email=email).first()
+
+    if user is None:
+        user = User(
+            email=email,
+            name=payload.get('name') or 'Student',
+            role=role,
+            is_verified=True,
+            accepted_terms=True,
+            created_at=utc_now(),
+            last_login=utc_now(),
+        )
+        db.session.add(user)
+    else:
+        if role == 'admin' and user.role != 'admin':
+            user.role = 'admin'
+        user.last_login = utc_now()
+
+    try:
+        db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        logger.warning(f'[AUTH] Could not persist restored session for {email}: {exc}')
+
+    return user
+
+
 def get_current_user():
     """Extract and authenticate current user from Bearer token."""
+    payload, _ = get_session_identity()
+    if not payload:
+        return None
+    return _resolve_user_for_payload(payload)
+
+
+def get_session_identity():
+    """Return (payload, reason). reason is 'token_invalid' when the token itself
+    is unusable, or None when the signature and expiry check passed."""
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer '):
-        return None
+        return None, 'token_invalid'
     token = auth_header.split(' ', 1)[1].strip()
     payload = JWTService.decode(token)
     if not payload:
-        return None
-        
+        return None, 'token_invalid'
+    return payload, None
+
+
+def _resolve_user_for_payload(payload):
     user_id = payload.get('sub')
-    email = payload.get('email')
-    
-    # Check regular User table
+    email = (payload.get('email') or '').strip().lower()
+
+    # 1. Normal path: the row still exists in this instance's database.
     if user_id:
-        user = db.session.get(User, user_id)
+        try:
+            user = db.session.get(User, user_id)
+        except Exception:
+            user = None
         if user:
-            if user.email and is_admin_email(user.email):
+            if user.email and is_admin_email(user.email) and user.role != 'admin':
                 user.role = 'admin'
+                try:
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
             return user
-            
-    # Check AdminUser table if role is admin
+
+    # 2. Admin accounts created through the admin table.
     if (payload.get('role') == 'admin' or (email and is_admin_email(email))) and email:
         admin_user = AdminUser.query.filter_by(email=email).first()
         if admin_user:
             return admin_user
-            
+
+    # 3. Row lost with the ephemeral database: rebuild it from the token.
+    if email:
+        return _restore_user_from_claims(payload)
+
+    # 4. Admin table row addressed by id only.
+    if user_id and payload.get('role') == 'admin':
+        return db.session.get(AdminUser, user_id)
+
     return None
 
 def login_required(f):
@@ -216,17 +283,42 @@ def verify_otp():
 
 @auth_bp.route('/api/auth/me', methods=['GET'])
 def me():
-    """Return authenticated profile information."""
-    user = get_current_user()
+    """Return authenticated profile information.
+
+    Three distinct outcomes, because the client must only sign a user out when
+    the token itself is unusable:
+      401 token_invalid -> clear the stored session
+      503 retryable     -> keep the session, try again later
+      200 success       -> refresh the profile
+    """
+    payload, _ = get_session_identity()
+    if not payload:
+        return jsonify({
+            'success': False,
+            'user': None,
+            'token_invalid': True,
+            'error': 'Session expired. Please sign in again.'
+        }), 401
+
+    user = _resolve_user_for_payload(payload)
     if not user:
         return jsonify({
             'success': False,
-            'user': None
-        }), 200
-        
+            'user': None,
+            'retryable': True,
+            'error': 'Could not load the session profile right now. Please retry.'
+        }), 503
+
+    profile = user.to_dict()
+    profile['isAdmin'] = bool(
+        getattr(user, 'role', '') == 'admin'
+        or (getattr(user, 'email', None) and is_admin_email(user.email))
+        or isinstance(user, AdminUser)
+    )
+
     return jsonify({
         'success': True,
-        'user': user.to_dict()
+        'user': profile
     }), 200
 
 @auth_bp.route('/api/auth/logout', methods=['POST'])

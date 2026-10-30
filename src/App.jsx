@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
@@ -14,6 +13,7 @@ import Chatbot from './pages/Chatbot';
 import Programs from './pages/Programs';
 import Eligibility from './pages/Eligibility';
 import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
 
 // Heavy secondary routes dynamically chunked
 const Curriculum = lazy(() => import('./pages/Curriculum'));
@@ -31,6 +31,32 @@ const LegalModal = lazy(() => import('./components/LegalModal'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
 
 const read = () => window.location.hash.replace('#/', '') || 'home';
+
+// Per-route document title and description. The Home page keeps the plain
+// site name; every other route says what it is so tabs, history and shares
+// are distinguishable.
+const SITE = 'Student Helpdesk';
+const PAGE_META = {
+  home: ['Student Helpdesk — LPU student information', 'Fee structures, hostel tariffs, eligibility and admission details for Lovely Professional University, compiled from public sources by students.'],
+  chat: ['Ask a question — Student Helpdesk', 'Ask about fees, hostel, scholarships, eligibility or admissions and get an answer from the helpdesk knowledge base.'],
+  programs: ['Programmes — Student Helpdesk', 'Browse LPU programmes with duration, eligibility and fee ranges, and compare degrees side by side.'],
+  curriculum: ['Curriculum — Student Helpdesk', 'Semester-wise curriculum and credit structure for LPU programmes.'],
+  knowledge: ['Knowledge base — Student Helpdesk', 'Reference answers on admissions, fees, hostel, scholarships and campus services.'],
+  admissions: ['Admissions — Student Helpdesk', 'Admission steps, LPUNEST schedule, seat confirmation and document checklists.'],
+  fees: ['Fees — Student Helpdesk', 'Tuition, hostel, mess and examination fees with a planner to estimate your total.'],
+  hostel: ['Hostel — Student Helpdesk', 'Hostel room types, tariffs, mess plans and campus living details.'],
+  eligibility: ['Eligibility — Student Helpdesk', 'Eligibility criteria and qualifying requirements for LPU programmes.'],
+  contact: ['Contact — Student Helpdesk', 'Campus offices, helplines and email contacts for admissions and student services.'],
+  analytics: ['Telemetry — Student Helpdesk', 'Administrator telemetry for chatbot usage, answer coverage and unanswered questions.'],
+  admin: ['Admin — Student Helpdesk', 'Administrator dashboard for managing programmes, knowledge entries and users.'],
+};
+
+function setMeta(page) {
+  const [title, description] = PAGE_META[page] || [`Page not found — ${SITE}`, 'The page you requested does not exist.'];
+  document.title = title;
+  const tag = document.querySelector('meta[name="description"]');
+  if (tag) tag.setAttribute('content', description);
+}
 
 function AppContent() {
   const [page, setPage] = useState(read);
@@ -129,11 +155,11 @@ function AppContent() {
     admin: AdminDashboard,
   };
 
-  const Page = pages[page] || Home;
+  const Page = pages[page] || NotFound;
+  useEffect(() => { setMeta(page in pages ? page : 'notfound'); }, [page]);
 
   return (
     <div className={`flex flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 ${page === 'chat' ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
-      <CustomCursor />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:p-3 focus:bg-orange-600 focus:text-white focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-xl focus-visible:ring-2 focus-visible:ring-orange-500"
