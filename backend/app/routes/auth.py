@@ -1,4 +1,5 @@
 import os
+import logging
 from functools import wraps
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
@@ -7,6 +8,8 @@ from app.models.user import User, SecurityLog, utc_now
 from app.models.admin import AdminUser
 from app.services.email_service import EmailService
 from app.services.jwt_service import JWTService
+
+logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -160,36 +163,49 @@ def verify_otp():
     # Check if this email is designated as an admin
     role = 'admin' if is_admin_email(email) else 'student'
 
-    # Find or create User
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        user = User(
-            email=email,
-            name=name,
-            role=role,
-            is_verified=True,
-            accepted_terms=accepted_terms,
-            created_at=utc_now(),
-            last_login=utc_now()
-        )
-        db.session.add(user)
-    else:
-        if name and name != 'Student':
-            user.name = name
-        if role == 'admin':
-            user.role = 'admin'
-        user.last_login = utc_now()
-        user.accepted_terms = accepted_terms
+    try:
+        # Find or create User
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(
+                email=email,
+                name=name,
+                role=role,
+                is_verified=True,
+                accepted_terms=accepted_terms,
+                created_at=utc_now(),
+                last_login=utc_now()
+            )
+            db.session.add(user)
+        else:
+            if name and name != 'Student':
+                user.name = name
+            if role == 'admin':
+                user.role = 'admin'
+            user.last_login = utc_now()
+            user.accepted_terms = accepted_terms
 
-    db.session.commit()
+        db.session.commit()
 
-    # Generate JWT Token
-    token = JWTService.encode({
-        'sub': user.id,
-        'email': user.email,
-        'name': user.name,
-        'role': user.role
-    })
+        # Generate JWT Token
+        token = JWTService.encode({
+            'sub': user.id,
+            'email': user.email,
+            'name': user.name,
+            'role': user.role
+        })
+    except Exception as e:
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        logger.error(f'[AUTH] Could not establish session for {email}: {type(e).__name__}: {e}')
+        verbose = os.environ.get('EXPOSE_ERROR_DETAILS', '1') != '0'
+        reason = f' ({type(e).__name__}: {e})' if verbose else ''
+        return jsonify({
+            'success': False,
+            'error': f'Verified, but the session could not be created due to a server-side error{reason}. Please try again shortly.'
+        }), 503
 
     return jsonify({
         'success': True,

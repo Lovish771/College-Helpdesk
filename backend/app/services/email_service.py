@@ -21,14 +21,36 @@ class EmailService:
 
     @classmethod
     def _reload_env(cls):
-        """Dynamically reload .env to detect any newly added API keys or SMTP settings without needing server restart."""
+        """
+        Reload .env so newly added SMTP settings are picked up without a restart.
+        override=False on purpose: real environment variables (e.g. the ones set in
+        the Vercel dashboard) must always win over a bundled .env file.
+        """
         try:
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
             env_path = os.path.join(project_root, '.env')
             if os.path.exists(env_path):
-                load_dotenv(env_path, override=True)
+                load_dotenv(env_path, override=False)
         except Exception as e:
             logger.debug(f"Failed to reload .env dynamically: {e}")
+
+    @staticmethod
+    def _safe_port(*names, default: int = 587) -> int:
+        """Read a port from the environment without ever raising on a malformed value."""
+        for name in names:
+            raw = (os.environ.get(name) or '').strip()
+            if not raw:
+                continue
+            try:
+                port = int(raw)
+            except (TypeError, ValueError):
+                logger.error(f'[Gmail SMTP] {name}={raw!r} is not a valid port number; using {default}.')
+                return default
+            if not (1 <= port <= 65535):
+                logger.error(f'[Gmail SMTP] {name}={raw!r} is out of range; using {default}.')
+                return default
+            return port
+        return default
 
     @classmethod
     def generate_otp(cls) -> str:
@@ -36,12 +58,40 @@ class EmailService:
         return str(secrets.randbelow(900000) + 100000)
 
     @classmethod
+    def _storage_failure(cls, error: Exception, email: str, action: str) -> tuple[str, int]:
+        """
+        Turn an unexpected backend error into a diagnosable response plus a server-side
+        log line, instead of letting it escape as an opaque 500.
+        """
+        logger.error(f'[AUTH] Could not {action} for {email}: {type(error).__name__}: {error}')
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        # Set EXPOSE_ERROR_DETAILS=0 once the deployment is healthy to hide internals
+        verbose = os.getenv('EXPOSE_ERROR_DETAILS', '1') != '0'
+        reason = f' ({type(error).__name__}: {error})' if verbose else ''
+        return (
+            f'Could not {action} due to a server-side error{reason}. Please try again shortly.',
+            503
+        )
+
+    @classmethod
     def request_otp(cls, email: str, ip_address: str = None, user_agent: str = None) -> tuple[bool, str, int, dict]:
+        """Request an OTP. Storage/provider failures are reported back, never raised."""
         cls._reload_env()
-        email = email.strip().lower()
+        email = (email or '').strip().lower()
         if not email or '@' not in email or '.' not in email:
             return False, 'Please provide a valid email address.', 400, {}
 
+        try:
+            return cls._issue_otp(email, ip_address, user_agent)
+        except Exception as e:
+            msg, status_code = cls._storage_failure(e, email, 'issue a verification code')
+            return False, msg, status_code, {'error_type': type(e).__name__}
+
+    @classmethod
+    def _issue_otp(cls, email: str, ip_address: str = None, user_agent: str = None) -> tuple[bool, str, int, dict]:
         # Check rate-limit / cooldown from last OTP
         last_otp = EmailOTP.query.filter_by(email=email).order_by(EmailOTP.created_at.desc()).first()
         if last_otp and not last_otp.is_used:
@@ -104,7 +154,18 @@ class EmailService:
         """
         Dispatches OTP email via Google Gmail SMTP using an App Password.
         Set SMTP_USER (gmail address) and SMTP_PASSWORD (16-char App Password) in env.
+
+        Never raises: any dispatch problem is reported as a failed delivery so the
+        caller can answer with a readable message instead of an opaque 500.
         """
+        try:
+            return cls._dispatch_online_email_impl(email, otp_code)
+        except Exception as e:
+            logger.error(f'[Gmail SMTP] Unexpected dispatch failure for {email}: {type(e).__name__}: {e}')
+            return False, 'Gmail SMTP', f'dispatch error ({type(e).__name__}): {e}'
+
+    @classmethod
+    def _dispatch_online_email_impl(cls, email: str, otp_code: str) -> tuple[bool, str, str]:
         subject = f"Lovely Professional University – Verification Code: {otp_code}"
         text_content, html_content = cls._build_email_templates(email, otp_code)
 
@@ -132,7 +193,7 @@ class EmailService:
             'smtp.gmail.com'
         ).strip()
 
-        smtp_port = int(os.environ.get('SMTP_PORT') or os.environ.get('EMAIL_PORT') or 587)
+        smtp_port = cls._safe_port('SMTP_PORT', 'EMAIL_PORT', default=587)
 
         if not smtp_user or not smtp_pass:
             detail = 'SMTP_USER or SMTP_PASSWORD not configured in environment variables'
@@ -352,12 +413,20 @@ Student Helpdesk Support: Block 29, Room 104 | admissions@lpu.co.in
 
     @classmethod
     def verify_otp(cls, email: str, candidate_otp: str, ip_address: str = None) -> tuple[bool, str, int]:
-        email = email.strip().lower()
-        candidate_otp = candidate_otp.strip()
+        email = (email or '').strip().lower()
+        candidate_otp = str(candidate_otp or '').strip()
 
         if not email or not candidate_otp:
             return False, 'Email and 6-digit code are required.', 400
 
+        try:
+            return cls._verify_otp_impl(email, candidate_otp, ip_address)
+        except Exception as e:
+            msg, status_code = cls._storage_failure(e, email, 'verify your code')
+            return False, msg, status_code
+
+    @classmethod
+    def _verify_otp_impl(cls, email: str, candidate_otp: str, ip_address: str = None) -> tuple[bool, str, int]:
         # Query latest unexpired OTP for email
         otp_record = EmailOTP.query.filter(
             EmailOTP.email == email,

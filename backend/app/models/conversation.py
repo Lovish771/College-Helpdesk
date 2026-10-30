@@ -9,7 +9,11 @@ class ConversationSession(db.Model):
     started_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_activity = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     message_count = db.Column(db.Integer, default=0)
-    
+    # Slot-filling state (programme id, semester, pending intent...) as JSON text.
+    # It lives here, not in a process-level dict, so a follow-up turn still sees
+    # what the previous turn established - across restarts and serverless instances.
+    context_json = db.Column(db.Text, nullable=True)
+
     # Relationship with messages
     messages = db.relationship('ConversationMessage', backref='session', lazy='dynamic', cascade='all, delete-orphan')
     
@@ -20,6 +24,7 @@ class ConversationSession(db.Model):
             'started_at': self.started_at.isoformat() if self.started_at else None,
             'last_activity': self.last_activity.isoformat() if self.last_activity else None,
             'message_count': self.message_count,
+            'context': self.context_json,
         }
 
 class ConversationMessage(db.Model):

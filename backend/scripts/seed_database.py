@@ -18,6 +18,11 @@ try:
 except ImportError:
     from data.lpu_data import programs as lpu_programs
 
+try:
+    from backend.data.rule_base import INTENT_PATTERNS
+except ImportError:
+    from data.rule_base import INTENT_PATTERNS
+
 # Fix unicode encoding for Windows console
 if sys.platform == 'win32':
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -112,113 +117,7 @@ def seed_curriculum():
 
 def seed_intent_patterns():
     """Seed intent detection patterns"""
-    intents_data = [
-        {
-            'intent_name': 'greeting',
-            'patterns': [r'^(hi|hello|hey|namaste|good\s*(morning|afternoon|evening)|start)(\b|!)'],
-            'priority': 10,
-        },
-        {
-            'intent_name': 'goodbye',
-            'patterns': [r'bye|goodbye|see you|thank\s*you|thanks|exit|quit'],
-            'priority': 10,
-        },
-        {
-            'intent_name': 'fee_query',
-            'patterns': [r'\b(fee|fees|cost|tuition|charges|pricing|expense|per\s*sem|how\s*much)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'hostel_query',
-            'patterns': [r'\b(hostel|mess|accommodation|dorm|room|seater|food\s*court|stay|living|uni-world)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'scholarship_query',
-            'patterns': [r'\b(scholarship|scholar|waiver|financial\s*aid|concession|discount|cat[- ]?[123])\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'eligibility_query',
-            'patterns': [r'\b(eligib|criteria|qualification|qualif|cut\s*off|percent(age)?|marks\s*required)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'admission_query',
-            'patterns': [r'\b(admission|apply|application|enrol|register|procedure|step|how\s*to\s*join)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'entrance_exam',
-            'patterns': [r'\b(lpunest|lpu\s*nest|entrance|exam|test|slot\s*booking)\b'],
-            'priority': 7,
-        },
-        {
-            'intent_name': 'curriculum_query',
-            'patterns': [r'\b(curriculum|syllabus|subjects|courses|what\s*will\s*i\s*learn|credits)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'placements',
-            'patterns': [r'\b(placement|package|recruiter|salary|companies|highest\s*pack|lpa|hiring|job)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'campus_life',
-            'patterns': [r'\b(campus|uni-mall|uni-hospital|infrastructure|stadium|swimming|acres|library)\b'],
-            'priority': 5,
-        },
-        {
-            'intent_name': 'deadline_query',
-            'patterns': [r'\b(deadline|last\s*date|schedule|due\s*date|when\s*is)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'document_query',
-            'patterns': [r'\b(document|certificate|paper|marksheet|checklist|verification)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'contact_query',
-            'patterns': [r'\b(contact|phone|email|call|toll\s*free|address|office|location|helpdesk)\b'],
-            'priority': 6,
-        },
-        {
-            'intent_name': 'program_query',
-            'patterns': [r'\b(program|course|degree|branch|speciali[sz]ation|offered)\b'],
-            'priority': 4,
-        },
-        {
-            'intent_name': 'loan_query',
-            'patterns': [r'\b(loan|education\s*loan|bank\s*loan|vidya\s*lakshmi|emi|installment|sbi\s*loan|pnb\s*loan|financial\s*assistance)\b'],
-            'priority': 7,
-        },
-        {
-            'intent_name': 'hostel_tier_query',
-            'patterns': [r'\b(apartment\s*hostel|studio\s*hostel|studio\s*apartment|hostel\s*tier|room\s*category|ac\s*room|standard\s*hostel)\b'],
-            'priority': 7,
-        },
-        {
-            'intent_name': 'exam_fee_query',
-            'patterns': [r'\b(exam(ination)?\s*(fee|charges?|cost)|when\s*is\s*exam\s*fee)\b'],
-            'priority': 8,
-        },
-        {
-            'intent_name': 'laundry_query',
-            'patterns': [r'\b(laundry|clothes|washing|dry\s*clean|wash\s*charges)\b'],
-            'priority': 7,
-        },
-        {
-            'intent_name': 'total_fee_query',
-            'patterns': [r'\b(total\s*fee|4\s*year\s*fee|four\s*year\s*fee|full\s*fee|overall\s*cost|calculator)\b'],
-            'priority': 7,
-        },
-        {
-            'intent_name': 'compare_query',
-            'patterns': [r'\b(compare|difference\s*between|vs|versus|which\s*is\s*better)\b'],
-            'priority': 7,
-        },
-    ]
+    intents_data = INTENT_PATTERNS
     
     for intent_data in intents_data:
         existing = db.session.query(IntentPattern).filter_by(intent_name=intent_data['intent_name']).first()

@@ -96,7 +96,8 @@ def test_centralized_error_handler_404(client):
     assert res.status_code == 404
     data = res.get_json()
     assert data is not None
-    assert data.get('error') is True
+    # 'error' is a human-readable string (it used to be a boolean flag)
+    assert isinstance(data.get('error'), str) and data['error']
     assert data.get('code') == 404
     assert 'timestamp' in data
 

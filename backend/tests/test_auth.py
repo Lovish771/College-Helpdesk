@@ -33,7 +33,8 @@ def test_send_otp_success_and_cooldown(client):
     # 2. Attempt immediately again (must trigger 30s cooldown -> 429)
     res2 = client.post('/api/auth/send-otp', json={'email': 'student@lpu.in'})
     assert res2.status_code == 429
-    assert 'Please wait' in res2.get_json()['message']
+    # Failure responses carry the text in 'error'; 'message' stays null on failure
+    assert 'Please wait' in (res2.get_json().get('error') or '')
 
 def test_send_otp_invalid_email(client):
     res = client.post('/api/auth/send-otp', json={'email': 'notanemail'})

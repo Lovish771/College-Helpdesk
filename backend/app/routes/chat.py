@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app, abort
-from app import db
+from app import db, mask_db_uri
 from app.models import ConversationSession, ConversationMessage, UnansweredQuery
 from app.services.rule_engine import RuleEngine
 from app.routes.auth import get_current_user
@@ -61,6 +61,18 @@ def health():
         except Exception:
             pass
 
+        # Per-table probe: a database can answer SELECT 1 while a specific table is
+        # missing or unreadable, which otherwise shows up as a 500 on first use.
+        table_probe = {}
+        for table in ('email_otps', 'users', 'security_logs',
+                      'conversation_sessions', 'conversation_messages', 'programs'):
+            try:
+                db.session.execute(text(f'SELECT COUNT(*) FROM {table}')).scalar()
+                table_probe[table] = 'ok'
+            except Exception as e:
+                db.session.rollback()
+                table_probe[table] = f'{type(e).__name__}: {e}'[:200]
+
         email_env_detected = {
             'has_resend': bool(os.environ.get('RESEND_API_KEY') or os.environ.get('RESEND_KEY') or os.environ.get('RESEND_TOKEN') or os.environ.get('VITE_RESEND_API_KEY')),
             'has_smtp_user': bool(
@@ -92,6 +104,8 @@ def health():
             'service': 'LPU Helpdesk Backend',
             'university': 'Lovely Professional University',
             'database': db_status,
+            'db_uri': mask_db_uri(current_app.config.get('SQLALCHEMY_DATABASE_URI')),
+            'tables': table_probe,
             'memory_mb': memory_mb,
             'email_config': email_env_detected
         }), 200

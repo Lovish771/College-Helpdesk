@@ -181,7 +181,10 @@ def test_chat_greeting(client):
     assert 'Lovely Professional University' in data['reply']
 
 def test_chat_slot_filling_flow(client):
-    cid = 'pytest_slot_flow_session'
+    # A fresh conversation per run: slot context is now stored on the session row,
+    # so a fixed id would inherit the programme remembered by an earlier run.
+    import uuid
+    cid = 'pytest_slot_flow_' + uuid.uuid4().hex[:8]
     # Turn 1: User asks for fee without specifying program
     res1 = client.post('/api/chat', json={'message': 'What is the fee structure?', 'conversation_id': cid})
     assert res1.status_code == 200
@@ -198,6 +201,9 @@ def test_chat_slot_filling_flow(client):
     assert data2['intent'] == 'fee_query'
     assert 'B.Tech CSE' in data2['reply']
     assert '₹1,60,000' in data2['reply']
+
+    # Leave the development database as it was found
+    client.delete('/api/conversations/%s' % cid)
 
 def test_chat_aiml_fee_query(client):
     # Direct query for AI & ML specialization fee
