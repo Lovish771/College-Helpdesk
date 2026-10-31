@@ -283,7 +283,6 @@ export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [selectedSchoolId, setSelectedSchoolId] = useState('all');
   const [selectedDegree, setSelectedDegree] = useState('All Degrees');
-  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'hierarchical' | 'catalog'
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
 
@@ -464,46 +463,6 @@ export default function Programs({ ask, onOpenCompare }) {
                 </button>
               )}
 
-              {/* View Mode Switcher */}
-              <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                <button
-                  onClick={() => setViewMode('carousel')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    viewMode === 'carousel'
-                      ? 'bg-orange-600 text-white shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                  aria-label="Interactive 3D Carousel"
-                >
-                  <Sparkles size={12} />
-                  <span>3D Carousel</span>
-                </button>
-                <button
-                  onClick={() => setViewMode('hierarchical')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    viewMode === 'hierarchical'
-                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                  aria-label="Group by academic faculty"
-                >
-                  <Layers size={12} />
-                  <span className="hidden sm:inline">By Faculty</span>
-                </button>
-                <button
-                  onClick={() => setViewMode('catalog')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    viewMode === 'catalog'
-                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                  aria-label="Display flat catalog"
-                >
-                  <Filter size={12} />
-                  <span className="hidden sm:inline">Flat Grid</span>
-                </button>
-              </div>
-
               {onOpenCompare && (
                 <button
                   type="button"
@@ -592,7 +551,7 @@ export default function Programs({ ask, onOpenCompare }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-8">
 
 
-        {/* ── Content View Modes ── */}
+        {/* ── Content: Infinite 3D Carousel ── */}
         {filtered.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
             <div className="h-12 w-12 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 flex items-center justify-center mx-auto mb-3">
@@ -609,7 +568,7 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
-        ) : viewMode === 'carousel' ? (
+        ) : (
           /* ── Premium Infinite Horizontal 3D Carousel (Prominent Center + Smooth Right-to-Left Loop) ── */
           <ProgramsCarousel
             programs={filtered}
@@ -617,86 +576,6 @@ export default function Programs({ ask, onOpenCompare }) {
             onAsk={ask}
             onCompare={(id) => handleToggleCompareQueue(id)}
           />
-        ) : viewMode === 'hierarchical' && selectedSchoolId === 'all' && !q ? (
-          /* ── Hierarchical School View (Eliminates flat crowded feeling) ── */
-          <div className="space-y-12">
-            {groupedBySchool.map(({ school, programs: schoolProgs }) => (
-              <div key={school.id} className="space-y-4">
-                
-                {/* School Header Card */}
-                <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-1 max-w-2xl">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
-                        {school.badge}
-                      </span>
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display">
-                      {school.name}
-                    </h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      {school.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
-                      {schoolProgs.length} Programmes Offered
-                    </span>
-                    <button
-                      onClick={() => setSelectedSchoolId(school.id)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-600 hover:text-white text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
-                    >
-                      <span>Filter School</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Programmes Grid for this School */}
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pr-2 sm:pr-4">
-                  {schoolProgs.map((p) => (
-                    <ProgramCard
-                      key={p.id}
-                      p={p}
-                      onView={(prog) => setSelectedProgram(prog)}
-                      onAsk={ask}
-                      onCompare={(id) => handleToggleCompareQueue(id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* ── Flat Filtered Catalog Grid ── */
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
-              <span>
-                Showing <strong className="text-slate-900 dark:text-white font-bold">{filtered.length}</strong> programmes
-              </span>
-              {selectedSchoolId !== 'all' && (
-                <button
-                  onClick={() => setSelectedSchoolId('all')}
-                  className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer"
-                >
-                  View All Faculties
-                </button>
-              )}
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pr-2 sm:pr-4">
-              {filtered.map((p) => (
-                <ProgramCard
-                  key={p.id}
-                  p={p}
-                  onView={(prog) => setSelectedProgram(prog)}
-                  onAsk={ask}
-                  onCompare={(id) => handleToggleCompareQueue(id)}
-                />
-              ))}
-            </div>
-          </div>
         )}
 
       </div>
