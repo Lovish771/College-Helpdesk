@@ -52,6 +52,17 @@ const STORAGE_SCHEMAS = {
     validate: (val) => Array.isArray(val) && val.every((id) => typeof id === 'string'),
     default: () => ['btech-cse', 'btech-aiml'],
   },
+  // Session credentials. Without a schema these fell through to the generic
+  // branch below, which ran JSON.parse() on the raw JWT: that throws, so the
+  // token was read back as null on every reload and the user was signed out.
+  lpu_auth_token: {
+    validate: (val) => val === null || (typeof val === 'string' && val.trim() !== ''),
+    default: () => null,
+  },
+  lpu_auth_user: {
+    validate: (val) => val === null || (typeof val === 'object' && !Array.isArray(val)),
+    default: () => null,
+  },
 };
 
 /**
@@ -64,7 +75,14 @@ export function getStoredItem(key) {
   if (!schema) {
     try {
       const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        // Values written as bare strings (tokens, ids) are not valid JSON.
+        // Returning the raw string beats the old behaviour of returning null.
+        return raw;
+      }
     } catch {
       return null;
     }

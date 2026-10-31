@@ -332,7 +332,6 @@ def create_app(config_name=None, **kwargs):
         <li><a href="/api/programs">/api/programs</a></li>
         <li><a href="/api/curriculum">/api/curriculum</a></li>
         <li><a href="/api/knowledge">/api/knowledge</a></li>
-        <li><a href="/api/analytics">/api/analytics</a></li>
         <li><a href="/api/auth/me">/api/auth/me</a></li>
       </ul>
     </div>
@@ -355,8 +354,7 @@ def create_app(config_name=None, **kwargs):
                 '/api/chat',
                 '/api/auth/send-otp',
                 '/api/auth/verify-otp',
-                '/api/auth/me',
-                '/api/analytics'
+                '/api/auth/me'
             ]
         }, 200
 
@@ -370,7 +368,7 @@ def create_app(config_name=None, **kwargs):
         }, 200
     
     # Register blueprints
-    from app.routes import chat, programs, curriculum, knowledge, feedback, admin, analytics, auth
+    from app.routes import chat, programs, curriculum, knowledge, feedback, admin, auth
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(chat.bp, url_prefix='/api')
     app.register_blueprint(programs.bp, url_prefix='/api')
@@ -378,7 +376,6 @@ def create_app(config_name=None, **kwargs):
     app.register_blueprint(knowledge.bp, url_prefix='/api')
     app.register_blueprint(feedback.bp, url_prefix='/api')
     app.register_blueprint(admin.bp, url_prefix='/api')
-    app.register_blueprint(analytics.bp, url_prefix='/api')
     
     # Create tables / migrate legacy columns, reporting failures loudly
     _init_database(app)

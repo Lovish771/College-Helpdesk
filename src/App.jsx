@@ -4,7 +4,7 @@ import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
-import { AuthProvider } from './hooks/useAuth';
+import useAuth, { AuthProvider } from './hooks/useAuth';
 import { getStoredItem, setStoredItem } from './utils/storage';
 
 // Core entry views loaded synchronously for instant first-paint
@@ -21,7 +21,6 @@ const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'));
 const Admissions = lazy(() => import('./pages/Admissions'));
 const Fees = lazy(() => import('./pages/Fees'));
 const Hostel = lazy(() => import('./pages/Hostel'));
-const Analytics = lazy(() => import('./pages/Analytics'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 // Heavy overlay modals dynamically loaded on demand
@@ -47,7 +46,6 @@ const PAGE_META = {
   hostel: ['Hostel — Student Helpdesk', 'Hostel room types, tariffs, mess plans and campus living details.'],
   eligibility: ['Eligibility — Student Helpdesk', 'Eligibility criteria and qualifying requirements for LPU programmes.'],
   contact: ['Contact — Student Helpdesk', 'Campus offices, helplines and email contacts for admissions and student services.'],
-  analytics: ['Telemetry — Student Helpdesk', 'Administrator telemetry for chatbot usage, answer coverage and unanswered questions.'],
   admin: ['Admin — Student Helpdesk', 'Administrator dashboard for managing programmes, knowledge entries and users.'],
 };
 
@@ -59,6 +57,7 @@ function setMeta(page) {
 }
 
 function AppContent() {
+  const { isAdmin, loading: authLoading } = useAuth();
   const [page, setPage] = useState(read);
   const [pending, setPending] = useState(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -151,12 +150,17 @@ function AppContent() {
     hostel: Hostel,
     eligibility: Eligibility,
     contact: Contact,
-    analytics: Analytics,
     admin: AdminDashboard,
   };
 
-  const Page = pages[page] || NotFound;
-  useEffect(() => { setMeta(page in pages ? page : 'notfound'); }, [page]);
+  // The admin console is not a public route. It resolves only for a session the
+  // server has confirmed as an administrator: while the stored token is still
+  // being verified we show nothing but a skeleton, and anyone else — guest or
+  // signed-in student — gets the same 404 as any unknown address, so the
+  // dashboard can neither be reached nor inferred from the URL.
+  const adminConfirmed = page === 'admin' && !authLoading && isAdmin;
+  const Page = page === 'admin' && !adminConfirmed ? NotFound : pages[page] || NotFound;
+  useEffect(() => { setMeta(page === 'admin' && !adminConfirmed ? 'notfound' : (page in pages ? page : 'notfound')); }, [page, adminConfirmed]);
 
   return (
     <div className={`flex flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 ${page === 'chat' ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
@@ -187,6 +191,8 @@ function AppContent() {
           <Suspense fallback={<PageSkeleton />}>
             {page === 'chat' ? (
               <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} onOpenAuth={handleOpenAuth} />
+            ) : page === 'admin' && authLoading ? (
+              <PageSkeleton />
             ) : (
               <Page {...props} />
             )}
@@ -233,11 +239,6 @@ function AppContent() {
             isOpen={authModalOpen}
             onClose={() => setAuthModalOpen(false)}
             onOpenLegal={handleOpenLegal}
-            onLoginSuccess={() => {
-              if (page === 'admin') {
-                window.location.reload();
-              }
-            }}
           />
         </Suspense>
       )}

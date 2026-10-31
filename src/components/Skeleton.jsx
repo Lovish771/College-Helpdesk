@@ -110,39 +110,6 @@ export function FeeTableSkeleton() {
 }
 
 /**
- * Skeleton for Analytics view
- */
-export function AnalyticsSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      <div className="space-y-2">
-        <SkeletonBlock className="h-8 w-64 rounded-md" />
-        <SkeletonBlock className="h-4 w-96 rounded-md" />
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-2">
-            <SkeletonBlock className="h-3 w-20" />
-            <SkeletonBlock className="h-7 w-24" />
-            <SkeletonBlock className="h-3 w-16" />
-          </div>
-        ))}
-      </div>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-4">
-          <SkeletonBlock className="h-5 w-40" />
-          <SkeletonBlock className="h-48 w-full rounded-xl" />
-        </div>
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-4">
-          <SkeletonBlock className="h-5 w-40" />
-          <SkeletonBlock className="h-48 w-full rounded-xl" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
  * Full page fallback skeleton
  */
 export default function PageSkeleton() {

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ShieldAlert, ShieldCheck, Users, MessageSquare, AlertTriangle,
   Activity, RefreshCw, Search, Trash2, Calendar, Database,
   CheckCircle2, ArrowUpDown, ChevronLeft, ChevronRight, Lock, KeyRound
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
+import { resolveApiUrl } from '../api/client';
 import { PageHead } from '../utils/useAsync';
 
 export default function AdminDashboard({ go, onOpenAuth }) {
@@ -26,6 +27,8 @@ export default function AdminDashboard({ go, onOpenAuth }) {
   const [logs, setLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  const [loadError, setLoadError] = useState(null);
+
   // Delete confirmation modal state
   const [userToDelete, setUserToDelete] = useState(null);
   const [deletingUser, setDeletingUser] = useState(false);
@@ -34,17 +37,21 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     if (!token) return;
     setLoadingMetrics(true);
     try {
-      const res = await fetch(`/api/admin/metrics?range=${range}`, {
+      const res = await fetch(resolveApiUrl(`/api/admin/metrics?range=${range}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
           setMetrics(data);
+          setLoadError(null);
         }
+      } else {
+        setLoadError(`Metrics request failed (${res.status}).`);
       }
     } catch (err) {
       console.error('Error fetching admin metrics:', err);
+      setLoadError('Could not reach the admin metrics endpoint.');
     } finally {
       setLoadingMetrics(false);
     }
@@ -54,7 +61,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     if (!token) return;
     setLoadingUsers(true);
     try {
-      const res = await fetch(`/api/admin/users?page=${usersPage}&limit=8&q=${encodeURIComponent(usersSearch)}`, {
+      const res = await fetch(resolveApiUrl(`/api/admin/users?page=${usersPage}&limit=8&q=${encodeURIComponent(usersSearch)}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -76,7 +83,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     if (!token) return;
     setLoadingLogs(true);
     try {
-      const res = await fetch('/api/admin/logs?limit=15', {
+      const res = await fetch(resolveApiUrl('/api/admin/logs?limit=15'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -104,7 +111,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     if (!userToDelete || !token) return;
     setDeletingUser(true);
     try {
-      const res = await fetch(`/api/admin/users/${userToDelete.id}`, {
+      const res = await fetch(resolveApiUrl(`/api/admin/users/${userToDelete.id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -158,9 +165,17 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     newRegistrations: 0,
     totalConversations: 0,
     totalMessages: 0,
+    botMessages: 0,
+    unansweredQueries: 0,
     failedLogins: 0,
-    serverHealth: { status: 'healthy', uptime: '99.98%', database: 'Connected' }
+    serverHealth: null
   };
+
+  // Bars are scaled against the largest category present, so a bar's length
+  // stays meaningful whatever the traffic volume is.
+  const maxVolume = Math.max(...(metrics?.chatVolume || []).map((i) => i.count), 1);
+  const health = m.serverHealth;
+  const healthOk = !health || health.status === 'healthy';
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors">
@@ -250,7 +265,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               {m.totalConversations}
             </span>
             <span className="text-[10px] text-slate-400 mt-1 block">
-              {m.totalMessages} total replies
+              {m.totalMessages} messages in period
             </span>
           </div>
 
@@ -276,20 +291,22 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               {m.failedLogins}
             </span>
             <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-1 block">
-              Blocked by rate-limit
+              Admin &amp; OTP attempts
             </span>
           </div>
 
           <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
             <div className="flex items-center justify-between text-slate-400 mb-2">
               <span className="text-[11px] font-bold uppercase tracking-wider">Server Health</span>
-              <Database className="w-4 h-4 text-emerald-500" />
+              <Database className={`w-4 h-4 ${healthOk ? 'text-emerald-500' : 'text-rose-500'}`} />
             </div>
-            <span className="text-sm font-extrabold font-display text-emerald-600 dark:text-emerald-400 block pt-1">
-              ● Healthy (99.98%)
+            <span className={`text-sm font-extrabold font-display block pt-1 ${
+              healthOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+            }`}>
+              {loadingMetrics ? '…' : `● ${healthOk ? 'Healthy' : 'Degraded'}`}
             </span>
             <span className="text-[10px] text-slate-400 mt-1 block truncate">
-              SQLite Connected
+              {health ? `Database ${health.database}` : 'Health unknown'}
             </span>
           </div>
         </div>
@@ -302,20 +319,26 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               Chatbot Query Volume by Category ({range.toUpperCase()})
             </h3>
             <div className="space-y-3">
-              {(metrics?.chatVolume || []).map((item) => (
-                <div key={item.category} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-slate-700 dark:text-slate-300">{item.category}</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{item.count} queries</span>
+              {(metrics?.chatVolume || []).length === 0 ? (
+                <p className="py-8 text-center text-xs italic text-slate-400">
+                  {loadingMetrics ? 'Loading volume...' : 'No categorised queries in this period.'}
+                </p>
+              ) : (
+                metrics.chatVolume.map((item) => (
+                  <div key={item.category} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{item.category}</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{item.count} queries</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div
+                        className="h-full bg-orange-500 rounded-full"
+                        style={{ width: `${Math.max(4, (item.count / maxVolume) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <div
-                      className="h-full bg-orange-500 rounded-full"
-                      style={{ width: `${Math.min(100, Math.max(10, (item.count / 500) * 100))}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 

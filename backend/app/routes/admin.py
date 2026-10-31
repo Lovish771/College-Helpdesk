@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, g
+from sqlalchemy import text
 from app import db
 from app.models.user import User, SecurityLog, utc_now
 from app.models.conversation import ConversationSession, ConversationMessage
@@ -22,17 +23,38 @@ def admin_metrics():
     total_users = User.query.count()
     active_users = User.query.filter(User.last_login >= cutoff).count()
     new_registrations = User.query.filter(User.created_at >= cutoff).count()
-    
-    total_conversations = ConversationSession.query.count()
-    total_messages = ConversationMessage.query.count()
-    unanswered_queries = UnansweredQuery.query.count()
-    
+
+    # Every count below is scoped to the selected range, so the header's range
+    # selector describes the numbers under it rather than only some of them.
+    total_conversations = ConversationSession.query.filter(
+        ConversationSession.started_at >= cutoff
+    ).count()
+    total_messages = ConversationMessage.query.filter(
+        ConversationMessage.timestamp >= cutoff
+    ).count()
+    bot_messages = ConversationMessage.query.filter(
+        ConversationMessage.role == 'bot',
+        ConversationMessage.timestamp >= cutoff
+    ).count()
+    unanswered_queries = UnansweredQuery.query.filter(
+        UnansweredQuery.last_seen >= cutoff
+    ).count()
+
     failed_logins = SecurityLog.query.filter(
         SecurityLog.event_type.in_(['failed_admin_login', 'otp_failed']),
         SecurityLog.timestamp >= cutoff
     ).count()
 
     total_programs = Program.query.count()
+
+    # Report the database as it actually answers right now. The previous
+    # hardcoded "99.98% uptime / Healthy" was decoration that could not go red.
+    try:
+        db.session.execute(text('SELECT 1'))
+        database_ok = True
+    except Exception:
+        db.session.rollback()
+        database_ok = False
 
     # User registrations grouped by day
     # SQLite compatible date string formatting
@@ -64,13 +86,13 @@ def admin_metrics():
             'newRegistrations': new_registrations,
             'totalConversations': total_conversations,
             'totalMessages': total_messages,
+            'botMessages': bot_messages,
             'unansweredQueries': unanswered_queries,
             'failedLogins': failed_logins,
             'totalPrograms': total_programs,
             'serverHealth': {
-                'status': 'healthy',
-                'uptime': '99.98%',
-                'database': 'Connected (SQLite/SQLAlchemy)',
+                'status': 'healthy' if database_ok else 'degraded',
+                'database': 'Connected' if database_ok else 'Unavailable',
                 'environment': os.environ.get('FLASK_ENV', 'production'),
                 'rateLimiter': 'Active (30 req/min sliding-window)'
             }

@@ -1014,22 +1014,6 @@ export const quickActions = [
   'Placements',
 ];
 
-export const analytics = {
-  totals: { conversations: 2480, answered: 2362, rate: 95.2, unanswered: 118 },
-  topics: [
-    ['Fees & Costs', 820],
-    ['Hostel & Living', 560],
-    ['Admissions & LPUNEST', 490],
-    ['Scholarships & Aid', 340],
-    ['Placements & Careers', 270],
-  ],
-  recent: [
-    ['Can I transfer credits from another university in second year?', 'unknown', 'Needs review', '2026-10-26'],
-    ['Are there student exchange programs with UK universities?', 'exchange_query', 'Unanswered', '2026-10-26'],
-    ['What is the syllabus for LPUNEST offline exam?', 'unknown', 'Needs review', '2026-10-25'],
-  ],
-};
-
 export const curriculum = {
   terms: {
     '1': { name: 'Autumn Term', period: 'August - December', type: 'Autumn' },

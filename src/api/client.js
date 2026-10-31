@@ -17,6 +17,38 @@ export const API_URL = (() => {
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 export const wait = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Build an absolute URL for an endpoint, collapsing a duplicate /api when the
+ * configured base already ends in it. Endpoints that talk to the backend
+ * directly (rather than through request() below) need this, or they hit the
+ * frontend origin and silently 404 outside production.
+ */
+export function resolveApiUrl(endpoint) {
+  const base = (API_URL || '').replace(/\/+$/, '');
+  const clean = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  if (!base) return clean;
+  if (base.endsWith('/api') && clean.startsWith('/api/')) {
+    return `${base}${clean.substring(4)}`;
+  }
+  return `${base}${clean}`;
+}
+
+/** Read the stored session token. Values written raw are not valid JSON. */
+export function getStoredToken() {
+  try {
+    const raw = localStorage.getItem('lpu_auth_token');
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return typeof parsed === 'string' ? parsed : null;
+    } catch {
+      return raw;
+    }
+  } catch {
+    return null;
+  }
+}
+
 // Every endpoint goes through here: mock() while USE_MOCK, otherwise a real fetch with seamless offline fallback.
 export async function request(path, mock, options = {}) {
   if (USE_MOCK) {
@@ -32,13 +64,7 @@ export async function request(path, mock, options = {}) {
     : `${cleanBase}${cleanPath}`;
 
   // Attach JWT Bearer token if available in storage
-  let token = null;
-  try {
-    const raw = localStorage.getItem('lpu_auth_token');
-    if (raw) token = JSON.parse(raw);
-  } catch {
-    token = localStorage.getItem('lpu_auth_token');
-  }
+  const token = getStoredToken();
 
   const headers = {
     'Content-Type': 'application/json',

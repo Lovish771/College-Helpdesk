@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, ChevronDown, Moon, Sun,
   Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
-  UserCheck, Wallet, BedDouble, BarChart3, Scale, PhoneCall,
+  UserCheck, Wallet, BedDouble, Scale, PhoneCall,
   User as UserIcon, LogOut, ShieldCheck, KeyRound
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
@@ -48,7 +48,6 @@ export default function Navbar({
     ['knowledge', 'Knowledge Base & FAQs', HelpCircle, 'UMS, 75% attendance rule & guidelines'],
     ['contact', 'DSR & Admissions Desk', PhoneCall, 'Block 29 and Block 30 contacts'],
     ...(isAdmin ? [
-      ['analytics', 'Telemetry & Audits', BarChart3, 'Query trends & resolution stats'],
       ['admin', 'Admin Dashboard', ShieldCheck, 'Real-time metrics, users & security logs']
     ] : []),
   ];

@@ -46,6 +46,11 @@ class AdminUser(db.Model):
             'username': self.username,
             'email': self.email,
             'is_active': self.is_active,
+            # A row in this table is an administrator by definition. Marking it
+            # here keeps the client's admin gate on a server-supplied flag
+            # instead of making it infer privilege from the email domain.
+            'role': 'admin',
+            'isAdmin': True,
             'created_at': self.created_at.isoformat(),
             'last_login': self.last_login.isoformat() if self.last_login else None,
         }
