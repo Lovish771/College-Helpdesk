@@ -5,18 +5,16 @@ import {
 import ProgramCard from './ProgramCard';
 
 /**
- * Premium Infinite 3D Carousel for Degree Cards
+ * Degree Programs Carousel with Click-to-Select and Smooth In-Place Expansion
  * Features:
- * - Continuous infinite carousel with smooth right-to-left transitions
- * - Snappy, silky-smooth animation curve (~450ms cubic-bezier)
- * - Autoplay timed at ~1.75s per transition (customizable in 1.5–2.0s range)
- * - Autoplay pauses on mouse hover over any card or carousel surface
- * - Seamless loop without any blank space or sudden jumps
- * - Subtle 3D perspective effect with hardware-accelerated depth, scaling, and rotation
- * - Prominent, highlighted, larger center card with active glow and elevation
- * - Side cards smoothly slide and rotate into center position
- * - Manual navigation (arrows, dots, click-on-card, swipe) seamlessly resets autoplay
- * - Fully responsive on desktop, tablet, and mobile
+ * - Clean, uniform horizontal card layout (no forced 3D tilt or center-distortion)
+ * - Click-to-select: Clicking any card smoothly expands that exact card in its existing position
+ * - Selected card scales up with a 500ms natural easing transition, premium orange border, and soft glow
+ * - Other cards remain in their original positions without moving, shifting, or jumping
+ * - Clicking another card smoothly restores the previous card to normal size and expands the new card
+ * - Hovering does NOT trigger selection or expansion
+ * - Entire card is clickable for selection while internal buttons (View Details, Ask AI, Compare, Quick Glimpse) keep their isolated actions
+ * - Preserves carousel navigation arrows, pagination pill indicators, and responsive design
  */
 export default function ProgramsCarousel({
   programs = [],
@@ -63,14 +61,14 @@ export default function ProgramsCarousel({
   const N = programs.length;
 
   // Responsive card dimension calculations
-  const { cardWidth, gap, isMobile } = useMemo(() => {
+  const { cardWidth, gap } = useMemo(() => {
     if (containerWidth < 640) {
-      return { cardWidth: Math.min(324, containerWidth - 36), gap: 16, isMobile: true };
+      return { cardWidth: Math.min(320, containerWidth - 36), gap: 16 };
     }
     if (containerWidth < 1024) {
-      return { cardWidth: 360, gap: 24, isMobile: false };
+      return { cardWidth: 355, gap: 24 };
     }
-    return { cardWidth: 395, gap: 28, isMobile: false };
+    return { cardWidth: 385, gap: 28 };
   }, [containerWidth]);
 
   const stepSize = cardWidth + gap;
@@ -78,7 +76,6 @@ export default function ProgramsCarousel({
   // Repeat count to create an infinite buffer with zero edges
   const repeatCount = useMemo(() => {
     if (N <= 1) return 1;
-    // Ensure at least 35 items in buffer and repeatCount is odd so middleCycle is symmetrical
     const needed = Math.max(7, Math.ceil(35 / N));
     return needed % 2 === 0 ? needed + 1 : needed;
   }, [N]);
@@ -91,6 +88,7 @@ export default function ProgramsCarousel({
   // Reset to middle block whenever programs array changes (e.g. search or filter changed)
   useEffect(() => {
     setCurrentIndex(baseIndex);
+    setSelectedProgramId(null);
     setIsTransitioning(false);
     requestAnimationFrame(() => {
       setIsTransitioning(true);
@@ -116,57 +114,63 @@ export default function ProgramsCarousel({
 
   // Active normalized program index
   const activeNormalizedIndex = N > 0 ? ((currentIndex % N) + N) % N : 0;
-  const activeProgram = (selectedProgramId && programs.find((p) => p.id === selectedProgramId)) || programs[activeNormalizedIndex] || null;
+  const activeProgram =
+    (selectedProgramId && programs.find((p) => p.id === selectedProgramId)) ||
+    programs[activeNormalizedIndex] ||
+    null;
 
   // Restart / sync autoplay timer on manual interactions
   const restartAutoplay = useCallback(() => {
     setAutoplayKey((prev) => prev + 1);
   }, []);
 
-  // Navigation handlers
+  // Navigation handlers (manual arrows or pagination)
   const handleNext = useCallback((isManual = false) => {
     if (N <= 1) return;
     setIsTransitioning(true);
     setCurrentIndex((prev) => prev + 1);
-    if (isManual) restartAutoplay();
+    if (isManual) {
+      setSelectedProgramId(null);
+      restartAutoplay();
+    }
   }, [N, restartAutoplay]);
 
   const handlePrev = useCallback((isManual = false) => {
     if (N <= 1) return;
     setIsTransitioning(true);
     setCurrentIndex((prev) => prev - 1);
-    if (isManual) restartAutoplay();
+    if (isManual) {
+      setSelectedProgramId(null);
+      restartAutoplay();
+    }
   }, [N, restartAutoplay]);
 
   const handleJumpToIndex = useCallback((targetOriginalIndex) => {
     if (N <= 1) return;
     setIsTransitioning(true);
+    setSelectedProgramId(null);
     const currentNorm = ((currentIndex % N) + N) % N;
     let diff = targetOriginalIndex - currentNorm;
-    // Choose shortest direction
     if (diff > N / 2) diff -= N;
     if (diff < -N / 2) diff += N;
     setCurrentIndex((prev) => prev + diff);
     restartAutoplay();
   }, [currentIndex, N, restartAutoplay]);
 
-  // Click-to-select interaction: smoothly selects and expands card in its current position without shifting the carousel
+  // Click-to-select: Expands the card in its CURRENT position without moving the carousel
   const handleCardSelect = useCallback((programId) => {
     if (hasDraggedRef.current) return;
     setSelectedProgramId((prev) => (prev === programId ? null : programId));
-    restartAutoplay();
-  }, [restartAutoplay]);
+  }, []);
 
-  // Seamless Wrap on transition end (100% invisible reset with zero jumps)
+  // Seamless Wrap on transition end (invisible cycle boundary reset)
   const handleTransitionEnd = useCallback((e) => {
-    // Only handle horizontal transform transition on the main track
     if (e.target !== trackRef.current || e.propertyName !== 'transform') return;
     if (N <= 1) return;
 
     const norm = ((currentIndex % N) + N) % N;
     const safeIndex = baseIndex + norm;
 
-    // If drifted away from the safe middle cycle, silently snap back
     if (currentIndex !== safeIndex) {
       setIsTransitioning(false);
       setCurrentIndex(safeIndex);
@@ -178,16 +182,32 @@ export default function ProgramsCarousel({
     }
   }, [currentIndex, N, baseIndex]);
 
-  // Continuous Fast Autoplay (moves smoothly every 1.75 seconds, paused on hover)
+  // Autoplay moves smoothly when no card is selected and not hovered
   useEffect(() => {
-    if (prefersReducedMotion || isHovered || isDragging || isPausedManually || N <= 1) {
+    if (
+      prefersReducedMotion ||
+      isHovered ||
+      isDragging ||
+      isPausedManually ||
+      selectedProgramId !== null ||
+      N <= 1
+    ) {
       return;
     }
     const timer = setInterval(() => {
       handleNext(false);
-    }, 1750); // ~1.75 seconds per transition
+    }, 2000);
     return () => clearInterval(timer);
-  }, [prefersReducedMotion, isHovered, isDragging, isPausedManually, N, handleNext, autoplayKey]);
+  }, [
+    prefersReducedMotion,
+    isHovered,
+    isDragging,
+    isPausedManually,
+    selectedProgramId,
+    N,
+    handleNext,
+    autoplayKey,
+  ]);
 
   // Pointer dragging & mobile touch swiping
   const pointerStartRef = useRef({ x: 0, y: 0, time: 0 });
@@ -204,7 +224,7 @@ export default function ProgramsCarousel({
   const handlePointerMove = (e) => {
     if (!isDragging) return;
     const deltaX = e.clientX - pointerStartRef.current.x;
-    if (Math.abs(deltaX) > 6 || hasDraggedRef.current) {
+    if (Math.abs(deltaX) > 8 || hasDraggedRef.current) {
       hasDraggedRef.current = true;
       setDragOffset(deltaX);
     }
@@ -213,7 +233,6 @@ export default function ProgramsCarousel({
   const handlePointerEnd = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    const deltaX = pointerStartRef.current.x ? 0 : 0; // fallback safety
     const endDeltaX = dragOffset;
     const deltaTime = Date.now() - pointerStartRef.current.time;
     const velocity = Math.abs(endDeltaX) / (deltaTime || 1);
@@ -221,19 +240,18 @@ export default function ProgramsCarousel({
     setIsTransitioning(true);
     setDragOffset(0);
 
-    // Swipe threshold: 40px or rapid flick
-    if (Math.abs(endDeltaX) > 40 || velocity > 0.4) {
+    // Swipe threshold: 45px or rapid flick
+    if (Math.abs(endDeltaX) > 45 || velocity > 0.45) {
       if (endDeltaX < 0) {
-        // Dragged left -> advance right to left
         setCurrentIndex((prev) => prev + 1);
       } else {
-        // Dragged right -> go previous
         setCurrentIndex((prev) => prev - 1);
       }
+      setSelectedProgramId(null);
       restartAutoplay();
     }
 
-    // Suppress clicks on child elements if user was actively dragging
+    // Suppress clicks on child elements only if actively dragged
     setTimeout(() => {
       hasDraggedRef.current = false;
     }, 120);
@@ -250,7 +268,7 @@ export default function ProgramsCarousel({
     }
   };
 
-  // Click capture to prevent accidental button clicks while dragging
+  // Click capture to prevent accidental clicks while dragging
   const handleClickCapture = (e) => {
     if (hasDraggedRef.current) {
       e.stopPropagation();
@@ -259,7 +277,8 @@ export default function ProgramsCarousel({
   };
 
   // Mathematical center coordinate calculation
-  const translateX = (containerWidth / 2) - (cardWidth / 2) - (currentIndex * stepSize) + dragOffset;
+  const translateX =
+    containerWidth / 2 - cardWidth / 2 - currentIndex * stepSize + dragOffset;
 
   if (N === 0) return null;
 
@@ -272,26 +291,35 @@ export default function ProgramsCarousel({
       onFocusCapture={() => setIsHovered(true)}
       onBlurCapture={() => setIsHovered(false)}
       tabIndex={0}
-      aria-label="Degree Programs 3D Infinite Carousel"
+      aria-label="Degree Programs Carousel"
       aria-roledescription="carousel"
-      className="relative w-full overflow-hidden select-none outline-none py-6 sm:py-8 transition-colors"
+      className="relative w-full select-none outline-none py-4 sm:py-6 transition-colors"
     >
       {/* ── Carousel Header & Status Bar ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
               <Sparkles size={11} />
-              <span>Interactive 3D Carousel</span>
+              <span>Interactive Degrees Carousel</span>
             </span>
             <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
-              Showing Degree <strong className="text-slate-900 dark:text-white font-mono font-bold">{activeNormalizedIndex + 1}</strong> of <strong className="text-slate-900 dark:text-white font-mono font-bold">{N}</strong>
+              Showing Degree{' '}
+              <strong className="text-slate-900 dark:text-white font-mono font-bold">
+                {activeNormalizedIndex + 1}
+              </strong>{' '}
+              of{' '}
+              <strong className="text-slate-900 dark:text-white font-mono font-bold">
+                {N}
+              </strong>
             </span>
           </div>
 
           {activeProgram && (
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-xl">
-              <span className="text-orange-600 dark:text-orange-400 font-mono mr-1.5">[{activeProgram.short}]</span>
+              <span className="text-orange-600 dark:text-orange-400 font-mono mr-1.5">
+                [{activeProgram.short}]
+              </span>
               {activeProgram.name}
             </p>
           )}
@@ -310,8 +338,14 @@ export default function ProgramsCarousel({
             title={isPausedManually ? 'Resume automatic sliding' : 'Pause automatic sliding'}
             aria-label={isPausedManually ? 'Resume autoplay' : 'Pause autoplay'}
           >
-            {isPausedManually ? <Play size={12} className="text-orange-500 fill-orange-500" /> : <Pause size={12} className="text-orange-500" />}
-            <span className="hidden sm:inline">{isPausedManually ? 'Resume' : 'Autoplay'}</span>
+            {isPausedManually ? (
+              <Play size={12} className="text-orange-500 fill-orange-500" />
+            ) : (
+              <Pause size={12} className="text-orange-500" />
+            )}
+            <span className="hidden sm:inline">
+              {isPausedManually ? 'Resume' : 'Autoplay'}
+            </span>
           </button>
 
           {/* Prev Arrow Button */}
@@ -338,9 +372,9 @@ export default function ProgramsCarousel({
         </div>
       </div>
 
-      {/* ── Main Sliding Track Container with 3D Stage Perspective ── */}
+      {/* ── Main Sliding Track Container ── */}
       <div
-        className="relative w-full py-6 sm:py-8 overflow-visible [perspective:1400px] [transform-style:preserve-3d] cursor-grab active:cursor-grabbing touch-pan-y"
+        className="relative w-full py-4 overflow-hidden cursor-grab active:cursor-grabbing touch-pan-y"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
@@ -350,20 +384,20 @@ export default function ProgramsCarousel({
         {/* Floating Left Gradient Edge Shadow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-20 z-40 bg-gradient-to-r from-[#F8FAFC] dark:from-slate-950 via-[#F8FAFC]/80 dark:via-slate-950/80 to-transparent"
+          className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-20 z-20 bg-gradient-to-r from-[#F8FAFC] dark:from-slate-950 via-[#F8FAFC]/80 dark:via-slate-950/80 to-transparent"
         />
 
         {/* Floating Right Gradient Edge Shadow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-20 z-40 bg-gradient-to-l from-[#F8FAFC] dark:from-slate-950 via-[#F8FAFC]/80 dark:via-slate-950/80 to-transparent"
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-20 z-20 bg-gradient-to-l from-[#F8FAFC] dark:from-slate-950 via-[#F8FAFC]/80 dark:via-slate-950/80 to-transparent"
         />
 
         {/* Floating Side Arrows on larger screens for direct in-canvas clicking */}
         <button
           type="button"
           onClick={() => handlePrev(true)}
-          className="hidden md:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/60 hover:scale-105 shadow-xl items-center justify-center transition-all cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-orange-500"
+          className="hidden md:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/60 hover:scale-105 shadow-xl items-center justify-center transition-all cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-orange-500"
           aria-label="Previous card"
         >
           <ChevronLeft size={20} />
@@ -372,7 +406,7 @@ export default function ProgramsCarousel({
         <button
           type="button"
           onClick={() => handleNext(true)}
-          className="hidden md:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/60 hover:scale-105 shadow-xl items-center justify-center transition-all cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-orange-500"
+          className="hidden md:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-500/60 hover:scale-105 shadow-xl items-center justify-center transition-all cursor-pointer active:scale-95 focus-visible:ring-2 focus-visible:ring-orange-500"
           aria-label="Next card"
         >
           <ChevronRight size={20} />
@@ -387,65 +421,15 @@ export default function ProgramsCarousel({
             transition: isTransitioning
               ? prefersReducedMotion
                 ? 'transform 120ms ease'
-                : 'transform 450ms cubic-bezier(0.22, 1, 0.36, 1)'
+                : 'transform 500ms cubic-bezier(0.22, 1, 0.36, 1)'
               : 'none',
           }}
-          className="flex items-center will-change-transform [transform-style:preserve-3d]"
+          className="flex items-center will-change-transform py-4"
         >
           {trackItems.map((item, idx) => {
             const distance = Math.abs(idx - currentIndex);
-            const isCenter = distance === 0;
-            const isLeft = idx < currentIndex;
-            const isSelected = selectedProgramId === item.program.id;
-
-            // Only render cards within active view window (distance <= 4) to ensure wide displays have zero blank pop-ins
             const isVisible = distance <= 4;
-
-            // Compute 3D Depth, Scaling, and Rotation angles
-            let transformStyle = '';
-            let opacity = 0;
-            let zIndex = 0;
-            let pointerEvents = 'none';
-
-            if (isCenter) {
-              transformStyle = prefersReducedMotion
-                ? 'scale(1.02)'
-                : isMobile
-                  ? 'scale(1.03) translateZ(16px) rotateY(0deg)'
-                  : 'scale(1.06) translateZ(36px) rotateY(0deg)';
-              opacity = 1;
-              zIndex = 30;
-              pointerEvents = 'auto';
-            } else if (distance === 1) {
-              const rot = isLeft ? (isMobile ? 4 : 7) : (isMobile ? -4 : -7);
-              const tz = isMobile ? -25 : -45;
-              transformStyle = prefersReducedMotion
-                ? 'scale(0.92)'
-                : `scale(0.92) translateZ(${tz}px) rotateY(${rot}deg)`;
-              opacity = 0.85;
-              zIndex = 20;
-              pointerEvents = 'auto';
-            } else if (distance === 2) {
-              const rot = isLeft ? (isMobile ? 8 : 12) : (isMobile ? -8 : -12);
-              const tz = isMobile ? -60 : -95;
-              transformStyle = prefersReducedMotion
-                ? 'scale(0.84)'
-                : `scale(0.84) translateZ(${tz}px) rotateY(${rot}deg)`;
-              opacity = 0.45;
-              zIndex = 10;
-              pointerEvents = 'auto';
-            } else if (distance === 3) {
-              const rot = isLeft ? 15 : -15;
-              transformStyle = `scale(0.76) translateZ(-145px) rotateY(${rot}deg)`;
-              opacity = 0.18;
-              zIndex = 5;
-              pointerEvents = 'none';
-            } else {
-              transformStyle = 'scale(0.7) translateZ(-190px)';
-              opacity = 0;
-              zIndex = 0;
-              pointerEvents = 'none';
-            }
+            const isSelected = selectedProgramId === item.program.id;
 
             return (
               <div
@@ -453,20 +437,12 @@ export default function ProgramsCarousel({
                 style={{
                   width: `${cardWidth}px`,
                   marginRight: `${gap}px`,
-                  transform: transformStyle,
-                  opacity: isSelected ? 1 : opacity,
-                  zIndex: isSelected ? 45 : zIndex,
-                  pointerEvents: pointerEvents,
-                  transition: isTransitioning
-                    ? prefersReducedMotion
-                      ? 'transform 120ms ease, opacity 120ms ease'
-                      : 'transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 500ms cubic-bezier(0.22, 1, 0.36, 1), filter 500ms ease'
-                    : 'none',
+                  zIndex: isSelected ? 30 : 10,
                 }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className="shrink-0 transform-gpu will-change-transform [transform-style:preserve-3d]"
-                aria-hidden={!isCenter && !isSelected}
+                className="shrink-0"
+                aria-hidden={!isVisible}
               >
                 {isVisible && (
                   <ProgramCard
@@ -474,7 +450,6 @@ export default function ProgramsCarousel({
                     onView={onView}
                     onAsk={onAsk}
                     onCompare={onCompare}
-                    isCenter={isCenter}
                     isSelected={isSelected}
                     onSelect={() => handleCardSelect(item.program.id)}
                   />
@@ -486,7 +461,7 @@ export default function ProgramsCarousel({
       </div>
 
       {/* ── Interactive Pagination Indicators Bar ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Interactive Dots / Pills */}
         <div
           className="flex items-center gap-1.5 overflow-x-auto max-w-full py-1 scrollbar-none"
@@ -513,11 +488,11 @@ export default function ProgramsCarousel({
           })}
         </div>
 
-        {/* Mobile Swipe Tip & Keyboard helper */}
+        {/* Tip helper */}
         <div className="flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500">
           <span className="flex items-center gap-1">
             <Compass size={12} className="text-orange-500" />
-            <span>Hover to pause • Drag, swipe or use arrow keys</span>
+            <span>Click any card to select &amp; expand • Drag or use arrows to slide</span>
           </span>
         </div>
       </div>

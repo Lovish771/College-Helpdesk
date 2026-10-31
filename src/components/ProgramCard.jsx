@@ -63,7 +63,7 @@ export default function ProgramCard({ p, onView, onAsk, onCompare, isCenter = fa
           transform-gpu transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
           ${
             isSelected
-              ? 'scale-[1.03] sm:scale-[1.04] border-orange-500 ring-2 ring-orange-500/30 shadow-[0_20px_50px_-10px_rgba(234,88,12,0.32),0_0_28px_-3px_rgba(249,115,22,0.38)] dark:shadow-[0_24px_60px_-10px_rgba(0,0,0,0.92),0_0_35px_-3px_rgba(249,115,22,0.45)]'
+              ? 'scale-[1.04] sm:scale-[1.05] border-orange-500 ring-2 ring-orange-500/40 shadow-[0_20px_50px_-10px_rgba(234,88,12,0.32),0_0_28px_-3px_rgba(249,115,22,0.38)] dark:shadow-[0_24px_60px_-10px_rgba(0,0,0,0.92),0_0_35px_-3px_rgba(249,115,22,0.45)]'
               : 'scale-100 border-slate-200/90 dark:border-slate-800 shadow-sm'
           }`}
         tabIndex={0}
