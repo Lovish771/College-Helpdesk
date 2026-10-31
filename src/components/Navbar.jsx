@@ -3,7 +3,7 @@ import {
   Menu, X, Search, ChevronDown, Moon, Sun,
   Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
   UserCheck, Wallet, BedDouble, Scale, PhoneCall,
-  User as UserIcon, LogOut, ShieldCheck, KeyRound
+  User as UserIcon, LogOut, ShieldCheck, KeyRound, Bell
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 import useAuth from '../hooks/useAuth';
@@ -125,8 +125,8 @@ export default function Navbar({
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/85 dark:bg-slate-900/85 border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6),inset_0_1px_0_0_rgba(255,255,255,0.08)]'
-              : 'bg-white/75 dark:bg-slate-900/75 border-slate-200/60 dark:border-white/[0.06] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.05),inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4),inset_0_1px_0_0_rgba(255,255,255,0.06)]'
+              ? 'bg-white/90 dark:bg-[#080D1A]/95 border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(0,0,0,0.4)]'
+              : 'bg-white/80 dark:bg-[#080D1A]/85 border-slate-200/60 dark:border-slate-800/80 text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(0,0,0,0.3)]'
           }`}
         >
           {/* Brand: Mascot Logo + Title */}
@@ -138,9 +138,12 @@ export default function Navbar({
             <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
               <LpuLogo variant={isDark ? 'dark' : 'light'} size={38} />
             </div>
-            <div className="flex flex-col justify-center leading-none">
-              <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+            <div className="flex flex-col justify-center leading-none text-left">
+              <span className="font-display font-extrabold text-sm sm:text-base tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                 Student Helpdesk
+              </span>
+              <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
+                LPU Support Portal
               </span>
             </div>
           </button>
@@ -156,7 +159,7 @@ export default function Navbar({
                     aria-current={active ? 'page' : undefined}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer group active:scale-95 ${
                       active
-                        ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 shadow-2xs'
+                        ? 'text-orange-500 dark:text-orange-400 bg-orange-950/40 border border-orange-500/50 shadow-[0_0_12px_rgba(249,115,22,0.15)]'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                     }`}
                   >
@@ -181,7 +184,7 @@ export default function Navbar({
                 onClick={() => setMoreOpen(!moreOpen)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
                   isMoreActive
-                    ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800'
+                    ? 'text-orange-500 dark:text-orange-400 bg-orange-950/40 border border-orange-500/50 shadow-[0_0_12px_rgba(249,115,22,0.15)]'
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                 }`}
                 aria-expanded={moreOpen}
@@ -262,18 +265,31 @@ export default function Navbar({
 
           {/* Right Action Elements */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Spotlight Search Modal Button */}
+            {/* Spotlight Search Pill Button */}
             <button
               type="button"
               onClick={onOpenSearch}
-              className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full text-xs font-semibold border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700"
-              title="Search programmes, fees, hostels & rules (Ctrl+K)"
+              className="hidden lg:flex items-center justify-between w-48 xl:w-56 px-3.5 py-1.5 rounded-full bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-200/80 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-inner"
+              title="Search (⌘K)"
             >
-              <Search size={14} className="text-orange-500 shrink-0" />
-              <span className="hidden md:inline">Search</span>
-              <kbd className="hidden 2xl:inline text-[9px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-400 bg-slate-200/80 dark:bg-slate-700">
+              <div className="flex items-center gap-2 truncate">
+                <Search size={13} className="text-slate-400 shrink-0" />
+                <span className="truncate text-slate-400 text-xs font-normal">Search anything...</span>
+              </div>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 shrink-0">
                 ⌘K
               </kbd>
+            </button>
+
+            {/* Mobile / Tablet search icon button */}
+            <button
+              type="button"
+              onClick={onOpenSearch}
+              className="lg:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
+              title="Search (Ctrl+K)"
+              aria-label="Search"
+            >
+              <Search size={14} />
             </button>
 
             {/* Dark / Light Theme Toggler */}
@@ -281,23 +297,31 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border-slate-200 dark:border-slate-700"
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               >
                 {isDark ? (
-                  <>
-                    <Sun size={15} className="text-amber-400 shrink-0" />
-                    <span className="hidden sm:inline text-xs font-bold text-amber-300">Light</span>
-                  </>
+                  <Sun size={14} className="text-amber-400 shrink-0" />
                 ) : (
-                  <>
-                    <Moon size={15} className="text-slate-700 shrink-0" />
-                    <span className="hidden sm:inline text-xs font-bold text-slate-800">Dark</span>
-                  </>
+                  <Moon size={14} className="text-slate-700 shrink-0" />
                 )}
               </button>
             )}
+
+            {/* Notification Bell with Badge 3 (as seen in new_design.png) */}
+            <button
+              type="button"
+              onClick={() => to('knowledge')}
+              className="relative w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs shrink-0"
+              title="3 Campus Notifications"
+              aria-label="3 Campus Notifications"
+            >
+              <Bell size={14} />
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                3
+              </span>
+            </button>
 
             {/* Authentication Button / User Dropdown */}
             {isAuthenticated ? (
@@ -305,14 +329,11 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-900/60 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-bold shadow-2xs hover:bg-orange-100 active:scale-95 transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
                   aria-expanded={userDropdownOpen}
+                  title={user.name || user.email}
                 >
-                  <div className="w-5 h-5 rounded-full bg-orange-600 text-white flex items-center justify-center text-[10px] font-extrabold uppercase">
-                    {(user.name || user.email || 'U')[0]}
-                  </div>
-                  <span className="hidden md:inline max-w-[100px] truncate">{user.name || user.email}</span>
-                  <ChevronDown size={11} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                  {(user.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AD')}
                 </button>
 
                 {userDropdownOpen && (
@@ -385,10 +406,11 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => onOpenAuth && onOpenAuth()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
+                title="Sign In / Register"
+                aria-label="Sign In"
               >
-                <UserIcon size={13} className="text-orange-500" />
-                <span>Sign In</span>
+                AD
               </button>
             )}
 

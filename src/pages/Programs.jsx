@@ -3,7 +3,7 @@ import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
   Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
-  Cpu, Code, Terminal, HeartPulse, Sprout, Landmark
+  Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
@@ -285,6 +285,8 @@ export default function Programs({ ask, onOpenCompare }) {
   const [selectedDegree, setSelectedDegree] = useState('All Degrees');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
+  const [sortBy, setSortBy] = useState('popularity');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   // Map each program to an Academic School
   const getProgramSchool = (p) => {
@@ -328,6 +330,27 @@ export default function Programs({ ask, onOpenCompare }) {
       return matchDegree && matchSchool && matchQuery;
     });
   }, [q, selectedSchoolId, selectedDegree]);
+
+  // Sorted list according to current sort criteria
+  const sortedFiltered = useMemo(() => {
+    const list = [...filtered];
+    if (sortBy === 'fee-asc') {
+      list.sort((a, b) => {
+        const feeA = parseInt((fees[a.id]?.tuition || '').replace(/[^0-9]/g, '')) || 200000;
+        const feeB = parseInt((fees[b.id]?.tuition || '').replace(/[^0-9]/g, '')) || 200000;
+        return feeA - feeB;
+      });
+    } else if (sortBy === 'fee-desc') {
+      list.sort((a, b) => {
+        const feeA = parseInt((fees[a.id]?.tuition || '').replace(/[^0-9]/g, '')) || 200000;
+        const feeB = parseInt((fees[b.id]?.tuition || '').replace(/[^0-9]/g, '')) || 200000;
+        return feeB - feeA;
+      });
+    } else if (sortBy === 'name') {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    return list;
+  }, [filtered, sortBy]);
 
   // Group programs by School for hierarchical display
   const groupedBySchool = useMemo(() => {
@@ -389,170 +412,252 @@ export default function Programs({ ask, onOpenCompare }) {
   return (
     <div className="min-h-screen max-w-full overflow-x-hidden bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-24">
       
-      {/* ── Institutional Header Banner ── */}
-      <div className="relative bg-slate-950 text-white py-12 sm:py-16 px-4 sm:px-6 overflow-hidden border-b border-slate-800">
+      {/* ── Institutional Header Banner (matches new_design.png) ── */}
+      <div className="relative bg-[#070B14] text-white pt-24 pb-14 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-800/80">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105"
+          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-luminosity scale-105"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&auto=format&fit=crop&q=80')`,
           }}
         />
-        <div className="absolute inset-0 bg-slate-950/85 transition-colors" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070B14] via-[#070B14]/85 to-[#070B14]/90" />
 
-        <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white">
-            Programmes &amp; Specializations
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed font-sans">
-            Explore 44 globally accredited degrees categorized by LPU's premier Academic Schools, with authentic curriculum, fee slabs, and LPUNEST scholarships.
-          </p>
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+          <div className="max-w-2xl">
+            {/* Pill: Explore Your Future */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-950/40 border border-orange-500/40 text-orange-400 text-xs font-bold mb-3 shadow-xs">
+              <Sparkles size={12} className="text-orange-400" />
+              <span>Explore Your Future</span>
+            </div>
 
-          {/* Search Input Bar */}
-          <div className="mt-7 max-w-xl mx-auto">
-            <div className="relative flex items-center rounded-2xl bg-white dark:bg-slate-900 shadow-2xl p-2 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-orange-500">
-              <Search size={18} className="text-slate-400 ml-2 shrink-0" />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white leading-tight">
+              Programmes <span className="text-orange-500">&amp;</span> Specializations
+            </h1>
+            <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed font-sans">
+              Explore 44 industry-aligned undergraduate and postgraduate programs across computing, engineering, management, and healthcare.
+            </p>
+
+            {/* Search Input Bar (rounded-full with orange arrow circle button) */}
+            <div className="mt-6 max-w-xl relative flex items-center bg-[#0B101D]/90 border border-slate-700/80 rounded-full pl-4 pr-1.5 py-1.5 shadow-2xl focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+              <Search size={18} className="text-slate-400 mr-2 shrink-0" />
               <input
                 type="text"
                 value={q}
                 maxLength={100}
                 onChange={(e) => setQ(e.target.value.slice(0, 100))}
-                placeholder="Search by degree name, subject, or school (e.g. AI & ML, B.Tech, MBA)..."
+                placeholder="Search by degree name, specialization, or school (e.g. AI & ML, B.Tech, MBA)..."
                 aria-label="Search programmes by name or discipline"
-                className="w-full bg-transparent px-3 py-1.5 text-xs sm:text-sm outline-none placeholder-slate-400 dark:placeholder-slate-500 text-slate-800 dark:text-slate-100 font-sans"
+                className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 outline-none font-sans"
               />
               {q && (
                 <button
                   onClick={() => setQ('')}
                   aria-label="Clear search input"
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 mr-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 rounded-full"
+                  className="p-1 text-slate-400 hover:text-white mr-1 cursor-pointer"
                 >
-                  <X size={16} />
+                  <X size={15} />
                 </button>
               )}
+              <button
+                type="button"
+                className="w-9 h-9 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 flex items-center justify-center text-white shrink-0 shadow-md transition-all active:scale-95 cursor-pointer ml-1"
+                aria-label="Submit search"
+              >
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Right Floating Card: LPU-NEST Scholarships (from new_design.png) */}
+          <div className="hidden lg:flex flex-col p-6 rounded-3xl bg-[#0D1322]/80 backdrop-blur-xl border border-white/10 max-w-xs xl:max-w-sm shadow-2xl shrink-0">
+            <div className="flex items-center gap-3.5 mb-3">
+              <div className="w-11 h-11 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0 shadow-inner">
+                <Trophy size={22} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white leading-snug">LPU-NEST Scholarships</h4>
+                <p className="text-[11px] text-orange-400 font-semibold mt-0.5">Phase 1 Admissions Open</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              Up to 50% tuition fee waiver based on national test performance across all technical programs.
+            </p>
+            <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between text-[11px]">
+              <span className="text-slate-400 font-medium">Category 1 Benefits</span>
+              <span className="text-emerald-400 font-bold">₹1,00,000+ Waiver</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ── Interactive Sticky Filter Drawer / Pill Bar ── */}
-      <div className="sticky top-16 z-20 backdrop-blur-md bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors">
+      <div className="sticky top-16 z-20 backdrop-blur-md bg-white/95 dark:bg-[#080D1A]/95 border-b border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 space-y-2.5">
-          {/* Status Row: Results Count & Instant Reset Pill */}
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-sans">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 dark:text-white">
-                Showing {filtered.length} of {programs.length} Programmes
-              </span>
-              {activeFilterCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-100 dark:bg-orange-950/70 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50">
-                  {activeFilterCount} active {activeFilterCount === 1 ? 'filter' : 'filters'}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {activeFilterCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
-                  aria-label="Reset all active filters"
-                >
-                  <X size={13} />
-                  <span>Instant Reset</span>
-                </button>
-              )}
-
-              {onOpenCompare && (
-                <button
-                  type="button"
-                  onClick={() => onOpenCompare(compareQueue.length > 0 ? compareQueue : ['btech-cse', 'btech-aiml'])}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500"
-                >
-                  <Scale size={13} />
-                  <span className="hidden sm:inline">Compare</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Top School Category Pills Container */}
-          <div
-            className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none max-w-full"
-            role="tablist"
-            aria-label="Academic Faculty Filter Pills"
-          >
-            <button
-              role="tab"
-              aria-selected={selectedSchoolId === 'all'}
-              onClick={() => setSelectedSchoolId('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                selectedSchoolId === 'all'
-                  ? 'bg-slate-900 dark:bg-orange-600 text-white shadow-xs'
-                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
-              }`}
+          {/* Row 1: Filter by: School Category Pills + Compare Degree Button */}
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none max-w-full"
+              role="tablist"
+              aria-label="Academic Faculty Filter Pills"
             >
-              All Schools ({programs.length})
-            </button>
-            {ACADEMIC_SCHOOLS.map((school) => {
-              const active = selectedSchoolId === school.id;
-              const count = programs.filter((p) => getProgramSchool(p).id === school.id).length;
-              return (
-                <button
-                  key={school.id}
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setSelectedSchoolId(school.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    active
-                      ? 'bg-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <span>{school.short}</span>
-                  <span
-                    className={`ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full ${
-                      active ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0 mr-1">
+                Filter by:
+              </span>
+
+              <button
+                role="tab"
+                aria-selected={selectedSchoolId === 'all'}
+                onClick={() => setSelectedSchoolId('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                  selectedSchoolId === 'all'
+                    ? 'bg-orange-600 text-white shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent dark:border-slate-700/60'
+                }`}
+              >
+                All Schools ({programs.length})
+              </button>
+
+              {ACADEMIC_SCHOOLS.map((school) => {
+                const active = selectedSchoolId === school.id;
+                const count = programs.filter((p) => getProgramSchool(p).id === school.id).length;
+                return (
+                  <button
+                    key={school.id}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setSelectedSchoolId(school.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                      active
+                        ? 'bg-orange-600 text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent dark:border-slate-700/60'
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
+                    <span>{school.short}</span>
+                    <span
+                      className={`ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full ${
+                        active ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Compare Degrees Button on right */}
+            {onOpenCompare && (
+              <button
+                type="button"
+                onClick={() => onOpenCompare(compareQueue.length > 0 ? compareQueue : ['btech-cse', 'btech-aiml'])}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors cursor-pointer shrink-0 shadow-2xs"
+              >
+                <Scale size={13} />
+                <span>Compare ({compareQueue.length > 0 ? compareQueue.length : 2})</span>
+              </button>
+            )}
           </div>
 
-          {/* Degree Level Filter Pills */}
-          <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 text-xs font-sans">
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">
-              Degree Level:
-            </span>
-            {DEGREE_LEVELS.map((deg) => {
-              const active = selectedDegree === deg;
-              return (
-                <button
-                  key={deg}
-                  onClick={() => setSelectedDegree(deg)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    active
-                      ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-bold'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {deg}
-                </button>
-              );
-            })}
+          {/* Row 2: Degree Level Filter Pills */}
+          <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-slate-800/80 text-xs font-sans">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">
+                Degree Level:
+              </span>
+              {DEGREE_LEVELS.map((deg) => {
+                const active = selectedDegree === deg;
+                return (
+                  <button
+                    key={deg}
+                    onClick={() => setSelectedDegree(deg)}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                      active
+                        ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-bold'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {deg}
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
+              >
+                <X size={12} />
+                <span>Reset Filters</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* ── Main Catalog Container ── */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 space-y-6">
 
+        {/* Section Header Toolbar (matches new_design.png) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-1.5 h-6 bg-orange-500 rounded-full" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Showing {sortedFiltered.length} of {programs.length} Programmes
+            </h2>
+          </div>
 
-        {/* ── Content: Infinite 3D Carousel ── */}
-        {filtered.length === 0 ? (
+          <div className="flex items-center gap-3">
+            {/* Sort by dropdown */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-medium hidden sm:inline">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              >
+                <option value="popularity">Popularity</option>
+                <option value="fee-asc">Fee: Low to High</option>
+                <option value="fee-desc">Fee: High to Low</option>
+                <option value="name">Alphabetical (A-Z)</option>
+              </select>
+            </div>
+
+            {/* Grid vs List View toggle */}
+            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'grid'
+                    ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+                title="Grid View (3 Columns)"
+                aria-label="Grid View"
+              >
+                <LayoutGrid size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'list'
+                    ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+                title="List View"
+                aria-label="List View"
+              >
+                <List size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Content: Grid of Program Cards (matches new_design.png) ── */}
+        {sortedFiltered.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
             <div className="h-12 w-12 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 flex items-center justify-center mx-auto mb-3">
               <Search size={22} />
@@ -568,14 +673,32 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedFiltered.map((p) => (
+              <ProgramCard
+                key={p.id}
+                p={p}
+                onView={(prog) => setSelectedProgram(prog)}
+                onAsk={ask}
+                onCompare={(id) => handleToggleCompareQueue(id)}
+                isSelected={compareQueue.includes(p.id)}
+              />
+            ))}
+          </div>
         ) : (
-          /* ── Premium Infinite Horizontal 3D Carousel (Prominent Center + Smooth Right-to-Left Loop) ── */
-          <ProgramsCarousel
-            programs={filtered}
-            onView={(prog) => setSelectedProgram(prog)}
-            onAsk={ask}
-            onCompare={(id) => handleToggleCompareQueue(id)}
-          />
+          <div className="space-y-4">
+            {sortedFiltered.map((p) => (
+              <ProgramCard
+                key={p.id}
+                p={p}
+                onView={(prog) => setSelectedProgram(prog)}
+                onAsk={ask}
+                onCompare={(id) => handleToggleCompareQueue(id)}
+                isSelected={compareQueue.includes(p.id)}
+              />
+            ))}
+          </div>
         )}
 
       </div>
