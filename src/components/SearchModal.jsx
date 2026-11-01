@@ -200,14 +200,20 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
           {query ? (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors mr-2 cursor-pointer"
+              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors mr-1 cursor-pointer"
+              title="Clear input"
             >
               <X size={16} />
             </button>
           ) : null}
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-            ESC to close
-          </kbd>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Close"
+            aria-label="Close search"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Quick Filter Category Pills */}

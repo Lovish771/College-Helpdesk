@@ -92,11 +92,15 @@ export function AuthProvider({ children }) {
 
   const extractError = (data, status, defaultMsg) => {
     if (data) {
-      if (typeof data.error === 'string' && data.error.trim() && data.error.toLowerCase() !== 'true') {
+      const isClean = (v) => typeof v === 'string' && v.trim() && !['true', 'false', 'null', 'undefined', '[object object]'].includes(v.trim().toLowerCase());
+      if (isClean(data.error)) {
         return data.error.trim();
       }
-      if (typeof data.message === 'string' && data.message.trim() && data.message.toLowerCase() !== 'true') {
+      if (isClean(data.message)) {
         return data.message.trim();
+      }
+      if (isClean(data.detail)) {
+        return data.detail.trim();
       }
     }
     return status ? `Server error (${status}). Please try again.` : defaultMsg;

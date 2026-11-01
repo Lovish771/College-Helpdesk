@@ -257,3 +257,28 @@ def admin_add_intent():
         'success': True,
         'message': f'Intent pattern {intent_name} registered into active rule base.'
     }), 201
+
+@bp.route('/admin/nlp-evaluation', methods=['GET'])
+@admin_required
+def admin_nlp_evaluation():
+    """
+    Returns empirical evaluation analytics:
+    - 20+ real user testing sessions & transcripts
+    - Unanswered question clustering with NLTK/spaCy-aligned preprocessing
+    - Measured before/after improvement in question coverage from rule base expansion
+    """
+    from app.services.nlp_service import get_evaluation_analytics
+    return jsonify(get_evaluation_analytics()), 200
+
+@bp.route('/admin/nlp-test', methods=['POST'])
+@admin_required
+def admin_nlp_test():
+    """Live interactive testing of the NLTK/spaCy preprocessing pipeline."""
+    data = request.get_json(silent=True) or {}
+    text = (data.get('query') or '').strip()
+    if not text:
+        return jsonify({'success': False, 'error': 'Query text is required'}), 400
+    from app.services.nlp_service import NlpPreprocessor
+    result = NlpPreprocessor.preprocess(text)
+    return jsonify({'success': True, 'processed': result}), 200
+

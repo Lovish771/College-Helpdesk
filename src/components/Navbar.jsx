@@ -3,7 +3,7 @@ import {
   Menu, X, Search, ChevronDown, Moon, Sun,
   Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
   UserCheck, Wallet, BedDouble, Scale, PhoneCall,
-  User as UserIcon, LogOut, ShieldCheck, KeyRound, Bell
+  User as UserIcon, LogOut, ShieldCheck, KeyRound
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 import useAuth from '../hooks/useAuth';
@@ -269,16 +269,11 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenSearch}
-              className="hidden lg:flex items-center justify-between w-48 xl:w-56 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-xs"
-              title="Search (⌘K)"
+              className="hidden lg:flex items-center gap-2 w-44 xl:w-52 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-xs"
+              title="Search"
             >
-              <div className="flex items-center gap-2 truncate">
-                <Search size={13} className="text-slate-400 shrink-0" />
-                <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
-              </div>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shrink-0 shadow-2xs">
-                ⌘K
-              </kbd>
+              <Search size={13} className="text-slate-400 shrink-0" />
+              <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
             </button>
 
             {/* Mobile / Tablet search icon button */}
@@ -286,7 +281,7 @@ export default function Navbar({
               type="button"
               onClick={onOpenSearch}
               className="lg:hidden w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
-              title="Search (Ctrl+K)"
+              title="Search"
               aria-label="Search"
             >
               <Search size={14} />
@@ -308,20 +303,6 @@ export default function Navbar({
                 )}
               </button>
             )}
-
-            {/* Notification Bell with Badge 3 (as seen in new_design.png) */}
-            <button
-              type="button"
-              onClick={() => to('knowledge')}
-              className="relative w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs shrink-0"
-              title="3 Campus Notifications"
-              aria-label="3 Campus Notifications"
-            >
-              <Bell size={14} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                3
-              </span>
-            </button>
 
             {/* Authentication Button / User Dropdown */}
             {isAuthenticated ? (

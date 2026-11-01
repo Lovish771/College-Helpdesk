@@ -418,34 +418,34 @@ export default function Programs({ ask, onOpenCompare }) {
   return (
     <div className="min-h-screen max-w-full overflow-x-hidden bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-24">
       
-      {/* ── Institutional Header Banner (matches new_design.png) ── */}
-      <div className="relative bg-[#070B14] text-white pt-24 pb-14 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-800/80">
+      {/* ── Institutional Header Banner (matches white on white theme, dark on dark theme) ── */}
+      <div className="relative bg-white dark:bg-[#070B14] text-slate-900 dark:text-white pt-6 sm:pt-8 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-200 dark:border-slate-800/80 transition-colors">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-luminosity scale-105"
+          className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&auto=format&fit=crop&q=80')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070B14] via-[#070B14]/85 to-[#070B14]/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-[#070B14] dark:via-[#070B14]/85 dark:to-[#070B14]/90 pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="max-w-2xl">
             {/* Pill: Explore Your Future */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-950/40 border border-orange-500/40 text-orange-400 text-xs font-bold mb-3 shadow-xs">
-              <Sparkles size={12} className="text-orange-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-2.5 shadow-2xs">
+              <Sparkles size={12} className="text-orange-500" />
               <span>Explore Your Future</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-white leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">
               Programmes <span className="text-orange-500">&amp;</span> Specializations
             </h1>
-            <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed font-sans">
+            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-sans">
               Explore 44 industry-aligned undergraduate and postgraduate programs across computing, engineering, management, and healthcare.
             </p>
 
-            {/* Search Input Bar (rounded-full with orange arrow circle button) */}
-            <div className="mt-6 max-w-xl relative flex items-center bg-[#0B101D]/90 border border-slate-700/80 rounded-full pl-4 pr-1.5 py-1.5 shadow-2xl focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
-              <Search size={18} className="text-slate-400 mr-2 shrink-0" />
+            {/* Compact Search Input Bar */}
+            <div className="mt-5 max-w-xl relative flex items-center bg-slate-50 dark:bg-[#0B101D]/90 border border-slate-200 dark:border-slate-700/80 rounded-full pl-4 pr-1.5 py-1 shadow-sm dark:shadow-xl focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+              <Search size={16} className="text-slate-400 mr-2 shrink-0" />
               <input
                 type="text"
                 value={q}
@@ -453,44 +453,44 @@ export default function Programs({ ask, onOpenCompare }) {
                 onChange={(e) => setQ(e.target.value.slice(0, 100))}
                 placeholder="Search by degree name, specialization, or school (e.g. AI & ML, B.Tech, MBA)..."
                 aria-label="Search programmes by name or discipline"
-                className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 outline-none font-sans"
+                className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none font-sans"
               />
               {q && (
                 <button
                   onClick={() => setQ('')}
                   aria-label="Clear search input"
-                  className="p-1 text-slate-400 hover:text-white mr-1 cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white mr-1 cursor-pointer"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
               )}
               <button
                 type="button"
-                className="w-9 h-9 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 flex items-center justify-center text-white shrink-0 shadow-md transition-all active:scale-95 cursor-pointer ml-1"
+                className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 flex items-center justify-center text-white shrink-0 shadow-sm transition-all active:scale-95 cursor-pointer ml-1"
                 aria-label="Submit search"
               >
-                <ArrowRight size={16} />
+                <ArrowRight size={14} />
               </button>
             </div>
           </div>
 
-          {/* Right Floating Card: LPU-NEST Scholarships (from new_design.png) */}
-          <div className="hidden lg:flex flex-col p-6 rounded-3xl bg-[#0D1322]/80 backdrop-blur-xl border border-white/10 max-w-xs xl:max-w-sm shadow-2xl shrink-0">
-            <div className="flex items-center gap-3.5 mb-3">
-              <div className="w-11 h-11 rounded-2xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0 shadow-inner">
-                <Trophy size={22} />
+          {/* Right Floating Card: LPU-NEST Scholarships */}
+          <div className="hidden lg:flex flex-col p-5 rounded-2xl bg-white dark:bg-[#0D1322]/80 border border-slate-200 dark:border-white/10 max-w-xs xl:max-w-sm shadow-sm dark:shadow-xl shrink-0">
+            <div className="flex items-center gap-3 mb-2.5">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                <Trophy size={20} />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white leading-snug">LPU-NEST Scholarships</h4>
-                <p className="text-[11px] text-orange-400 font-semibold mt-0.5">Phase 1 Admissions Open</p>
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug">LPU-NEST Scholarships</h4>
+                <p className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold mt-0.5">Phase 1 Admissions Open</p>
               </div>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
               Up to 50% tuition fee waiver based on national test performance across all technical programs.
             </p>
-            <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between text-[11px]">
-              <span className="text-slate-400 font-medium">Category 1 Benefits</span>
-              <span className="text-emerald-400 font-bold">₹1,00,000+ Waiver</span>
+            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Category 1 Benefits</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹1,00,000+ Waiver</span>
             </div>
           </div>
         </div>
@@ -683,7 +683,7 @@ export default function Programs({ ask, onOpenCompare }) {
           </div>
         ) : viewMode === 'moving' ? (
           /* ── Infinite Vertical Moving Streams (Slow speed, pauses on hover with 3D uplift) ── */
-          <div className="vertical-stream-group relative h-[860px] overflow-hidden rounded-3xl p-1">
+          <div className="vertical-stream-group relative h-[680px] overflow-hidden rounded-2xl p-1">
             {/* Top & Bottom gradient fade masks for smooth infinite visual feel */}
             <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
