@@ -158,10 +158,11 @@ export default function KnowledgeBase({ ask }) {
                 return (
                   <div
                     key={art.id}
+                    onMouseEnter={() => setExpandedId(art.id)}
                     className={`rounded-2xl transition-all duration-200 border overflow-hidden ${
                       isOpen
-                        ? 'bg-white dark:bg-slate-900 border-orange-300 dark:border-orange-800/80 shadow-md ring-1 ring-orange-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+                        ? 'bg-white dark:bg-slate-900 border-orange-400 dark:border-orange-600 shadow-md ring-1 ring-orange-500/20'
+                        : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
                     }`}
                   >
                     {/* Accordion Question Header */}

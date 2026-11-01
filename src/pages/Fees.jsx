@@ -619,8 +619,15 @@ export default function Fees({ ask, onOpenCompare, go }) {
 
                 <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
                   <button
-                    onClick={() => go('admissions')}
+                    onClick={() => {
+                      go('admissions');
+                      setTimeout(() => {
+                        const el = document.getElementById('education-loans');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 120);
+                    }}
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-white text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shadow-md"
+                    title="View LPU Financial Aid & Education Loan Process"
                   >
                     <Landmark size={14} className="text-orange-600" />
                     <span>Apply for Education Loan</span>

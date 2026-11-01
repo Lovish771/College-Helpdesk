@@ -36,6 +36,7 @@ export default function Navbar({
 
   const lastScrollY = useRef(0);
   const moreRef = useRef(null);
+  const moreTimeoutRef = useRef(null);
   const userRef = useRef(null);
 
   const isChat = page === 'chat';
@@ -178,7 +179,19 @@ export default function Navbar({
             })}
 
             {/* Resources & Academic Tools Dropdown */}
-            <li className="relative" ref={moreRef}>
+            <li
+              className="relative"
+              ref={moreRef}
+              onMouseEnter={() => {
+                if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
+                setMoreOpen(true);
+              }}
+              onMouseLeave={() => {
+                moreTimeoutRef.current = setTimeout(() => {
+                  setMoreOpen(false);
+                }, 180);
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setMoreOpen(!moreOpen)}

@@ -983,8 +983,8 @@ hostel = {
             "Economical shared apartment option with attached washroom. (Air-Cooled: ₹83,000 / year | AC: ₹93,000 / year)",
         ],
         [
-            "Studio Apartment (3/4 BHK AC)",
-            "Modern luxury apartment with private living room lobby, pantry, and independent attached rooms. (Approx. ₹1,00,000 - ₹1,40,000 / year)",
+            "Studio Apartments (1/2/3/4-Seater AC with Kitchenette)",
+            "Modern luxury studio apartment with attached washroom, personal kitchenette counter, split AC, and consolidated 10-month session electricity quota. (Approx. ₹1,00,000 - ₹1,90,000 / year)",
         ],
     ],
 }
@@ -1026,12 +1026,30 @@ deadlines = [
 ]
 
 faqs = [
-    ["What is the fee for B.Tech CSE at LPU?", "What is the fee for B.Tech CSE?"],
-    ["How much scholarship can I get through LPUNEST?", "Tell me about LPU scholarships"],
-    ["What are the hostel room options and charges?", "What are the hostel room options and facilities?"],
-    ["What is the highest placement package at LPU?", "Tell me about LPU placements and packages"],
-    ["How do I register for LPUNEST?", "What is the LPUNEST admission process?"],
-    ["Which documents are required for admission?", "Which documents are required for admission?"],
+    [
+        "What is the fee for B.Tech CSE at LPU?",
+        "The standard base tuition for B.Tech CSE is ₹1,60,000 per semester plus ₹5,000 examination fee. Under the LPUNEST merit scholarship slabs, students can receive up to a 50% tuition waiver (Category I: ₹80,000/sem, Category II: ₹96,000/sem, Category III: ₹1,12,000/sem), which continues across all 4 years subject to maintaining academic standards.",
+    ],
+    [
+        "How much scholarship can I get through LPUNEST?",
+        "LPU offers extensive merit scholarships up to 50% tuition reduction across 3 performance slabs: Category I (Top 10% / 95%+ marks) grants 50% concession, Category II grants 40%, and Category III grants 30%. Concessions are also available based on JEE Main, CUET, board examination percentiles, sports, defense wards, and orphan quotas.",
+    ],
+    [
+        "What are the hostel room options and charges?",
+        "LPU Uni-World accommodations provide Studio Apartments (1, 2, 3 & 4-Seater) and Standard Hostel Residences (1, 2, 3 & 4-Seater) in both AC and Air-Cooled configurations. Fees range from ₹83,000/year (4-Seater Air-Cooled) up to ₹1,90,000/year (Studio 1-Seater AC with kitchenette). AC rooms receive consolidated 10-month session electricity quotas (e.g. 2,000 units for 4-seater, 1,500 units for 3-seater, 1,000 units for 2-seater, 500 units for 1-seater).",
+    ],
+    [
+        "What is the highest placement package at LPU?",
+        "LPU holds a landmark international placement package of ₹3 Crore per annum at a global MNC and a domestic high of ₹64 LPA at Palo Alto Networks. Over 1,000+ recruiters, including Google, Microsoft, Amazon, Cisco, and Cognizant, conduct annual campus recruitment with 2,000+ dream and super dream offers.",
+    ],
+    [
+        "How do I register for LPUNEST?",
+        "Register online at admission.lpu.in, complete the application profile, and purchase the registration kit. You can schedule your preferred date and time slot for the test (conducted in Remotely Proctored Online mode from home or at authorized test centres). Admit cards are generated instantly upon slot confirmation.",
+    ],
+    [
+        "Which documents are required for admission?",
+        "Required documents include: 10th and 12th original marksheets and passing certificates, graduation transcripts (for PG applicants), LPUNEST / national exam scorecards (JEE, CUET, NEET, CAT), government-issued photo ID (Aadhaar or Passport), 6 passport-size photographs, transfer certificate, migration certificate, and medical fitness certificate.",
+    ],
 ]
 
 documents = [

@@ -71,7 +71,28 @@ const ACADEMIC_SCHOOLS = [
   },
 ];
 
-const DEGREE_LEVELS = ['All Degrees', 'Undergraduate', 'Postgraduate'];
+const getProgramType = (p) => {
+  const name = (p.name || '').toUpperCase();
+  const short = (p.short || '').toUpperCase();
+  if (name.includes('B.TECH') || short.includes('B.TECH')) return 'B.Tech';
+  if (name.includes('BCA') || short.includes('BCA')) return 'BCA';
+  if (name.includes('B.SC') || short.includes('B.SC')) return 'B.Sc';
+  if (name.includes('BBA') || short.includes('BBA')) return 'BBA';
+  if (name.includes('B.COM') || short.includes('B.COM')) return 'B.Com';
+  if (name.includes('PHARM') || name.includes('PHYSIOTHERAPY')) return p.degree === 'Postgraduate' ? 'M.Pharm' : 'B.Pharm';
+  if (name.includes('LL.B') || name.includes('LL.M') || name.includes('LAW')) return p.degree === 'Postgraduate' ? 'LL.M' : 'Law';
+  if (name.includes('DESIGN') || name.includes('ARCH') || name.includes('ANIMATION')) return 'Design & Arch';
+  if (name.includes('MBA') || short.includes('MBA')) return 'MBA';
+  if (name.includes('MCA') || short.includes('MCA')) return 'MCA';
+  if (name.includes('M.TECH') || short.includes('M.TECH')) return 'M.Tech';
+  if (name.includes('M.SC') || short.includes('M.SC')) return 'M.Sc';
+  return 'Other';
+};
+
+const UG_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'B.Pharm', 'Law', 'Design & Arch'];
+const PG_DEGREE_TYPES = ['All Degrees', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'M.Pharm', 'LL.M'];
+const ALL_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'Law', 'Design & Arch'];
+
 
 // Detailed Program View
 function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
@@ -282,8 +303,9 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
 
 export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
+  const [level, setLevel] = useState('All'); // 'All' | 'UG' | 'PG'
+  const [selectedDegreeType, setSelectedDegreeType] = useState('All');
   const [selectedSchoolId, setSelectedSchoolId] = useState('all');
-  const [selectedDegree, setSelectedDegree] = useState('All Degrees');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
   const [sortBy, setSortBy] = useState('popularity');
@@ -309,28 +331,33 @@ export default function Programs({ ask, onOpenCompare }) {
   // Filtered Programs
   const filtered = useMemo(() => {
     return programs.filter((p) => {
-      // Degree match
-      const matchDegree =
-        selectedDegree === 'All Degrees' ||
-        (selectedDegree === 'Undergraduate' && p.degree === 'Undergraduate') ||
-        (selectedDegree === 'Postgraduate' && p.degree === 'Postgraduate');
+      // Level match
+      if (level === 'UG' && p.degree !== 'Undergraduate') return false;
+      if (level === 'PG' && p.degree !== 'Postgraduate') return false;
+
+      // Degree Type match
+      if (selectedDegreeType !== 'All' && selectedDegreeType !== 'All Degrees') {
+        const pType = getProgramType(p);
+        if (pType !== selectedDegreeType) return false;
+      }
 
       // School match
       const pSchool = getProgramSchool(p);
-      const matchSchool =
-        selectedSchoolId === 'all' || pSchool.id === selectedSchoolId;
+      if (selectedSchoolId !== 'all' && pSchool.id !== selectedSchoolId) return false;
 
       // Query match
-      const matchQuery =
-        !q ||
-        p.name.toLowerCase().includes(q.toLowerCase()) ||
-        p.short.toLowerCase().includes(q.toLowerCase()) ||
-        p.description.toLowerCase().includes(q.toLowerCase()) ||
-        pSchool.name.toLowerCase().includes(q.toLowerCase());
+      if (q.trim()) {
+        const query = q.toLowerCase();
+        const matchesName = p.name.toLowerCase().includes(query);
+        const matchesShort = p.short.toLowerCase().includes(query);
+        const matchesDesc = p.description.toLowerCase().includes(query);
+        const matchesSchool = pSchool.name.toLowerCase().includes(query) || pSchool.short.toLowerCase().includes(query);
+        if (!matchesName && !matchesShort && !matchesDesc && !matchesSchool) return false;
+      }
 
-      return matchDegree && matchSchool && matchQuery;
+      return true;
     });
-  }, [q, selectedSchoolId, selectedDegree]);
+  }, [q, level, selectedDegreeType, selectedSchoolId]);
 
   // Sorted list according to current sort criteria
   const sortedFiltered = useMemo(() => {
@@ -405,15 +432,24 @@ export default function Programs({ ask, onOpenCompare }) {
   }
 
   const activeFilterCount =
+    (level !== 'All' ? 1 : 0) +
+    (selectedDegreeType !== 'All' && selectedDegreeType !== 'All Degrees' ? 1 : 0) +
     (selectedSchoolId !== 'all' ? 1 : 0) +
-    (selectedDegree !== 'All Degrees' ? 1 : 0) +
     (q.trim() ? 1 : 0);
 
   const handleResetFilters = () => {
     setQ('');
+    setLevel('All');
+    setSelectedDegreeType('All');
     setSelectedSchoolId('all');
-    setSelectedDegree('All Degrees');
   };
+
+  const currentDegreeTypes =
+    level === 'UG'
+      ? UG_DEGREE_TYPES
+      : level === 'PG'
+      ? PG_DEGREE_TYPES
+      : ALL_DEGREE_TYPES;
 
   return (
     <div className="min-h-screen max-w-full overflow-x-hidden bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-24">
@@ -496,108 +532,132 @@ export default function Programs({ ask, onOpenCompare }) {
         </div>
       </div>
 
-      {/* ── Interactive Sticky Filter Drawer / Pill Bar ── */}
-      <div className="sticky top-16 z-20 backdrop-blur-md bg-white/95 dark:bg-[#080D1A]/95 border-b border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 space-y-2.5">
-          {/* Row 1: Filter by: School Category Pills + Compare Degree Button */}
-          <div className="flex items-center justify-between gap-3">
-            <div
-              className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none max-w-full"
-              role="tablist"
-              aria-label="Academic Faculty Filter Pills"
-            >
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0 mr-1">
-                Filter by:
-              </span>
-
-              <button
-                role="tab"
-                aria-selected={selectedSchoolId === 'all'}
-                onClick={() => setSelectedSchoolId('all')}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                  selectedSchoolId === 'all'
-                    ? 'bg-orange-600 text-white shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent dark:border-slate-700/60'
-                }`}
-              >
-                All Schools ({programs.length})
-              </button>
-
-              {ACADEMIC_SCHOOLS.map((school) => {
-                const active = selectedSchoolId === school.id;
-                const count = programs.filter((p) => getProgramSchool(p).id === school.id).length;
-                return (
-                  <button
-                    key={school.id}
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setSelectedSchoolId(school.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                      active
-                        ? 'bg-orange-600 text-white shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent dark:border-slate-700/60'
-                    }`}
-                  >
-                    <span>{school.short}</span>
-                    <span
-                      className={`ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full ${
-                        active ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                      }`}
-                    >
-                      {count}
-                    </span>
+      {/* ── Unified Search & Filter Control Bar (Matches user attached image) ── */}
+      <div className="sticky top-16 z-20 backdrop-blur-md bg-white/95 dark:bg-[#080D1A]/95 border-b border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors py-3">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 sm:p-4 shadow-xs space-y-3">
+            {/* Row 1: Search Input + Showing count + Compare button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="relative flex-1 flex items-center">
+                <Search size={15} className="absolute left-3.5 text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Search by degree title, subject, or short code (e.g. B.Tech, CSE, MBA)..."
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
+                />
+                {q && (
+                  <button onClick={() => setQ('')} className="absolute right-3 p-1 text-slate-400 hover:text-slate-600">
+                    <X size={14} />
                   </button>
-                );
-              })}
+                )}
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Showing <strong className="text-orange-600 dark:text-orange-400 font-bold">{sortedFiltered.length}</strong> of {programs.length} Programmes
+                </span>
+                {onOpenCompare && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenCompare(compareQueue.length > 0 ? compareQueue : ['btech-cse', 'btech-aiml'])}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Scale size={13} />
+                    <span>Compare ({compareQueue.length > 0 ? compareQueue.length : 2})</span>
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Compare Degrees Button on right */}
-            {onOpenCompare && (
-              <button
-                type="button"
-                onClick={() => onOpenCompare(compareQueue.length > 0 ? compareQueue : ['btech-cse', 'btech-aiml'])}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors cursor-pointer shrink-0 shadow-2xs"
-              >
-                <Scale size={13} />
-                <span>Compare ({compareQueue.length > 0 ? compareQueue.length : 2})</span>
-              </button>
-            )}
-          </div>
+            {/* Row 2: Level Filter Pills + Disciplines */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none text-xs">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">
+                  LEVEL:
+                </span>
+                {['All', 'UG', 'PG'].map((lvl) => (
+                  <button
+                    key={lvl}
+                    onClick={() => {
+                      setLevel(lvl);
+                      setSelectedDegreeType('All');
+                    }}
+                    className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                      level === lvl
+                        ? 'bg-orange-600 text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
 
-          {/* Row 2: Degree Level Filter Pills */}
-          <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-slate-800/80 text-xs font-sans">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">
-                Degree Level:
+              <span className="text-slate-300 dark:text-slate-700 shrink-0">|</span>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => setSelectedSchoolId('all')}
+                  className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedSchoolId === 'all'
+                      ? 'bg-orange-600 text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  All Disciplines
+                </button>
+                {ACADEMIC_SCHOOLS.map((school) => {
+                  const active = selectedSchoolId === school.id;
+                  return (
+                    <button
+                      key={school.id}
+                      onClick={() => setSelectedSchoolId(school.id)}
+                      className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        active
+                          ? 'bg-orange-600 text-white shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {school.short}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Row 3: Degree award types (B.Tech, BCA, B.Sc, BBA, MBA, etc.) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1">
+                DEGREE:
               </span>
-              {DEGREE_LEVELS.map((deg) => {
-                const active = selectedDegree === deg;
+              {currentDegreeTypes.map((type) => {
+                const active = selectedDegreeType === type || (type === 'All Degrees' && selectedDegreeType === 'All');
                 return (
                   <button
-                    key={deg}
-                    onClick={() => setSelectedDegree(deg)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 ${
+                    key={type}
+                    onClick={() => setSelectedDegreeType(type === 'All Degrees' ? 'All' : type)}
+                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       active
                         ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-bold'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
-                    {deg}
+                    {type}
                   </button>
                 );
               })}
-            </div>
 
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
-              >
-                <X size={12} />
-                <span>Reset Filters</span>
-              </button>
-            )}
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={handleResetFilters}
+                  className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer shrink-0"
+                >
+                  <X size={12} />
+                  <span>Reset Filters</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

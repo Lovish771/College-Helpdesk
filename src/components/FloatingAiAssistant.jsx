@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, MessageSquare } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 const STORAGE_KEY = 'lpu_ai_assistant_pos';
 
@@ -10,6 +10,9 @@ export default function FloatingAiAssistant({ go, page }) {
   const buttonRef = useRef(null);
   const [pos, setPos] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const posRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+
   const dragInfoRef = useRef({
     startX: 0,
     startY: 0,
@@ -31,6 +34,7 @@ export default function FloatingAiAssistant({ go, page }) {
 
   // Initialize position from sessionStorage or default to bottom-right
   useEffect(() => {
+    let initialPos = getDefaultPos();
     try {
       const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -43,46 +47,45 @@ export default function FloatingAiAssistant({ go, page }) {
           parsed.y >= 0 &&
           parsed.y <= window.innerHeight - 40
         ) {
-          setPos(parsed);
-          return;
+          initialPos = parsed;
         }
       }
     } catch {}
 
-    setPos(getDefaultPos());
+    posRef.current = initialPos;
+    setPos(initialPos);
   }, [getDefaultPos]);
 
   // Adjust position if window is resized to prevent off-screen drifting
   useEffect(() => {
     const handleResize = () => {
-      setPos((prev) => {
-        if (!prev) return getDefaultPos();
-        const btnWidth = buttonRef.current?.offsetWidth || 160;
-        const btnHeight = buttonRef.current?.offsetHeight || 48;
-        return {
-          x: Math.min(Math.max(12, prev.x), Math.max(12, window.innerWidth - btnWidth - 12)),
-          y: Math.min(Math.max(12, prev.y), Math.max(12, window.innerHeight - btnHeight - 12)),
-        };
-      });
+      const btnWidth = buttonRef.current?.offsetWidth || 160;
+      const btnHeight = buttonRef.current?.offsetHeight || 48;
+      const current = posRef.current;
+      const clamped = {
+        x: Math.min(Math.max(12, current.x), Math.max(12, window.innerWidth - btnWidth - 12)),
+        y: Math.min(Math.max(12, current.y), Math.max(12, window.innerHeight - btnHeight - 12)),
+      };
+      posRef.current = clamped;
+      setPos(clamped);
+      if (buttonRef.current) {
+        buttonRef.current.style.transform = `translate3d(${clamped.x}px, ${clamped.y}px, 0)`;
+      }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [getDefaultPos]);
+  }, []);
 
-  // Pointer drag event handlers
+  // Direct 60/120fps hardware-accelerated pointer drag handlers
   const handlePointerDown = (e) => {
-    // Only primary mouse button or touch
     if (e.button !== undefined && e.button !== 0) return;
-
-    const currentX = pos?.x ?? getDefaultPos().x;
-    const currentY = pos?.y ?? getDefaultPos().y;
 
     dragInfoRef.current = {
       startX: e.clientX,
       startY: e.clientY,
-      origX: currentX,
-      origY: currentY,
+      origX: posRef.current.x,
+      origY: posRef.current.y,
       hasMoved: false,
     };
 
@@ -96,7 +99,7 @@ export default function FloatingAiAssistant({ go, page }) {
     const dx = e.clientX - dragInfoRef.current.startX;
     const dy = e.clientY - dragInfoRef.current.startY;
 
-    if (!dragInfoRef.current.hasMoved && Math.hypot(dx, dy) > 4) {
+    if (!dragInfoRef.current.hasMoved && Math.hypot(dx, dy) > 3) {
       dragInfoRef.current.hasMoved = true;
     }
 
@@ -113,7 +116,15 @@ export default function FloatingAiAssistant({ go, page }) {
         window.innerHeight - btnHeight - 12
       );
 
-      setPos({ x: newX, y: newY });
+      posRef.current = { x: newX, y: newY };
+
+      // Instantaneous hardware-accelerated transformation with zero React render delay
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        if (buttonRef.current) {
+          buttonRef.current.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+        }
+      });
     }
   };
 
@@ -126,14 +137,13 @@ export default function FloatingAiAssistant({ go, page }) {
     } catch {}
 
     if (dragInfoRef.current.hasMoved) {
-      // Save position to sessionStorage so it stays in same window
-      if (pos) {
-        try {
-          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pos));
-        } catch {}
-      }
+      const finalPos = posRef.current;
+      setPos(finalPos);
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(finalPos));
+      } catch {}
     } else {
-      // Was a click/tap without moving
+      // Direct click/tap without drag
       go('chat');
     }
   };
@@ -145,7 +155,6 @@ export default function FloatingAiAssistant({ go, page }) {
     }
   };
 
-  // If pos not yet calculated, don't flash
   if (!pos) return null;
 
   return (
@@ -162,16 +171,19 @@ export default function FloatingAiAssistant({ go, page }) {
       onKeyDown={handleKeyDown}
       style={{
         position: 'fixed',
-        left: `${pos.x}px`,
-        top: `${pos.y}px`,
+        left: 0,
+        top: 0,
+        transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+        willChange: 'transform',
+        transition: isDragging ? 'none' : 'transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1)',
         zIndex: 45,
         touchAction: 'none',
         userSelect: 'none',
       }}
-      className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white shadow-2xl transition-all cursor-grab active:cursor-grabbing select-none backdrop-blur-md
+      className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white select-none backdrop-blur-md
         bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-500
         border border-white/20 shadow-[0_10px_30px_rgba(249,115,22,0.4)] hover:shadow-[0_12px_35px_rgba(249,115,22,0.55)]
-        ${isDragging ? 'scale-105 shadow-2xl opacity-95' : 'hover:scale-[1.03]'}`}
+        ${isDragging ? 'cursor-grabbing scale-105 shadow-2xl opacity-95' : 'cursor-grab hover:scale-[1.03]'}`}
     >
       {/* Glowing pulsating radar badge */}
       <span className="relative flex h-2.5 w-2.5">
@@ -180,7 +192,7 @@ export default function FloatingAiAssistant({ go, page }) {
       </span>
 
       {/* Sparkles Icon */}
-      <div className="p-1 rounded-full bg-white/20 text-white group-hover:rotate-12 transition-transform duration-300">
+      <div className="p-1 rounded-full bg-white/20 text-white group-hover:rotate-12 transition-transform duration-200">
         <Sparkles size={14} className="shrink-0" />
       </div>
 

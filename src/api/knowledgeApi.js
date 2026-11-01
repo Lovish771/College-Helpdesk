@@ -37,7 +37,7 @@ export const mockArticles = [
     tag: 'Living',
     reads: '5.1k',
     answer: `LPU offers one of India’s largest on-campus residential systems across 15+ student hostels with biometric access:\n\n• Studio Apartments (AC + Kitchenette): 1-Seater Studio is ₹1,90,000/yr (Early Bird: ₹1,80k / Reg: ₹2,00k); 2-Seater Studio is ₹1,40,000/yr; 3-Seater Studio is ₹1,20,000/yr; 4-Seater Studio is ₹1,00,000/yr.\n• Standard Rooms (AC & Air-Cooled): 1-Seater AC is ₹1,53,000/yr; 2-Seater AC is ₹1,33,000/yr (Air-Cooled: ₹1,13,000/yr); 3-Seater AC is ₹1,13,000/yr (Air-Cooled: ₹98,000/yr); 4-Seater AC is ₹93,000/yr (Air-Cooled: ₹83,000/yr).\n• Mess & Dining Plans: Standard Mess 4-Meals is ₹50,000/yr (Early Bird: ₹45,000); Standard 3-Meals is ₹46,000/yr (Early: ₹41,400); Standard 2-Meals is ₹42,000/yr (Early: ₹37,800); Special Multi-Cuisine Mess is ₹58,000/yr. Mess is optional—students can dine pay-as-you-eat at 40+ campus food courts and Uni-Mall.\n• Uni-Laundry Automated Service: Available for ₹5,400/academic session (up to 70 garments/month with steam iron & barcode tracking).\n• Campus Amenities: 24/7 biometric turnstiles, 50-bed Uni-Hospital with emergency ambulance, indoor sports stadium, Olympic pool, and 6-storey Uni-Mall.`,
-    highlights: ['Studio Apartments: ₹1,90,000/yr with kitchenette', '2-BHK Luxury Flats: from ₹1,60,000/yr', 'Choice to opt in or out of mess each year'],
+    highlights: ['Studio Apartments: ₹1,90,000/yr with kitchenette', 'Studio 2-Seater Flats: from ₹1,40,000/yr', 'Choice to opt in or out of mess each year'],
   },
   {
     id: 4,
