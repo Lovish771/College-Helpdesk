@@ -125,8 +125,8 @@ export default function Navbar({
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/90 dark:bg-[#080D1A]/95 border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(0,0,0,0.4)]'
-              : 'bg-white/80 dark:bg-[#080D1A]/85 border-slate-200/60 dark:border-slate-800/80 text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(0,0,0,0.3)]'
+              ? 'bg-white/95 dark:bg-[#080D1A]/95 border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)]'
+              : 'bg-white/90 dark:bg-[#080D1A]/85 border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
           }`}
         >
           {/* Brand: Mascot Logo + Title */}
@@ -159,8 +159,8 @@ export default function Navbar({
                     aria-current={active ? 'page' : undefined}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer group active:scale-95 ${
                       active
-                        ? 'text-orange-500 dark:text-orange-400 bg-orange-950/40 border border-orange-500/50 shadow-[0_0_12px_rgba(249,115,22,0.15)]'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+                        ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/50 shadow-xs dark:shadow-[0_0_12px_rgba(249,115,22,0.15)] font-bold'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium'
                     }`}
                   >
                     <Icon
@@ -184,8 +184,8 @@ export default function Navbar({
                 onClick={() => setMoreOpen(!moreOpen)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
                   isMoreActive
-                    ? 'text-orange-500 dark:text-orange-400 bg-orange-950/40 border border-orange-500/50 shadow-[0_0_12px_rgba(249,115,22,0.15)]'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
+                    ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/50 shadow-xs dark:shadow-[0_0_12px_rgba(249,115,22,0.15)] font-bold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium'
                 }`}
                 aria-expanded={moreOpen}
               >
@@ -269,14 +269,14 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenSearch}
-              className="hidden lg:flex items-center justify-between w-48 xl:w-56 px-3.5 py-1.5 rounded-full bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-200/80 dark:hover:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-inner"
+              className="hidden lg:flex items-center justify-between w-48 xl:w-56 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-xs"
               title="Search (⌘K)"
             >
               <div className="flex items-center gap-2 truncate">
                 <Search size={13} className="text-slate-400 shrink-0" />
-                <span className="truncate text-slate-400 text-xs font-normal">Search anything...</span>
+                <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
               </div>
-              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 shrink-0">
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shrink-0 shadow-2xs">
                 ⌘K
               </kbd>
             </button>
@@ -285,7 +285,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenSearch}
-              className="lg:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
+              className="lg:hidden w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
               title="Search (Ctrl+K)"
               aria-label="Search"
             >
@@ -297,7 +297,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
+                className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               >
@@ -313,7 +313,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={() => to('knowledge')}
-              className="relative w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs shrink-0"
+              className="relative w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shadow-xs shrink-0"
               title="3 Campus Notifications"
               aria-label="3 Campus Notifications"
             >
@@ -413,20 +413,6 @@ export default function Navbar({
                 AD
               </button>
             )}
-
-            {/* AI Assistant Pill Button */}
-            <button
-              type="button"
-              onClick={() => to('chat')}
-              className={`hidden md:inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium bg-orange-600 hover:bg-orange-700 text-white transition-colors cursor-pointer shrink-0 ${
-                page === 'chat'
-                  ? 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-slate-900'
-                  : ''
-              }`}
-            >
-              <Sparkles size={13} className="shrink-0" />
-              <span>AI Assistant</span>
-            </button>
 
             {/* Mobile Menu Toggle */}
             <button

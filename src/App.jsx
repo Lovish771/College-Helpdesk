@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingAiAssistant from './components/FloatingAiAssistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
@@ -242,6 +243,9 @@ function AppContent() {
           />
         </Suspense>
       )}
+
+      {/* Draggable Floating AI Assistant Button */}
+      <FloatingAiAssistant go={go} page={page} />
 
       {/* Legal & Unofficial Disclaimer / Terms Modal - Placed after AuthModal with z-[80] to layer on top */}
       {legalModalOpen && (

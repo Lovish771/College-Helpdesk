@@ -3,7 +3,8 @@ import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
   Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
-  Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List
+  Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List,
+  Activity, ChevronsUpDown
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
@@ -286,7 +287,7 @@ export default function Programs({ ask, onOpenCompare }) {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
   const [sortBy, setSortBy] = useState('popularity');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('moving'); // 'moving' | 'grid'
 
   // Map each program to an Academic School
   const getProgramSchool = (p) => {
@@ -351,6 +352,11 @@ export default function Programs({ ask, onOpenCompare }) {
     }
     return list;
   }, [filtered, sortBy]);
+
+  // 3-Column distribution for vertical moving card stream
+  const col1 = useMemo(() => sortedFiltered.filter((_, i) => i % 3 === 0), [sortedFiltered]);
+  const col2 = useMemo(() => sortedFiltered.filter((_, i) => i % 3 === 1), [sortedFiltered]);
+  const col3 = useMemo(() => sortedFiltered.filter((_, i) => i % 3 === 2), [sortedFiltered]);
 
   // Group programs by School for hierarchical display
   const groupedBySchool = useMemo(() => {
@@ -624,39 +630,41 @@ export default function Programs({ ask, onOpenCompare }) {
               </select>
             </div>
 
-            {/* Grid vs List View toggle */}
+            {/* View Mode Switcher: Moving Stream vs Static Grid */}
             <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'grid'
+                onClick={() => setViewMode('moving')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'moving'
                     ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
-                title="Grid View (3 Columns)"
-                aria-label="Grid View"
+                title="Moving Stream Transition (Hover to Pause & 3D Uplift)"
+                aria-label="Moving Stream"
               >
-                <LayoutGrid size={15} />
+                <ChevronsUpDown size={14} className="text-orange-500" />
+                <span className="hidden sm:inline">Moving Stream</span>
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'list'
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  viewMode === 'grid'
                     ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
-                title="List View"
-                aria-label="List View"
+                title="Static 3-Column Grid View"
+                aria-label="Static Grid View"
               >
-                <List size={15} />
+                <LayoutGrid size={14} />
+                <span className="hidden sm:inline">Static Grid</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* ── Content: Grid of Program Cards (matches new_design.png) ── */}
+        {/* ── Content: Program Cards with Vertical Moving Transition or Static Grid ── */}
         {sortedFiltered.length === 0 ? (
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800">
             <div className="h-12 w-12 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 flex items-center justify-center mx-auto mb-3">
@@ -673,21 +681,66 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedFiltered.map((p) => (
-              <ProgramCard
-                key={p.id}
-                p={p}
-                onView={(prog) => setSelectedProgram(prog)}
-                onAsk={ask}
-                onCompare={(id) => handleToggleCompareQueue(id)}
-                isSelected={compareQueue.includes(p.id)}
-              />
-            ))}
+        ) : viewMode === 'moving' ? (
+          /* ── Infinite Vertical Moving Streams (Slow speed, pauses on hover with 3D uplift) ── */
+          <div className="vertical-stream-group relative h-[860px] overflow-hidden rounded-3xl p-1">
+            {/* Top & Bottom gradient fade masks for smooth infinite visual feel */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-full">
+              {/* Column 1 (Scrolls Up slowly) */}
+              <div className="overflow-hidden h-full">
+                <div className="animate-vertical-up space-y-6 pb-6">
+                  {(col1.length > 0 ? [...col1, ...col1] : sortedFiltered).map((p, idx) => (
+                    <ProgramCard
+                      key={`col1-${p.id}-${idx}`}
+                      p={p}
+                      onView={(prog) => setSelectedProgram(prog)}
+                      onAsk={ask}
+                      onCompare={(id) => handleToggleCompareQueue(id)}
+                      isSelected={compareQueue.includes(p.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2 (Scrolls Down / Alternating) */}
+              <div className="overflow-hidden h-full hidden md:block">
+                <div className="animate-vertical-down space-y-6 pb-6">
+                  {(col2.length > 0 ? [...col2, ...col2] : sortedFiltered).map((p, idx) => (
+                    <ProgramCard
+                      key={`col2-${p.id}-${idx}`}
+                      p={p}
+                      onView={(prog) => setSelectedProgram(prog)}
+                      onAsk={ask}
+                      onCompare={(id) => handleToggleCompareQueue(id)}
+                      isSelected={compareQueue.includes(p.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3 (Scrolls Up gently) */}
+              <div className="overflow-hidden h-full hidden lg:block">
+                <div className="animate-vertical-up-slow space-y-6 pb-6">
+                  {(col3.length > 0 ? [...col3, ...col3] : sortedFiltered).map((p, idx) => (
+                    <ProgramCard
+                      key={`col3-${p.id}-${idx}`}
+                      p={p}
+                      onView={(prog) => setSelectedProgram(prog)}
+                      onAsk={ask}
+                      onCompare={(id) => handleToggleCompareQueue(id)}
+                      isSelected={compareQueue.includes(p.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          /* ── Static 3-Column Grid View ── */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedFiltered.map((p) => (
               <ProgramCard
                 key={p.id}
