@@ -1036,7 +1036,7 @@ faqs = [
     ],
     [
         "What are the hostel room options and charges?",
-        "LPU Uni-World accommodations provide Studio Apartments (1, 2, 3 & 4-Seater) and Standard Hostel Residences (1, 2, 3 & 4-Seater) in both AC and Air-Cooled configurations. Fees range from ₹83,000/year (4-Seater Air-Cooled) up to ₹1,90,000/year (Studio 1-Seater AC with kitchenette). AC rooms receive consolidated 10-month session electricity quotas (e.g. 2,000 units for 4-seater, 1,500 units for 3-seater, 1,000 units for 2-seater, 500 units for 1-seater).",
+        "LPU Uni-World accommodations provide Studio Apartments (1, 2, 3 & 4-Seater) and Standard Hostel Residences (1, 2, 3 & 4-Seater) in both AC and Air-Cooled configurations. Fees range from ₹83,000/year (4-Seater Air-Cooled) up to ₹1,90,000/year (Studio 1-Seater AC with kitchenette). AC rooms receive consolidated 10-month session electricity quotas: 4-Seater: 500 units/student (2,000 units/room), 3-Seater: 550 units/student (1,650 units/room), 2-Seater: 750 units/student (1,500 units/room), 1-Seater: 1,000 units/room. Air-Cooled rooms include 300 to 400 units/student (e.g. 1,200 units for 4-seater) for cooler and fans.",
     ],
     [
         "What is the highest placement package at LPU?",

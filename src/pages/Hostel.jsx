@@ -136,14 +136,14 @@ const COMPARISON_FEATURES = [
     subtitle: 'Subsidized power quota allocated for 10-month academic session',
     studio: {
       available: true,
-      title: '500 Units / Student Quota',
-      detail: '(500 units per student: e.g. 2,000 units for 4-seater studio for Session 2026-27)',
+      title: '500 to 1,000 Units / Student Quota',
+      detail: '(Tiered quota per student: 4-Seater = 500 units [2,000/rm], 3-Seater = 550 units [1,650/rm], 2-Seater = 750 units [1,500/rm], 1-Seater = 1,000 units)',
       badge: '500 Units/Student'
     },
     standard: {
       available: true,
-      title: '500 Units / Student (AC)',
-      detail: '(500 units per student for AC rooms; standard power included for air-cooled rooms)',
+      title: 'AC: 500-1,000 Units | Air-Cooled: 300-400 Units',
+      detail: '(Session quota per student for 10-month term based on room occupancy)',
       badge: 'Session Quota'
     }
   },
@@ -178,15 +178,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,90,000',
     feePerStudentNum: 190000,
     roomTotalFee: '₹1,90,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '500 Units / Room (Session 2026-27)',
+    perStudentQuota: '1,000 Units',
+    roomSessionQuota: '1,000 Units / Room (Session 2026-27)',
     earlyFee: '₹1,90,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '1-Seater Studio Apartment',
     cooling: 'Hot & Cold Split AC',
-    freePower: '500 Units for Session 2026-27 (500 units/student)',
+    freePower: '1,000 Units for Session 2026-27 (1,000 units/student)',
     desc: 'Independent luxury studio apartment with single bed, split AC, personal modular kitchenette (induction cooktop & microwave provision), attached private bathroom with geyser, refrigerator, and private balcony.',
-    highlights: ['Personal Kitchenette & Sink', 'Single Occupancy Privacy', '500 Units Quota (Session 2026-27)', 'Hot & Cold Split AC & Geyser']
+    highlights: ['Personal Kitchenette & Sink', 'Single Occupancy Privacy', '1,000 Units Quota (Session 2026-27)', 'Hot & Cold Split AC & Geyser']
   },
   {
     id: 'studio-2-seater',
@@ -197,15 +197,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,40,000',
     feePerStudentNum: 140000,
     roomTotalFee: '₹2,80,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '1,000 Units / Room (Session 2026-27)',
+    perStudentQuota: '750 Units',
+    roomSessionQuota: '1,500 Units / Room (Session 2026-27)',
     earlyFee: '₹1,40,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '2-Seater Studio Apartment',
     cooling: 'Hot & Cold Split AC',
-    freePower: '1,000 Units / Room for Session 2026-27 (500 units/student × 2)',
+    freePower: '1,500 Units / Room for Session 2026-27 (750 units/student × 2)',
     desc: 'Shared luxury apartment with two box-storage single beds, modern kitchen counter, attached bathroom with 25L geyser, split AC, and expansive study workstations.',
-    highlights: ['Shared Kitchenette Counter', 'Twin Box Storage Beds', '1,000 Units / Room (Session 2026-27)', 'Spacious Wardrobes']
+    highlights: ['Shared Kitchenette Counter', 'Twin Box Storage Beds', '1,500 Units / Room (Session 2026-27)', 'Spacious Wardrobes']
   },
   {
     id: 'studio-3-seater',
@@ -216,15 +216,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,20,000',
     feePerStudentNum: 120000,
     roomTotalFee: '₹3,60,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '1,500 Units / Room (Session 2026-27)',
+    perStudentQuota: '550 Units',
+    roomSessionQuota: '1,650 Units / Room (Session 2026-27)',
     earlyFee: '₹1,20,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '3-Seater Studio Apartment',
     cooling: 'Hot & Cold Split AC',
-    freePower: '1,500 Units / Room for Session 2026-27 (500 units/student × 3)',
+    freePower: '1,650 Units / Room for Session 2026-27 (550 units/student × 3)',
     desc: 'Tri-sharing apartment balancing cost efficiency and luxury studio living with split air conditioning, modular pantry setup, and individual storage.',
-    highlights: ['Modular Pantry Space', 'Hot & Cold Split AC', '1,500 Units / Room (Session 2026-27)', 'Tri-Sharing Cost Advantage']
+    highlights: ['Modular Pantry Space', 'Hot & Cold Split AC', '1,650 Units / Room (Session 2026-27)', 'Tri-Sharing Cost Advantage']
   },
   {
     id: 'studio-4-seater',
@@ -256,15 +256,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,53,000',
     feePerStudentNum: 153000,
     roomTotalFee: '₹1,53,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '500 Units / Room (Session 2026-27)',
+    perStudentQuota: '1,000 Units',
+    roomSessionQuota: '1,000 Units / Room (Session 2026-27)',
     earlyFee: '₹1,53,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: 'Single AC Room',
     cooling: 'Split AC',
-    freePower: '500 Units for Session 2026-27 (500 units/student)',
+    freePower: '1,000 Units for Session 2026-27 (1,000 units/student)',
     desc: 'Private single room with split air conditioner, attached washroom with geyser, personal wooden study desk, and secure wardrobe almirah.',
-    highlights: ['Private Individual Room', 'Split Air Conditioner', '500 Units Quota (Session 2026-27)', 'Dedicated Study Station']
+    highlights: ['Private Individual Room', 'Split Air Conditioner', '1,000 Units Quota (Session 2026-27)', 'Dedicated Study Station']
   },
   {
     id: 'standard-ac-2-seater',
@@ -275,15 +275,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,33,000',
     feePerStudentNum: 133000,
     roomTotalFee: '₹2,66,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '1,000 Units / Room (Session 2026-27)',
+    perStudentQuota: '750 Units',
+    roomSessionQuota: '1,500 Units / Room (Session 2026-27)',
     earlyFee: '₹1,33,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '2-Seater AC Room',
     cooling: 'Split AC',
-    freePower: '1,000 Units / Room for Session 2026-27 (500 units/student × 2)',
+    freePower: '1,500 Units / Room for Session 2026-27 (750 units/student × 2)',
     desc: 'Twin sharing room with individual wooden beds, split air-conditioner, attached bathroom with geyser, and separate study stations.',
-    highlights: ['Dual Occupancy AC', 'Attached Bath with Geyser', '1,000 Units / Room (Session 2026-27)', 'Study Tables with Book Racks']
+    highlights: ['Dual Occupancy AC', 'Attached Bath with Geyser', '1,500 Units / Room (Session 2026-27)', 'Study Tables with Book Racks']
   },
   {
     id: 'standard-ac-3-seater',
@@ -294,15 +294,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,13,000',
     feePerStudentNum: 113000,
     roomTotalFee: '₹3,39,000',
-    perStudentQuota: '500 Units',
-    roomSessionQuota: '1,500 Units / Room (Session 2026-27)',
+    perStudentQuota: '550 Units',
+    roomSessionQuota: '1,650 Units / Room (Session 2026-27)',
     earlyFee: '₹1,13,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '3-Seater AC Room',
     cooling: 'Split AC',
-    freePower: '1,500 Units / Room for Session 2026-27 (500 units/student × 3)',
+    freePower: '1,650 Units / Room for Session 2026-27 (550 units/student × 3)',
     desc: 'Comfortable 3-student living room with split air cooling, attached bath with geyser, personal wardrobes, and generous natural lighting.',
-    highlights: ['Triple Sharing AC', 'Attached Washroom', '1,500 Units / Room (Session 2026-27)', 'Comfortable Climate Control']
+    highlights: ['Triple Sharing AC', 'Attached Washroom', '1,650 Units / Room (Session 2026-27)', 'Comfortable Climate Control']
   },
   {
     id: 'standard-ac-4-seater',
@@ -334,15 +334,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹1,13,000',
     feePerStudentNum: 113000,
     roomTotalFee: '₹2,26,000',
-    perStudentQuota: 'Fans & Cooler Power',
-    roomSessionQuota: 'Air-Cooling & Standard Power Included',
+    perStudentQuota: '400 Units',
+    roomSessionQuota: '800 Units / Room (Session 2026-27)',
     earlyFee: '₹1,13,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '2-Seater Air-Cooled',
     cooling: 'Air-Cooler Included',
-    freePower: 'Air-Cooler, Fans & Lighting Power Included for Session 2026-27',
+    freePower: '800 Units / Room for Session 2026-27 (400 units/student × 2)',
     desc: 'Dual-occupancy spacious room with room air-cooler, attached washroom, twin wardrobes, and individual study desks.',
-    highlights: ['Air-Cooling System', 'Attached Washroom & Geyser', 'Twin Wooden Beds', 'Two Study Desks']
+    highlights: ['Air-Cooling System', 'Attached Washroom & Geyser', '800 Units / Room Quota', 'Twin Wooden Beds']
   },
   {
     id: 'standard-cooler-3-seater',
@@ -353,15 +353,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹98,000',
     feePerStudentNum: 98000,
     roomTotalFee: '₹2,94,000',
-    perStudentQuota: 'Fans & Cooler Power',
-    roomSessionQuota: 'Air-Cooling & Standard Power Included',
+    perStudentQuota: '350 Units',
+    roomSessionQuota: '1,050 Units / Room (Session 2026-27)',
     earlyFee: '₹98,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '3-Seater Air-Cooled',
     cooling: 'Air-Cooler Included',
-    freePower: 'Air-Cooler, Fans & Lighting Power Included for Session 2026-27',
+    freePower: '1,050 Units / Room for Session 2026-27 (350 units/student × 3)',
     desc: 'Comfortable 3-student living room with natural ventilation, air cooling, attached bath, and individual wardrobes.',
-    highlights: ['Air Cooling Provided', 'Budget Friendly', 'Attached Washroom', 'Ample Natural Light']
+    highlights: ['Air Cooling Provided', 'Budget Friendly', '1,050 Units / Room Quota', 'Ample Natural Light']
   },
   {
     id: 'standard-cooler-4-seater',
@@ -372,15 +372,15 @@ const ROOM_OPTIONS = [
     feePerStudent: '₹83,000',
     feePerStudentNum: 83000,
     roomTotalFee: '₹3,32,000',
-    perStudentQuota: 'Fans & Cooler Power',
-    roomSessionQuota: 'Air-Cooling & Standard Power Included',
+    perStudentQuota: '300 Units',
+    roomSessionQuota: '1,200 Units / Room (Session 2026-27)',
     earlyFee: '₹83,000',
     term: 'Price for 10 months (Academic Session 2026-27)',
     badge: '4-Seater Air-Cooled (Economy)',
     cooling: 'Air-Cooler Included',
-    freePower: 'Air-Cooler, Fans & Lighting Power Included for Session 2026-27',
+    freePower: '1,200 Units / Room for Session 2026-27 (300 units/student × 4)',
     desc: 'Affordable 4-student dormitory room with attached washroom, personal study racks, and room air cooling.',
-    highlights: ['Lowest Annual Living Cost', 'Attached Bathroom', 'Lockable Almirahs', 'Air Cooling Included']
+    highlights: ['Lowest Annual Living Cost', 'Attached Bathroom', '1,200 Units / Room Quota', 'Air Cooling Included']
   }
 ];
 
@@ -532,11 +532,11 @@ export default function Hostel() {
             </div>
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
               <span className="text-slate-400 block font-medium">Power Allocation</span>
-              <strong className="text-emerald-600 dark:text-emerald-400 font-display text-sm">500 Units / Student</strong>
+              <strong className="text-emerald-600 dark:text-emerald-400 font-display text-sm">Tiered Session Quota</strong>
             </div>
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
               <span className="text-slate-400 block font-medium">4-Seater Room Quota</span>
-              <strong className="text-orange-600 dark:text-orange-400 font-display text-sm">2,000 Units / Session</strong>
+              <strong className="text-orange-600 dark:text-orange-400 font-display text-sm">4-S: 2,000U | 3-S: 1,650U</strong>
             </div>
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
               <span className="text-slate-400 block font-medium">Security &amp; Medical</span>
@@ -715,7 +715,7 @@ export default function Hostel() {
                   Luxury Studio Apartments (Session 2026-27)
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Tailored for students seeking independent living, private kitchenettes, refrigerator provisions, and Hot &amp; Cold split air-conditioning. Available in 1-Seater, 2-Seater, 3-Seater, and 4-Seater configurations with 500 units/student session electricity quota.
+                  Tailored for students seeking independent living, private kitchenettes, refrigerator provisions, and Hot &amp; Cold split air-conditioning. Available in 1-Seater, 2-Seater, 3-Seater, and 4-Seater configurations with consolidated session electricity quotas (4-Seater: 2,000 units, 3-Seater: 1,650 units, 2-Seater: 1,500 units, 1-Seater: 1,000 units).
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2 text-xs">
                   <span className="px-3 py-1 rounded-full bg-white/10 text-white font-medium flex items-center gap-1.5">
@@ -724,7 +724,7 @@ export default function Hostel() {
                   </span>
                   <span className="px-3 py-1 rounded-full bg-white/10 text-white font-medium flex items-center gap-1.5">
                     <CheckCircle2 size={13} className="text-emerald-400" />
-                    <span>500 Units / Student Quota (Session 2026-27)</span>
+                    <span>Tiered Session Quota (e.g. 3-Seater: 1,650 Units / Room)</span>
                   </span>
                   <span className="px-3 py-1 rounded-full bg-white/10 text-white font-medium flex items-center gap-1.5">
                     <CheckCircle2 size={13} className="text-emerald-400" />
@@ -992,13 +992,13 @@ export default function Hostel() {
               <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 shadow-sm space-y-2">
                 <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                   <Zap size={18} />
-                  <span>Consolidated Session Quota</span>
+                  <span>Consolidated Session Quotas</span>
                 </div>
                 <p className="font-extrabold text-base text-slate-900 dark:text-white font-display">
-                  500 Units / Student × Seaters
+                  Quota/Student × Seaters
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Example: 4-Seater AC Room = 500 units × 4 students = <strong className="text-emerald-600 dark:text-emerald-400">2,000 Units</strong> per room for Session 2026-27 (10 Months).
+                  4-Seater AC = 500U × 4 = <strong className="text-emerald-600 dark:text-emerald-400">2,000U</strong> | 3-Seater AC = 550U × 3 = <strong className="text-emerald-600 dark:text-emerald-400">1,650U</strong> | 2-Seater AC = 750U × 2 = <strong className="text-emerald-600 dark:text-emerald-400">1,500U</strong> | 1-Seater = <strong className="text-emerald-600 dark:text-emerald-400">1,000U</strong>.
                 </p>
               </div>
 
@@ -1028,7 +1028,7 @@ export default function Hostel() {
                   </span>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold shrink-0">
-                  500 Units / Student Basis
+                  Official LPU Session Quotas
                 </span>
               </div>
 
@@ -1054,31 +1054,31 @@ export default function Hostel() {
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹93,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹3,72,000 <span className="text-[10px] text-slate-400 font-normal">(₹93k × 4)</span></td>
                       <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">2,000 Units / Room</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">2,000 Units / Room <span className="text-[10px] text-slate-400 font-normal">(500 × 4)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">Standard 3-Seater Room (AC)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,13,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹3,39,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.13L × 3)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,500 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">550 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,650 Units / Room <span className="text-[10px] text-slate-400 font-normal">(550 × 3)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">Standard 2-Seater Room (AC)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,33,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹2,66,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.33L × 2)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,000 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">750 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,500 Units / Room <span className="text-[10px] text-slate-400 font-normal">(750 × 2)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">Standard 1-Seater Room (AC)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,53,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹1,53,000 <span className="text-[10px] text-slate-400 font-normal">(Single)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">500 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">1,000 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,000 Units / Room <span className="text-[10px] text-slate-400 font-normal">(Single)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Split AC</td>
                     </tr>
 
@@ -1091,31 +1091,31 @@ export default function Hostel() {
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,00,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹4,00,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.00L × 4)</span></td>
                       <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">2,000 Units / Room</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">2,000 Units / Room <span className="text-[10px] text-slate-400 font-normal">(500 × 4)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Hot &amp; Cold Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 bg-orange-500/[0.02]">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">3-Seater Studio Apartment (AC + Kitchenette)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,20,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹3,60,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.20L × 3)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,500 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">550 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,650 Units / Room <span className="text-[10px] text-slate-400 font-normal">(550 × 3)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Hot &amp; Cold Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 bg-orange-500/[0.02]">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">2-Seater Studio Apartment (AC + Kitchenette)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,40,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹2,80,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.40L × 2)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,000 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">750 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,500 Units / Room <span className="text-[10px] text-slate-400 font-normal">(750 × 2)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Hot &amp; Cold Split AC</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 bg-orange-500/[0.02]">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">1-Seater Studio Apartment (AC + Kitchenette)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,90,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹1,90,000 <span className="text-[10px] text-slate-400 font-normal">(Single)</span></td>
-                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">500 Units</td>
-                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">500 Units / Room</td>
+                      <td className="py-3 px-5 font-semibold text-emerald-600 dark:text-emerald-400">1,000 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,000 Units / Room <span className="text-[10px] text-slate-400 font-normal">(Single)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Hot &amp; Cold Split AC</td>
                     </tr>
 
@@ -1127,24 +1127,24 @@ export default function Hostel() {
                       </td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹83,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹3,32,000 <span className="text-[10px] text-slate-400 font-normal">(₹83k × 4)</span></td>
-                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">Included</td>
-                      <td className="py-3 px-5 font-semibold text-slate-800 dark:text-slate-200">Cooler &amp; Fan Power Included</td>
+                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">300 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,200 Units / Room <span className="text-[10px] text-slate-400 font-normal">(300 × 4)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Air-Cooler</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">Standard 3-Seater Room (Air-Cooled)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹98,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹2,94,000 <span className="text-[10px] text-slate-400 font-normal">(₹98k × 3)</span></td>
-                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">Included</td>
-                      <td className="py-3 px-5 font-semibold text-slate-800 dark:text-slate-200">Cooler &amp; Fan Power Included</td>
+                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">350 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">1,050 Units / Room <span className="text-[10px] text-slate-400 font-normal">(350 × 3)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Air-Cooler</td>
                     </tr>
                     <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-5 font-bold text-slate-900 dark:text-white">Standard 2-Seater Room (Air-Cooled)</td>
                       <td className="py-3 px-5 font-bold text-orange-600 dark:text-orange-400">₹1,13,000</td>
                       <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">₹2,26,000 <span className="text-[10px] text-slate-400 font-normal">(₹1.13L × 2)</span></td>
-                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">Included</td>
-                      <td className="py-3 px-5 font-semibold text-slate-800 dark:text-slate-200">Cooler &amp; Fan Power Included</td>
+                      <td className="py-3 px-5 font-semibold text-blue-600 dark:text-blue-400">400 Units</td>
+                      <td className="py-3 px-5 font-extrabold text-slate-900 dark:text-white">800 Units / Room <span className="text-[10px] text-slate-400 font-normal">(400 × 2)</span></td>
                       <td className="py-3 px-5 text-slate-600 dark:text-slate-400 font-medium">Air-Cooler</td>
                     </tr>
                   </tbody>
