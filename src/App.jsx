@@ -16,19 +16,42 @@ import Eligibility from './pages/Eligibility';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 
-// Heavy secondary routes dynamically chunked
-const Curriculum = lazy(() => import('./pages/Curriculum'));
-const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'));
-const Admissions = lazy(() => import('./pages/Admissions'));
-const Fees = lazy(() => import('./pages/Fees'));
-const Hostel = lazy(() => import('./pages/Hostel'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+// Helper to handle dynamic chunk load failures after new deployments
+function lazyWithRetry(componentImport) {
+  return lazy(() =>
+    componentImport().catch((error) => {
+      const isChunkError =
+        error?.message?.includes('Failed to fetch dynamically imported module') ||
+        error?.message?.includes('Importing a module script failed') ||
+        error?.name === 'ChunkLoadError';
 
-// Heavy overlay modals dynamically loaded on demand
-const SearchModal = lazy(() => import('./components/SearchModal'));
-const DegreeComparisonModal = lazy(() => import('./components/DegreeComparisonModal'));
-const LegalModal = lazy(() => import('./components/LegalModal'));
-const AuthModal = lazy(() => import('./components/AuthModal'));
+      if (isChunkError && typeof window !== 'undefined') {
+        const retryKey = `chunk_retry_${window.location.hash || 'app'}`;
+        const hasRetried = window.sessionStorage.getItem(retryKey);
+        if (!hasRetried) {
+          window.sessionStorage.setItem(retryKey, 'true');
+          window.location.reload();
+          return new Promise(() => {}); // Wait for browser reload
+        }
+      }
+      throw error;
+    })
+  );
+}
+
+// Heavy secondary routes dynamically chunked with auto-retry
+const Curriculum = lazyWithRetry(() => import('./pages/Curriculum'));
+const KnowledgeBase = lazyWithRetry(() => import('./pages/KnowledgeBase'));
+const Admissions = lazyWithRetry(() => import('./pages/Admissions'));
+const Fees = lazyWithRetry(() => import('./pages/Fees'));
+const Hostel = lazyWithRetry(() => import('./pages/Hostel'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
+
+// Heavy overlay modals dynamically loaded on demand with auto-retry
+const SearchModal = lazyWithRetry(() => import('./components/SearchModal'));
+const DegreeComparisonModal = lazyWithRetry(() => import('./components/DegreeComparisonModal'));
+const LegalModal = lazyWithRetry(() => import('./components/LegalModal'));
+const AuthModal = lazyWithRetry(() => import('./components/AuthModal'));
 
 const read = () => window.location.hash.replace('#/', '') || 'home';
 

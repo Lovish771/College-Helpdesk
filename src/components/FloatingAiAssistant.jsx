@@ -21,14 +21,15 @@ export default function FloatingAiAssistant({ go, page }) {
     hasMoved: false,
   });
 
-  // Calculate default bottom-right position
+  // Calculate default bottom-right position (compact on phones)
   const getDefaultPos = useCallback(() => {
-    const btnWidth = 160;
-    const btnHeight = 48;
-    const padding = 24;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const btnWidth = isMobile ? 130 : 160;
+    const btnHeight = isMobile ? 42 : 48;
+    const padding = isMobile ? 14 : 24;
     return {
-      x: Math.max(16, window.innerWidth - btnWidth - padding),
-      y: Math.max(16, window.innerHeight - btnHeight - padding),
+      x: Math.max(10, window.innerWidth - btnWidth - padding),
+      y: Math.max(10, window.innerHeight - btnHeight - padding),
     };
   }, []);
 
@@ -180,7 +181,7 @@ export default function FloatingAiAssistant({ go, page }) {
         touchAction: 'none',
         userSelect: 'none',
       }}
-      className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white select-none backdrop-blur-md
+      className={`group flex items-center gap-2 sm:gap-2.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm text-white select-none backdrop-blur-md
         bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 hover:from-orange-500 hover:to-amber-500
         border border-white/20 shadow-[0_10px_30px_rgba(249,115,22,0.4)] hover:shadow-[0_12px_35px_rgba(249,115,22,0.55)]
         ${isDragging ? 'cursor-grabbing scale-105 shadow-2xl opacity-95' : 'cursor-grab hover:scale-[1.03]'}`}

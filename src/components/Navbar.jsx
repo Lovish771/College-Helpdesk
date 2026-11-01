@@ -31,6 +31,7 @@ export default function Navbar({
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
 
@@ -137,13 +138,13 @@ export default function Navbar({
             className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl group transition-transform active:scale-95 shrink-0 cursor-pointer text-left pr-2"
           >
             <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <LpuLogo variant={isDark ? 'dark' : 'light'} size={38} />
+              <LpuLogo variant={isDark ? 'dark' : 'light'} size={32} />
             </div>
             <div className="flex flex-col justify-center leading-none text-left">
-              <span className="font-display font-extrabold text-sm sm:text-base tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+              <span className="font-display font-extrabold text-xs sm:text-base tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                 Student Helpdesk
               </span>
-              <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
+              <span className="hidden sm:block text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
                 LPU Support Portal
               </span>
             </div>
@@ -293,7 +294,7 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenSearch}
-              className="lg:hidden w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
+              className="lg:hidden w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
               title="Search"
               aria-label="Search"
             >
@@ -305,7 +306,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               >
@@ -323,7 +324,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
                   aria-expanded={userDropdownOpen}
                   title={user.name || user.email}
                 >
@@ -385,9 +386,9 @@ export default function Navbar({
                         type="button"
                         onClick={() => {
                           setUserDropdownOpen(false);
-                          logout();
+                          setShowSignOutConfirm(true);
                         }}
-                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors"
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors cursor-pointer"
                       >
                         <LogOut size={14} />
                         <span>Sign Out</span>
@@ -400,7 +401,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => onOpenAuth && onOpenAuth()}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
                 title="Sign In / Register"
                 aria-label="Sign In"
               >
@@ -411,7 +412,7 @@ export default function Navbar({
             {/* Mobile Menu Toggle */}
             <button
               type="button"
-              className="p-1.5 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label={open ? 'Close navigation' : 'Open navigation'}
               onClick={() => setOpen(!open)}
             >
@@ -422,7 +423,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="xl:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+          <div className="xl:hidden mt-2 p-3 sm:p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-[80vh] overflow-y-auto no-scrollbar">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu
@@ -432,9 +433,9 @@ export default function Navbar({
                   type="button"
                   onClick={() => {
                     setOpen(false);
-                    logout();
+                    setShowSignOutConfirm(true);
                   }}
-                  className="text-xs font-bold text-rose-600 flex items-center gap-1"
+                  className="text-xs font-bold text-rose-600 flex items-center gap-1 cursor-pointer"
                 >
                   <LogOut size={12} />
                   <span>Sign Out</span>
@@ -481,7 +482,52 @@ export default function Navbar({
             </ul>
           </div>
         )}
-      </header>
+        {/* Sign Out Confirmation Modal */}
+      {showSignOutConfirm && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowSignOutConfirm(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-12 w-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-sm">
+              <LogOut size={22} />
+            </div>
+            <div className="text-center space-y-1.5">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                Sign Out of Helpdesk?
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Are you sure you want to end your current verified session? You can sign back in anytime with your registered email.
+              </p>
+            </div>
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowSignOutConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSignOutConfirm(false);
+                  logout();
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/25 transition-all cursor-pointer"
+              >
+                Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
     </>
   );
 }
