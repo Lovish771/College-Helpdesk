@@ -112,9 +112,56 @@ function AppContent() {
     } catch {}
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  }, []);
+  const toggleTheme = useCallback((event) => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+
+    // Premium circular view transition if supported by browser
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      try {
+        const x = event?.clientX ?? (window.innerWidth - 80);
+        const y = event?.clientY ?? 30;
+        const endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y)
+        );
+
+        const transition = document.startViewTransition(() => {
+          setTheme(nextTheme);
+        });
+
+        transition.ready.then(() => {
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`
+          ];
+          document.documentElement.animate(
+            {
+              clipPath: clipPath,
+            },
+            {
+              duration: 500,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            }
+          );
+        });
+        return;
+      } catch {
+        // Fallback below
+      }
+    }
+
+    // Smooth fallback with global transition class
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.add('theme-transitioning');
+      setTheme(nextTheme);
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 500);
+    } else {
+      setTheme(nextTheme);
+    }
+  }, [theme]);
 
   const chat = useChat();
 

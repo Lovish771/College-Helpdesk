@@ -1,7 +1,7 @@
 /**
  * Degree detection and color theme utility
  * Maps degree identifiers and names to standard Main Degree labels (e.g. B.Tech, B.Sc, BCA)
- * and provides premium color palettes and shining gradient styling.
+ * and provides premium color palettes, glowing borders, and shining gradient styling.
  */
 
 export const getMainDegree = (p) => {
@@ -46,7 +46,9 @@ export const getMainDegree = (p) => {
 };
 
 /**
- * Returns premium theme styling, gradients, glows, and borders for each main degree
+ * Returns premium theme styling, gradients, glowing borders, and shadows for each main degree.
+ * Notice: glowBorder and glowShadow are strictly scoped to hover states, ensuring they
+ * disappear cleanly when mouse leaves the card.
  */
 export const getDegreeTheme = (mainDegree) => {
   switch (mainDegree) {
@@ -55,8 +57,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: 'B.Tech',
         gradient: 'from-blue-600 via-indigo-600 to-violet-600',
         glow: 'shadow-indigo-500/25',
-        hoverBorder: 'group-hover:border-indigo-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(99,102,241,0.25)]',
+        glowBorder: 'hover:border-indigo-500 dark:hover:border-indigo-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(99,102,241,0.45),0_12px_30px_-10px_rgba(99,102,241,0.25)]',
         badgeBg: 'bg-indigo-500/10 dark:bg-indigo-950/40 border-indigo-500/30 text-indigo-600 dark:text-indigo-400',
         textAccent: 'text-indigo-600 dark:text-indigo-400',
         ringColor: 'ring-indigo-500',
@@ -66,8 +68,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: 'M.Tech',
         gradient: 'from-violet-600 via-purple-600 to-indigo-600',
         glow: 'shadow-purple-500/25',
-        hoverBorder: 'group-hover:border-purple-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(168,85,247,0.25)]',
+        glowBorder: 'hover:border-purple-500 dark:hover:border-purple-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(168,85,247,0.45),0_12px_30px_-10px_rgba(168,85,247,0.25)]',
         badgeBg: 'bg-purple-500/10 dark:bg-purple-950/40 border-purple-500/30 text-purple-600 dark:text-purple-400',
         textAccent: 'text-purple-600 dark:text-purple-400',
         ringColor: 'ring-purple-500',
@@ -78,8 +80,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-emerald-600 via-teal-600 to-cyan-600',
         glow: 'shadow-emerald-500/25',
-        hoverBorder: 'group-hover:border-emerald-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(16,185,129,0.25)]',
+        glowBorder: 'hover:border-emerald-500 dark:hover:border-emerald-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(16,185,129,0.45),0_12px_30px_-10px_rgba(16,185,129,0.25)]',
         badgeBg: 'bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-600 dark:text-emerald-400',
         textAccent: 'text-emerald-600 dark:text-emerald-400',
         ringColor: 'ring-emerald-500',
@@ -90,8 +92,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-purple-600 via-fuchsia-600 to-pink-600',
         glow: 'shadow-fuchsia-500/25',
-        hoverBorder: 'group-hover:border-fuchsia-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(217,70,239,0.25)]',
+        glowBorder: 'hover:border-fuchsia-500 dark:hover:border-fuchsia-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(217,70,239,0.45),0_12px_30px_-10px_rgba(217,70,239,0.25)]',
         badgeBg: 'bg-fuchsia-500/10 dark:bg-fuchsia-950/40 border-fuchsia-500/30 text-fuchsia-600 dark:text-fuchsia-400',
         textAccent: 'text-fuchsia-600 dark:text-fuchsia-400',
         ringColor: 'ring-fuchsia-500',
@@ -102,8 +104,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-amber-500 via-orange-500 to-red-500',
         glow: 'shadow-orange-500/25',
-        hoverBorder: 'group-hover:border-orange-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(249,115,22,0.25)]',
+        glowBorder: 'hover:border-amber-500 dark:hover:border-amber-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(245,158,11,0.45),0_12px_30px_-10px_rgba(245,158,11,0.25)]',
         badgeBg: 'bg-orange-500/10 dark:bg-orange-950/40 border-orange-500/30 text-orange-600 dark:text-orange-400',
         textAccent: 'text-orange-600 dark:text-orange-400',
         ringColor: 'ring-orange-500',
@@ -114,8 +116,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-cyan-600 via-blue-600 to-indigo-600',
         glow: 'shadow-blue-500/25',
-        hoverBorder: 'group-hover:border-blue-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(59,130,246,0.25)]',
+        glowBorder: 'hover:border-cyan-500 dark:hover:border-cyan-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(6,182,212,0.45),0_12px_30px_-10px_rgba(6,182,212,0.25)]',
         badgeBg: 'bg-blue-500/10 dark:bg-blue-950/40 border-blue-500/30 text-blue-600 dark:text-blue-400',
         textAccent: 'text-blue-600 dark:text-blue-400',
         ringColor: 'ring-blue-500',
@@ -127,8 +129,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-rose-600 via-pink-600 to-red-600',
         glow: 'shadow-rose-500/25',
-        hoverBorder: 'group-hover:border-rose-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(244,63,94,0.25)]',
+        glowBorder: 'hover:border-rose-500 dark:hover:border-rose-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(244,63,94,0.45),0_12px_30px_-10px_rgba(244,63,94,0.25)]',
         badgeBg: 'bg-rose-500/10 dark:bg-rose-950/40 border-rose-500/30 text-rose-600 dark:text-rose-400',
         textAccent: 'text-rose-600 dark:text-rose-400',
         ringColor: 'ring-rose-500',
@@ -139,8 +141,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-amber-700 via-amber-600 to-yellow-600',
         glow: 'shadow-amber-600/25',
-        hoverBorder: 'group-hover:border-amber-600/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(217,119,6,0.25)]',
+        glowBorder: 'hover:border-yellow-500 dark:hover:border-yellow-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(234,179,8,0.45),0_12px_30px_-10px_rgba(234,179,8,0.25)]',
         badgeBg: 'bg-amber-500/10 dark:bg-amber-950/40 border-amber-500/30 text-amber-700 dark:text-amber-300',
         textAccent: 'text-amber-700 dark:text-amber-300',
         ringColor: 'ring-amber-600',
@@ -151,8 +153,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-fuchsia-600 via-purple-600 to-pink-600',
         glow: 'shadow-fuchsia-500/25',
-        hoverBorder: 'group-hover:border-fuchsia-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(192,38,211,0.25)]',
+        glowBorder: 'hover:border-pink-500 dark:hover:border-pink-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(236,72,153,0.45),0_12px_30px_-10px_rgba(236,72,153,0.25)]',
         badgeBg: 'bg-fuchsia-500/10 dark:bg-fuchsia-950/40 border-fuchsia-500/30 text-fuchsia-600 dark:text-fuchsia-400',
         textAccent: 'text-fuchsia-600 dark:text-fuchsia-400',
         ringColor: 'ring-fuchsia-500',
@@ -162,8 +164,8 @@ export const getDegreeTheme = (mainDegree) => {
         label: mainDegree,
         gradient: 'from-orange-500 via-amber-500 to-orange-600',
         glow: 'shadow-orange-500/25',
-        hoverBorder: 'group-hover:border-orange-500/60',
-        hoverGlow: 'group-hover:shadow-[0_20px_45px_-10px_rgba(249,115,22,0.25)]',
+        glowBorder: 'hover:border-orange-500 dark:hover:border-orange-400',
+        glowShadow: 'hover:shadow-[0_0_25px_-3px_rgba(249,115,22,0.45),0_12px_30px_-10px_rgba(249,115,22,0.25)]',
         badgeBg: 'bg-orange-500/10 dark:bg-orange-950/40 border-orange-500/30 text-orange-600 dark:text-orange-400',
         textAccent: 'text-orange-600 dark:text-orange-400',
         ringColor: 'ring-orange-500',

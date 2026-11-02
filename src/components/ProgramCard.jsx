@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Clock, ArrowRight, Wallet, Flame, Star, Sparkles,
-  Code, Cpu, Wifi, TrendingUp, HeartPulse, Layers, GraduationCap, CheckCircle2, Award
+  Code, Cpu, Wifi, TrendingUp, HeartPulse, Layers, GraduationCap, CheckCircle2, Scale
 } from 'lucide-react';
 import { fees } from '../data/mockData';
 import { getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
@@ -107,11 +107,13 @@ export default function ProgramCard({
         if (onSelect) onSelect(p);
         else if (onView) onView(p);
       }}
-      className={`group relative flex flex-col rounded-3xl p-6 transition-all duration-300 cursor-pointer border select-none
-        bg-white dark:bg-[#0D131F] border-slate-200/90 dark:border-slate-800/90
+      className={`group relative flex flex-col rounded-3xl p-6 transition-all duration-300 ease-out cursor-pointer border select-none
+        bg-white dark:bg-[#0D131F]
+        border-slate-200/90 dark:border-slate-800/90
         shadow-sm dark:shadow-md
-        hover:-translate-y-2 hover:scale-[1.015] ${theme.hoverBorder}
-        ${theme.hoverGlow}
+        hover:-translate-y-2 hover:scale-[1.015]
+        ${theme.glowBorder}
+        ${theme.glowShadow}
         ${
           isSelected
             ? `ring-2 ${theme.ringColor} border-transparent shadow-xl scale-[1.02]`
@@ -185,8 +187,8 @@ export default function ProgramCard({
         </div>
       )}
 
-      {/* Footer Row: Semester Fee + Action Button */}
-      <div className="mt-4 pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-2">
+      {/* Footer Row: Semester Fee + Action Buttons (Compare & View Details) */}
+      <div className="mt-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-3">
         <div className="flex flex-col">
           <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium flex items-center gap-1">
             <Wallet size={12} className="text-slate-400 dark:text-slate-500" />
@@ -197,17 +199,41 @@ export default function ProgramCard({
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onView) onView(p);
-          }}
-          className="px-4 py-2 rounded-full border border-orange-500/70 hover:bg-orange-600 bg-orange-500/5 hover:text-white text-orange-600 dark:text-orange-400 hover:dark:text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
-        >
-          <span>View Details</span>
-          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Functional Compare Toggle Button */}
+          {onCompare && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCompare(p.id);
+              }}
+              className={`px-3 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
+                isSelected
+                  ? 'bg-orange-600 text-white border-orange-600 shadow-md shadow-orange-600/30'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400'
+              }`}
+              title={isSelected ? 'Remove from Comparison' : 'Add to Compare'}
+              aria-label={isSelected ? `Remove ${p.name} from comparison` : `Add ${p.name} to comparison`}
+            >
+              <Scale size={13} className={isSelected ? 'text-white' : 'text-orange-500'} />
+              <span>{isSelected ? 'In Compare' : 'Compare'}</span>
+            </button>
+          )}
+
+          {/* View Details Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onView) onView(p);
+            }}
+            className="px-3.5 py-2 rounded-full border border-orange-500/70 hover:bg-orange-600 bg-orange-500/5 hover:text-white text-orange-600 dark:text-orange-400 hover:dark:text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs"
+          >
+            <span>View Details</span>
+            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
