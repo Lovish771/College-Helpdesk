@@ -983,6 +983,18 @@ hostel = {
             "Economical shared apartment option with attached washroom. (Air-Cooled: ₹83,000 / year | AC: ₹93,000 / year)",
         ],
         [
+            "5-Seater Room (Air-Cooled / AC)",
+            "Spacious 5-occupant room with attached washroom. (Air-Cooled: ₹72,000 / year [300 free units] | AC: ₹81,000 / year [400 free units])",
+        ],
+        [
+            "6/7/8-Seater Dormitory (Air-Cooled / AC)",
+            "Large dormitory accommodation with attached bath. (Air-Cooled: ₹72,000 / year [250 free units] | AC: ₹81,000 / year [350 free units])",
+        ],
+        [
+            "4x2-Seater Suite (Air-Cooled)",
+            "Suite-style room configuration. (Air-Cooled: ₹72,000 / year [250 free units])",
+        ],
+        [
             "Studio Apartments (1/2/3/4-Seater AC with Kitchenette)",
             "Modern luxury studio apartment with attached washroom, personal kitchenette counter, split AC, and consolidated 10-month session electricity quota. (Approx. ₹1,00,000 - ₹1,90,000 / year)",
         ],
