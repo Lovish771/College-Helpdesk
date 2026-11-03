@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Calendar, HelpCircle, CheckCircle, ArrowRight, Sparkles,
   CreditCard, Building2, FileText, CheckCircle2, ChevronDown, ChevronUp,

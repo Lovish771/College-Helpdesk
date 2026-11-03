@@ -3,10 +3,11 @@ import {
   Wallet, Award, BedDouble, ChevronRight, CheckCircle2,
   Sparkles, ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
   Building2, Users, Info, Scale, Check, Plus, Calculator, Landmark,
-  Calendar, Layers, Clock, Coffee, Shirt, X
+  Calendar, Layers, Clock, Coffee, Shirt, X, GraduationCap
 } from 'lucide-react';
 import { programs, scholarships as mockScholarships, fees as mockFees } from '../data/mockData';
 import { PageHead } from '../utils/useAsync';
+import { getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
 import { getStoredItem, setStoredItem } from '../utils/storage';
 import {
   RESIDENTIAL_SERVICES,
@@ -881,20 +882,27 @@ export default function Fees({ ask, onOpenCompare, go }) {
                 {filteredCourses.map((p) => {
                   const f = mockFees[p.id] || { tuition: '₹1,60,000 / semester (Base)' };
                   const isSelected = selectedCourseId === p.id;
+                  const mainDeg = getMainDegree(p);
+                  const degTheme = getDegreeTheme(mainDeg);
                   return (
                     <div
                       key={p.id}
-                      className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 flex flex-col justify-between group ${
+                      className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-300 flex flex-col justify-between group ${
                         isSelected
-                          ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-md'
-                          : 'border-slate-200/90 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700'
+                          ? `ring-2 ${degTheme.ringColor} border-transparent shadow-md`
+                          : `border-slate-200/90 dark:border-slate-800 ${degTheme.hoverBorder} ${degTheme.hoverGlow}`
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 uppercase tracking-wider">
-                            {p.short}
-                          </span>
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                          <div className={`relative inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider overflow-hidden shadow-xs ${degTheme.glow} select-none transition-transform duration-300 group-hover:scale-105`}>
+                            <div className={`absolute inset-0 bg-gradient-to-r ${degTheme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
+                            <GraduationCap size={11} className="relative z-10 text-white drop-shadow-xs" />
+                            <span className="relative z-10 text-white font-extrabold tracking-wide drop-shadow-xs">
+                              {mainDeg}
+                            </span>
+                          </div>
                           <span className="text-[11px] font-medium text-slate-400">{p.duration}</span>
                         </div>
                         <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">

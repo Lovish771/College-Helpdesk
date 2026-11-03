@@ -305,7 +305,7 @@ export default function Navbar({
             {onToggleTheme && (
               <button
                 type="button"
-                onClick={onToggleTheme}
+                onClick={(e) => onToggleTheme && onToggleTheme(e)}
                 className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}

@@ -10,6 +10,9 @@ import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
 import ProgramsCarousel from '../components/ProgramsCarousel';
 import { PROGRAM_IMAGES } from '../data/programImages';
+import { getProgramEnrichment } from '../data/programDetails';
+import { PROGRAM_COMPARISON_DATA } from '../data/programComparisonData';
+import { getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
 
 // Academic Schools / Faculties representing LPU's institutional hierarchy
 const ACADEMIC_SCHOOLS = [
@@ -94,10 +97,15 @@ const PG_DEGREE_TYPES = ['All Degrees', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'M.Pharm
 const ALL_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'Law', 'Design & Arch'];
 
 
-// Detailed Program View
+// Detailed Program View (Comprehensive, Lists All Degree Details)
 function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
   const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Eligibility & Admissions', 'Fee & Scholarship Slabs', 'Curriculum', 'Placements'];
+  const tabs = ['Overview & Pathways', 'Curriculum & Semester 1', 'Placements & Recruiters', 'Eligibility & Criteria', 'Fee & Scholarships'];
+
+  const mainDeg = getMainDegree(p);
+  const theme = getDegreeTheme(mainDeg);
+  const enrichment = getProgramEnrichment(p.id) || {};
+  const compData = PROGRAM_COMPARISON_DATA[p.id] || {};
 
   const f = fees[p.id] || {
     tuition: '₹1,60,000 / semester (Base)',
@@ -106,89 +114,134 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
     scholarship: 'Category I: up to 50% waiver | Cat II: up to 40% | Cat III: up to 30%',
   };
 
+  const rawTuition = parseInt((f.tuition || '₹1,60,000').replace(/[^0-9]/g, ''), 10) || 160000;
+  const semFeeStr = `₹${rawTuition.toLocaleString('en-IN')}`;
+  const annualFeeStr = `₹${(rawTuition * 2).toLocaleString('en-IN')}`;
+  const cat1Fee = `₹${Math.round(rawTuition * 0.5).toLocaleString('en-IN')}`;
+  const cat2Fee = `₹${Math.round(rawTuition * 0.6).toLocaleString('en-IN')}`;
+  const cat3Fee = `₹${Math.round(rawTuition * 0.7).toLocaleString('en-IN')}`;
+
+  const semester1Courses = enrichment.semester1Subjects || [
+    { code: 'CSE101', name: 'Computer Programming & Problem Solving', credits: 4, type: 'Core' },
+    { code: 'CSE111', name: 'Software Foundations Practicum', credits: 1, type: 'Lab' },
+    { code: 'MTH165', name: 'Mathematics & Statistical Foundations', credits: 4, type: 'Core' },
+    { code: 'PHY110', name: 'Engineering Physics & Systems', credits: 3, type: 'Core' },
+    { code: 'PEL121', name: 'Corporate Communication & Soft Skills', credits: 2, type: 'Skill' },
+  ];
+
+  const careerRoles = enrichment.careerTracks || compData.careerRoles || [
+    'Software Development Engineer (SDE)', 'Systems Architect', 'Full Stack Developer', 'Data Specialist'
+  ];
+
+  const techStack = compData.techStack || ['Linux', 'Git', 'Cloud Platforms', 'SQL', 'Modern Frameworks'];
+  const languages = compData.languages || ['Python', 'Java', 'C++', 'SQL'];
+  const topRecruiters = [
+    'Google', 'Microsoft', 'Amazon', 'Cognizant', 'Infosys', 'Capgemini',
+    'Deloitte', 'Cisco', 'TCS', 'Wipro', 'IBM', 'Oracle'
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 pb-16 transition-colors">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 pb-20 transition-colors">
       {/* Top Breadcrumb Bar */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      <div className="sticky top-16 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
           >
-            <ArrowLeft size={15} />
+            <ArrowLeft size={16} />
             <span>Back to All Programmes</span>
           </button>
-          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
-            Programme Code: <code className="text-slate-600 dark:text-slate-300 font-mono font-bold">{p.id}</code>
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 hidden sm:inline">Programme ID:</span>
+            <code className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+              {p.id}
+            </code>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
         {/* Hero Banner for Program */}
-        <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-800 bg-slate-950 text-white">
+        <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-35 mix-blend-luminosity scale-105"
+            className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
             style={{
               backgroundImage: `url(${PROGRAM_IMAGES[p.id] || PROGRAM_IMAGES['btech-cse']})`,
             }}
           />
-          <div className="absolute inset-0 bg-slate-950/80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-slate-950 dark:via-slate-900/90 dark:to-slate-950/95 pointer-events-none" />
 
-          <div className="relative z-10 p-6 sm:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="max-w-3xl">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <span className="rounded-lg bg-orange-600 text-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider">
-                  {p.short}
-                </span>
-                <span className="rounded-lg bg-white/10 backdrop-blur-md text-white border border-white/20 px-2.5 py-1 text-[11px] font-semibold">
+          <div className="relative z-10 p-6 sm:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="max-w-3xl space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Shining Main Degree Bar */}
+                <div className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider overflow-hidden shadow-sm ${theme.glow} select-none`}>
+                  <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} opacity-95`} />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
+                  <GraduationCap size={13} className="relative z-10 text-white drop-shadow-xs" />
+                  <span className="relative z-10 text-white font-extrabold tracking-wide drop-shadow-xs">
+                    {mainDegree}
+                  </span>
+                </div>
+
+                <span className="rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2.5 py-1 text-[11px] font-semibold">
                   {p.degree}
                 </span>
-                <span className="rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-1 text-[11px] font-semibold">
+
+                <span className="rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold">
                   {p.duration}
                 </span>
+
+                {enrichment.nirfBadge && (
+                  <span className="rounded-lg bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-500/20 px-2.5 py-1 text-[11px] font-bold">
+                    {enrichment.nirfBadge}
+                  </span>
+                )}
               </div>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display leading-tight text-white">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display leading-tight text-slate-900 dark:text-white">
                 {p.name}
               </h1>
 
-              <p className="mt-3 text-sm text-slate-300 leading-relaxed max-w-2xl line-clamp-2">
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
                 {p.description}
               </p>
             </div>
 
-            <div className="shrink-0 flex flex-col sm:flex-row gap-3">
+            <div className="shrink-0 flex flex-col sm:flex-row gap-2.5">
               {onOpenCompare && (
                 <button
+                  type="button"
                   onClick={() => onOpenCompare([p.id])}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-all cursor-pointer shadow-xs"
                 >
-                  <Scale size={14} />
-                  <span>Compare Degree</span>
+                  <Scale size={15} className="text-orange-500" />
+                  <span>Compare with Another Degree</span>
                 </button>
               )}
               <button
-                onClick={() => ask(`I want to apply for ${p.name}. What is the eligibility, LPUNEST cutoff, and scholarship slabs?`)}
-                className="btn-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-bold cursor-pointer"
+                type="button"
+                onClick={() => ask(`I want detailed admission information for ${p.name} at LPU. Tell me the eligibility, LPUNEST exam syllabus, fee structures, and scholarship cutoffs.`)}
+                className="btn-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-xs font-bold cursor-pointer shadow-lg shadow-orange-600/20"
               >
                 <span>Ask AI About Admissions</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex overflow-x-auto gap-2 border-b border-slate-200 dark:border-slate-800 mt-6 pb-2">
+        <div className="flex overflow-x-auto gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 no-scrollbar scrollbar-none">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === tab
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800'
               }`}
             >
               {tab}
@@ -196,111 +249,251 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div className="mt-6 bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors">
-          {activeTab === 'Overview' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display mb-2">Programme Summary</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{p.description}</p>
+        {/* Tab 1: Overview & Pathways */}
+        {activeTab === 'Overview & Pathways' && (
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Duration</span>
+                <span className="text-base font-extrabold text-slate-900 dark:text-white mt-1 block">{p.duration}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Academic Level</span>
+                <span className="text-base font-extrabold text-slate-900 dark:text-white mt-1 block">{p.degree}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Base Semester Fee</span>
+                <span className="text-base font-extrabold text-orange-600 dark:text-orange-400 mt-1 block">{semFeeStr} / sem</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Min. Eligibility</span>
+                <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">{p.minPercent}% Marks</span>
+              </div>
+            </div>
+
+            {/* Career Tracks */}
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div className="flex items-center gap-2">
+                <Briefcase size={17} className="text-orange-500" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">Target Career Roles &amp; Profiles</h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Graduates from this degree programme are placed into specialized corporate trajectories:</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {careerRoles.map((role) => (
+                  <span key={role} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-xs font-bold">
+                    <CheckCircle2 size={12} className="text-orange-500" />
+                    <span>{role}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Tech Stack & Languages */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                  <Code size={16} />
+                  <h4 className="text-sm font-bold font-display">Core Programming Languages</h4>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {languages.map((lang) => (
+                    <span key={lang} className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-semibold">
+                      {lang}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
-                  <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Duration</span>
-                  <span className="text-base font-extrabold text-slate-900 dark:text-white mt-1 block">{p.duration}</span>
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400">
+                  <Cpu size={16} />
+                  <h4 className="text-sm font-bold font-display">Tools &amp; Industry Frameworks</h4>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
-                  <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Academic Level</span>
-                  <span className="text-base font-extrabold text-slate-900 dark:text-white mt-1 block">{p.degree}</span>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60">
-                  <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Semester Base Fee</span>
-                  <span className="text-base font-extrabold text-orange-600 dark:text-orange-400 mt-1 block">{f.tuition.split(' ')[0]} / sem</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {techStack.map((tech) => (
+                    <span key={tech} className="px-2.5 py-1 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 text-xs font-semibold">
+                      {tech}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
 
-          {activeTab === 'Eligibility & Admissions' && (
-            <div className="space-y-5">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">Minimum Qualifying Criteria</h3>
-              <div className="p-5 rounded-2xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                  {p.eligibility}
-                </p>
+            {/* Academic Electives & Labs */}
+            {compData.coreElectives && (
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white font-display">Key Academic Electives</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{compData.coreElectives}</p>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 2: Curriculum & Semester 1 */}
+        {activeTab === 'Curriculum & Semester 1' && (
+          <div className="space-y-6">
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">Semester 1 Course Structure</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Official syllabus subjects, laboratory practicums, and credit allocations.</p>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 text-xs font-bold self-start sm:self-center">
+                  Total ~20 Credits
+                </span>
+              </div>
+
+              <div className="overflow-x-auto mt-4 no-scrollbar scrollbar-none">
+                <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
+                      <th className="py-3 px-4 font-bold text-slate-900 dark:text-white">Course Code</th>
+                      <th className="py-3 px-4 font-bold text-slate-900 dark:text-white">Subject Title</th>
+                      <th className="py-3 px-4 font-bold text-orange-600 dark:text-orange-400">Type</th>
+                      <th className="py-3 px-4 font-bold text-slate-900 dark:text-white text-right">Credits</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    {semester1Courses.map((c) => (
+                      <tr key={c.code} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td className="py-3 px-4 font-mono font-bold text-slate-700 dark:text-slate-300">{c.code}</td>
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">{c.name || c.title}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                            c.type === 'Lab' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300' :
+                            c.type === 'Skill' ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300' :
+                            'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+                          }`}>
+                            {c.type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-bold text-slate-900 dark:text-white text-right">{c.credits}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Want full syllabus for Semester 2 to 8?</span>
+                <button
+                  type="button"
+                  onClick={() => ask(`Give me the full 8-semester curriculum, total credits, and elective choices for ${p.name}`)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
+                >
+                  <Sparkles size={13} />
+                  <span>Ask AI for Full 8-Semester Syllabus</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Placements & Recruiters */}
+        {activeTab === 'Placements & Recruiters' && (
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div className="p-5 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold uppercase tracking-wider block">Highest International Package</span>
+                <strong className="text-xl sm:text-2xl font-extrabold text-emerald-800 dark:text-emerald-200 font-display block">₹3 Crore / annum</strong>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Global Tech Placement</span>
+              </div>
+              <div className="p-5 rounded-3xl bg-orange-500/10 border border-orange-500/30 space-y-1">
+                <span className="text-xs text-orange-700 dark:text-orange-300 font-bold uppercase tracking-wider block">Highest Domestic Package</span>
+                <strong className="text-xl sm:text-2xl font-extrabold text-orange-800 dark:text-orange-200 font-display block">₹64 LPA</strong>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Top Tier Corporate Offers</span>
+              </div>
+              <div className="p-5 rounded-3xl bg-blue-500/10 border border-blue-500/30 space-y-1">
+                <span className="text-xs text-blue-700 dark:text-blue-300 font-bold uppercase tracking-wider block">Average Super-Dream Tier</span>
+                <strong className="text-xl sm:text-2xl font-extrabold text-blue-800 dark:text-blue-200 font-display block">₹8.5 - 12 LPA</strong>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Tier 1 Recruiters</span>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">Top Corporate Recruiters</h3>
+              <div className="flex flex-wrap gap-2">
+                {topRecruiters.map((company) => (
+                  <span key={company} className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-2xs">
+                    {company}
+                  </span>
+                ))}
+              </div>
+              {compData.certifications && (
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Industry Certifications Integrated</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-300">{compData.certifications}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Eligibility & Criteria */}
+        {activeTab === 'Eligibility & Criteria' && (
+          <div className="space-y-6">
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">Official Qualifying Requirements</h3>
+              <div className="p-4 rounded-2xl bg-orange-500/5 dark:bg-orange-950/20 border border-orange-500/20">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">{p.eligibility}</p>
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Accepted Entrance Exams</p>
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Accepted Entrance Exams</span>
                   <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">LPUNEST / JEE Main / CUET</p>
                 </div>
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Minimum Aggregate Marks</p>
-                  <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">{p.minPercent}% in Qualifying Exam</p>
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Minimum Aggregate Percentage</span>
+                  <p className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">{p.minPercent}% Marks</p>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'Fee & Scholarship Slabs' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">Tuition and LPUNEST Scholarships</h3>
+        {/* Tab 5: Fee & Scholarships */}
+        {activeTab === 'Fee & Scholarships' && (
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Base Tuition (Per Semester)</span>
+                <span className="text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1 block">{semFeeStr}</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Full Year: {annualFeeStr}</span>
+              </div>
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Examination &amp; Admin Fee</span>
+                <span className="text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1 block">₹5,000 / sem</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Standard university examination fee</span>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">LPUNEST Scholarship Concession Slabs</h3>
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                  <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">Category I Scholarship</span>
-                  <span className="text-xl font-extrabold text-emerald-800 dark:text-emerald-200 mt-1 block">Up to 50% Waiver</span>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">For LPUNEST 95%+ or 95%+ in qualifying examination.</p>
+                  <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider block">Category I (Top Slab)</span>
+                  <strong className="text-xl font-extrabold text-emerald-800 dark:text-emerald-200 mt-1 block">Up to 50% Waiver</strong>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">Net Fee: <strong className="text-emerald-700 dark:text-emerald-300 font-bold">{cat1Fee} / sem</strong></p>
                 </div>
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                  <span className="text-xs font-extrabold text-amber-700 dark:text-amber-300 uppercase tracking-wider block">Category II Scholarship</span>
-                  <span className="text-xl font-extrabold text-amber-800 dark:text-amber-200 mt-1 block">Up to 40% Waiver</span>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">For LPUNEST 90% - 94.9%.</p>
+                  <span className="text-xs font-extrabold text-amber-700 dark:text-amber-300 uppercase tracking-wider block">Category II Slab</span>
+                  <strong className="text-xl font-extrabold text-amber-800 dark:text-amber-200 mt-1 block">Up to 40% Waiver</strong>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">Net Fee: <strong className="text-amber-700 dark:text-amber-300 font-bold">{cat2Fee} / sem</strong></p>
                 </div>
                 <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
-                  <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 uppercase tracking-wider block">Category III Scholarship</span>
-                  <span className="text-xl font-extrabold text-blue-800 dark:text-blue-200 mt-1 block">Up to 30% Waiver</span>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2">For LPUNEST 80% - 89.9%.</p>
+                  <span className="text-xs font-extrabold text-blue-700 dark:text-blue-300 uppercase tracking-wider block">Category III Slab</span>
+                  <strong className="text-xl font-extrabold text-blue-800 dark:text-blue-200 mt-1 block">Up to 30% Waiver</strong>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-medium">Net Fee: <strong className="text-blue-700 dark:text-blue-300 font-bold">{cat3Fee} / sem</strong></p>
                 </div>
               </div>
             </div>
-          )}
-
-          {activeTab === 'Curriculum' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">Curriculum Framework</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Organized into Autumn Term (August-December) and Spring Term (January-June) with continuous assessment (CA), mid-term examinations, and lab practicums.
-              </p>
-              <button
-                onClick={() => ask(`Give me the semester-wise subjects and credit breakdown for ${p.name}`)}
-                className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
-              >
-                <Sparkles size={14} />
-                <span>Ask AI for Full Semester Syllabus</span>
-              </button>
-            </div>
-          )}
-
-          {activeTab === 'Placements' && (
-            <div className="space-y-5">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">Corporate Placements &amp; Career Trajectory</h3>
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                  LPU graduates from this programme are recruited by top Fortune 500 corporations including Google, Microsoft, Amazon, Cognizant, Infosys, Capgemini, and Deloitte.
-                </p>
-                <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mt-3">
-                  Highest Package: Up to ₹3 Crore (International) / ₹64 LPA (Domestic)
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
 export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [level, setLevel] = useState('All'); // 'All' | 'UG' | 'PG'
@@ -404,6 +597,13 @@ export default function Programs({ ask, onOpenCompare }) {
 
     return Object.values(map).filter((group) => group.programs.length > 0);
   }, [filtered]);
+
+  const handleViewProgram = (prog) => {
+    setSelectedProgram(prog);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const handleToggleCompareQueue = (id) => {
     setCompareQueue((prev) => {
@@ -756,7 +956,7 @@ export default function Programs({ ask, onOpenCompare }) {
                     <ProgramCard
                       key={`col1-${p.id}-${idx}`}
                       p={p}
-                      onView={(prog) => setSelectedProgram(prog)}
+                      onView={(prog) => handleViewProgram(prog)}
                       onAsk={ask}
                       onCompare={(id) => handleToggleCompareQueue(id)}
                       isSelected={compareQueue.includes(p.id)}
@@ -772,7 +972,7 @@ export default function Programs({ ask, onOpenCompare }) {
                     <ProgramCard
                       key={`col2-${p.id}-${idx}`}
                       p={p}
-                      onView={(prog) => setSelectedProgram(prog)}
+                      onView={(prog) => handleViewProgram(prog)}
                       onAsk={ask}
                       onCompare={(id) => handleToggleCompareQueue(id)}
                       isSelected={compareQueue.includes(p.id)}
@@ -788,7 +988,7 @@ export default function Programs({ ask, onOpenCompare }) {
                     <ProgramCard
                       key={`col3-${p.id}-${idx}`}
                       p={p}
-                      onView={(prog) => setSelectedProgram(prog)}
+                      onView={(prog) => handleViewProgram(prog)}
                       onAsk={ask}
                       onCompare={(id) => handleToggleCompareQueue(id)}
                       isSelected={compareQueue.includes(p.id)}
@@ -805,7 +1005,7 @@ export default function Programs({ ask, onOpenCompare }) {
               <ProgramCard
                 key={p.id}
                 p={p}
-                onView={(prog) => setSelectedProgram(prog)}
+                onView={(prog) => handleViewProgram(prog)}
                 onAsk={ask}
                 onCompare={(id) => handleToggleCompareQueue(id)}
                 isSelected={compareQueue.includes(p.id)}
