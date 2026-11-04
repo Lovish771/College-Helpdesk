@@ -4,7 +4,7 @@ import {
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
   Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
   Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List,
-  Activity, ChevronsUpDown
+  Activity, ChevronsUpDown, SlidersHorizontal
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
@@ -502,7 +502,7 @@ export default function Programs({ ask, onOpenCompare }) {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
   const [sortBy, setSortBy] = useState('popularity');
-  const [viewMode, setViewMode] = useState('moving'); // 'moving' | 'grid'
+  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'grid'
 
   // Map each program to an Academic School
   const getProgramSchool = (p) => {
@@ -890,21 +890,21 @@ export default function Programs({ ask, onOpenCompare }) {
               </select>
             </div>
 
-            {/* View Mode Switcher: Moving Stream vs Static Grid */}
+            {/* View Mode Switcher: 3D Horizontal Slide Carousel vs Static Grid */}
             <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
-                onClick={() => setViewMode('moving')}
+                onClick={() => setViewMode('carousel')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'moving'
+                  viewMode === 'carousel'
                     ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
                     : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
-                title="Moving Stream Transition (Hover to Pause & 3D Uplift)"
-                aria-label="Moving Stream"
+                title="Smooth Horizontal Slide Carousel View"
+                aria-label="Horizontal Slide Carousel View"
               >
-                <ChevronsUpDown size={14} className="text-orange-500" />
-                <span className="hidden sm:inline">Moving Stream</span>
+                <SlidersHorizontal size={14} className="text-orange-500" />
+                <span className="hidden sm:inline">Slide Carousel</span>
               </button>
               <button
                 type="button"
@@ -941,63 +941,15 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
-        ) : viewMode === 'moving' ? (
-          /* ── Infinite Vertical Moving Streams (Slow speed, pauses on hover with 3D uplift) ── */
-          <div className="vertical-stream-group relative h-[680px] overflow-hidden rounded-2xl p-1">
-            {/* Top & Bottom gradient fade masks for smooth infinite visual feel */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#F8FAFC] dark:from-slate-950 to-transparent z-10" />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-full">
-              {/* Column 1 (Scrolls Up slowly) */}
-              <div className="overflow-hidden h-full">
-                <div className="animate-vertical-up space-y-6 pb-6">
-                  {(col1.length > 0 ? [...col1, ...col1] : sortedFiltered).map((p, idx) => (
-                    <ProgramCard
-                      key={`col1-${p.id}-${idx}`}
-                      p={p}
-                      onView={(prog) => handleViewProgram(prog)}
-                      onAsk={ask}
-                      onCompare={(id) => handleToggleCompareQueue(id)}
-                      isSelected={compareQueue.includes(p.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 2 (Scrolls Down / Alternating) */}
-              <div className="overflow-hidden h-full hidden md:block">
-                <div className="animate-vertical-down space-y-6 pb-6">
-                  {(col2.length > 0 ? [...col2, ...col2] : sortedFiltered).map((p, idx) => (
-                    <ProgramCard
-                      key={`col2-${p.id}-${idx}`}
-                      p={p}
-                      onView={(prog) => handleViewProgram(prog)}
-                      onAsk={ask}
-                      onCompare={(id) => handleToggleCompareQueue(id)}
-                      isSelected={compareQueue.includes(p.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 3 (Scrolls Up gently) */}
-              <div className="overflow-hidden h-full hidden lg:block">
-                <div className="animate-vertical-up-slow space-y-6 pb-6">
-                  {(col3.length > 0 ? [...col3, ...col3] : sortedFiltered).map((p, idx) => (
-                    <ProgramCard
-                      key={`col3-${p.id}-${idx}`}
-                      p={p}
-                      onView={(prog) => handleViewProgram(prog)}
-                      onAsk={ask}
-                      onCompare={(id) => handleToggleCompareQueue(id)}
-                      isSelected={compareQueue.includes(p.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        ) : viewMode === 'carousel' ? (
+          /* ── Premium Smooth Horizontal Slide Carousel ── */
+          <ProgramsCarousel
+            programs={sortedFiltered}
+            onView={(prog) => handleViewProgram(prog)}
+            onAsk={ask}
+            onCompare={(id) => handleToggleCompareQueue(id)}
+            compareQueue={compareQueue}
+          />
         ) : (
           /* ── Static 3-Column Grid View ── */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
