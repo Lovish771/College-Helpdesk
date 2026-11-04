@@ -1,12 +1,12 @@
 import React from 'react';
 
 /**
- * Base shimmering block with fluid diagonal light sheen
+ * Base shimmering block
  */
 export function SkeletonBlock({ className = '' }) {
   return (
     <div
-      className={`relative overflow-hidden bg-slate-200/80 dark:bg-slate-800/80 rounded-lg before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/30 dark:before:via-white/10 before:to-transparent ${className}`}
+      className={`animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-800 dark:via-slate-700/60 dark:to-slate-800 rounded-lg ${className}`}
       aria-hidden="true"
     />
   );
@@ -17,33 +17,26 @@ export function SkeletonBlock({ className = '' }) {
  */
 export function CourseCardSkeleton() {
   return (
-    <div className="flex flex-col justify-between rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4">
-      {/* Top Badges Row Placeholder */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <SkeletonBlock className="h-6 w-24 rounded-lg" />
-          <SkeletonBlock className="h-6 w-20 rounded-lg" />
-        </div>
-        <SkeletonBlock className="h-4 w-16" />
-      </div>
+    <div className="flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-xs p-0">
+      {/* Top Banner Image Placeholder */}
+      <SkeletonBlock className="h-48 w-full rounded-none" />
 
       {/* Card Body */}
-      <div className="flex-1 flex flex-col justify-between space-y-4">
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
         <div className="space-y-3">
-          {/* Code & Title Placeholder */}
-          <SkeletonBlock className="h-4 w-16 rounded" />
-          <SkeletonBlock className="h-6 w-3/4 rounded-md" />
-          <SkeletonBlock className="h-4 w-full rounded-md" />
+          {/* Title Placeholder */}
+          <SkeletonBlock className="h-5 w-3/4 rounded-md" />
+          <SkeletonBlock className="h-4 w-1/2 rounded-md" />
 
           {/* Quick info grid */}
-          <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-            <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+          <div className="space-y-2 pt-2">
+            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
               <SkeletonBlock className="h-3 w-20" />
               <SkeletonBlock className="h-3 w-24" />
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-200/60 dark:border-slate-700/60">
+            <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
               <SkeletonBlock className="h-3 w-28" />
-              <SkeletonBlock className="h-3 w-20" />
+              <SkeletonBlock className="h-3 w-16" />
             </div>
             <div className="flex justify-between py-1">
               <SkeletonBlock className="h-3 w-24" />
@@ -104,6 +97,39 @@ export function FeeTableSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <SkeletonBlock key={i} className="h-14 w-full rounded-xl" />
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Skeleton for Analytics view
+ */
+export function AnalyticsSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <div className="space-y-2">
+        <SkeletonBlock className="h-8 w-64 rounded-md" />
+        <SkeletonBlock className="h-4 w-96 rounded-md" />
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-2">
+            <SkeletonBlock className="h-3 w-20" />
+            <SkeletonBlock className="h-7 w-24" />
+            <SkeletonBlock className="h-3 w-16" />
+          </div>
+        ))}
+      </div>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-4">
+          <SkeletonBlock className="h-5 w-40" />
+          <SkeletonBlock className="h-48 w-full rounded-xl" />
+        </div>
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 space-y-4">
+          <SkeletonBlock className="h-5 w-40" />
+          <SkeletonBlock className="h-48 w-full rounded-xl" />
+        </div>
       </div>
     </div>
   );

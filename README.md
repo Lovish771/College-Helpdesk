@@ -39,8 +39,7 @@
 - **Pricing & Duration Clarity**: All duration labels explicitly state `Price for 10 months (Academic Session)`.
 - **Live Availability Interaction**: Interactive "Check Live Availability" buttons with 600ms loading spinners and simulated real-time floor/room vacancy dialogs.
 - **Free Electricity Allowance & Tariffs (Session 2026-27)**:
-  - Studio 1-Seater & 1-Seater AC: **500 units / session**
-  - 4-Seater AC Rooms: **2,000 units / session (Session 2026-27)**
+  - 1 BHK & 1-Seater Studio: **100 units / month** (1,000 units / session)
   - 2-Seater Studio: **70 units / month per room** (700 units / session)
   - 3-Seater Studio: **85 units / month per room** (850 units / session)
   - 4-Seater Studio: **100 units / month per room** (1,000 units / session)
@@ -48,7 +47,7 @@
   - 2-Seater Standard AC: **50 units / month** (500 units / session)
   - 3-Seater Standard AC: **45 units / month** (450 units / session)
   - 4-Seater Standard AC: **40 units / month** (400 units / session)
-  - Air-Cooled Rooms: Room air cooling included at **₹0 extra tariff** for full 10-month session.
+  - Air-Cooled Rooms: Duct cooling included at **₹0 extra tariff**; 30 units/mo for lighting/fans.
   - Excess units billed according to PSPCL commercial residential tariff (~₹10.50/unit) via student UMS portal.
 
 ### 4. Cryptographic Email OTP Authentication & Privacy

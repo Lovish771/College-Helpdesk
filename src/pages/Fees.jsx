@@ -3,19 +3,11 @@ import {
   Wallet, Award, BedDouble, ChevronRight, CheckCircle2,
   Sparkles, ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
   Building2, Users, Info, Scale, Check, Plus, Calculator, Landmark,
-  Calendar, Layers, Clock, Coffee, Shirt, X, GraduationCap
+  Calendar, Layers, Clock, Coffee, Shirt, X
 } from 'lucide-react';
 import { programs, scholarships as mockScholarships, fees as mockFees } from '../data/mockData';
 import { PageHead } from '../utils/useAsync';
-import { getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
 import { getStoredItem, setStoredItem } from '../utils/storage';
-import {
-  RESIDENTIAL_SERVICES,
-  HOSTEL_RATES,
-  MESS_RATES,
-  LAUNDRY_RATE,
-  ANNUAL_EXAM_FEE,
-} from '../data/feeConstants';
 
 const DISCIPLINES = [
   'All Disciplines',
@@ -28,8 +20,82 @@ const DISCIPLINES = [
   'Design & Architecture',
 ];
 
+const RESIDENTIAL_SERVICES = [
+  {
+    category: 'Hostel Accommodation (Room Charges)',
+    icon: BedDouble,
+    duration: 'Annual (10 Months Academic Session 2026-27)',
+    bg: 'rgba(234,88,12,0.1)',
+    color: '#EA580C',
+    items: [
+      { name: '1-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,90,000 / yr', desc: 'Independent luxury studio apartment with single bed, split AC, personal kitchenette with induction & microwave, refrigerator, geyser, and balcony.' },
+      { name: '2-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,40,000 / yr', desc: 'Twin-sharing luxury studio apartment with modular kitchenette, attached washroom with geyser, split AC, and refrigerator.' },
+      { name: '3-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,20,000 / yr', desc: 'Triple-sharing studio flat layout with split AC, modular kitchenette, and modern attached bathroom.' },
+      { name: '4-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,00,000 / yr', desc: 'Quad-sharing apartment flat living with split AC, modular pantry/kitchenette, and attached bathroom.' },
+      { name: '1-Seater Standard Room (AC)', fee: '₹1,53,000 / yr', desc: 'Individual room with attached washroom, study desk, ergonomic chair, wooden wardrobe, geyser, and air conditioner.' },
+      { name: '2-Seater Room (AC)', fee: '₹1,33,000 / yr', desc: 'Climate-controlled dual occupancy suite with attached bathroom, water heater, and study units.' },
+      { name: '2-Seater Room (Air-Cooled)', fee: '₹1,13,000 / yr', desc: 'Twin sharing room designed for academic focus with air-cooling ducting.' },
+      { name: '3-Seater Room (AC)', fee: '₹1,13,000 / yr', desc: 'Triple sharing room with dedicated 1.5-ton split AC and personal study stations.' },
+      { name: '3-Seater Room (Air-Cooled)', fee: '₹98,000 / yr', desc: 'Triple sharing with natural ventilation, attached balcony, and individual lockable storage.' },
+      { name: '4-Seater Room (AC)', fee: '₹93,000 / yr', desc: 'Four occupancy climate-controlled room with high-efficiency split AC.' },
+      { name: '4-Seater Room (Air-Cooled)', fee: '₹83,000 / yr', desc: 'Spacious 4-sharing room with individual study desk, wardrobe, and desert cooling ducts.' },
+    ],
+  },
+  {
+    category: 'Food & Mess Dining Plans',
+    icon: Award,
+    duration: 'Annual / Per Academic Year (Session 2026-27)',
+    bg: 'rgba(16,185,129,0.1)',
+    color: '#10B981',
+    items: [
+      { name: 'Standard Mess – 4 Meals (Full Day)', fee: '₹50,000 / yr (Early Bird: ₹45,000)', desc: 'Complete daily nutrition: Unlimited Breakfast, Lunch, Evening High-Tea with Snacks, and Dinner with dessert. Includes choice of North, South, Rajasthani, or Eastern cuisines.' },
+      { name: 'Standard Mess – 3 Meals (Without Snacks)', fee: '₹46,000 / yr (Early Bird: ₹41,400)', desc: 'Nutritious 3 meals daily (Breakfast, Lunch, Dinner) for students not requiring evening high tea.' },
+      { name: 'Standard Mess – 2 Meals (Flexible)', fee: '₹42,000 / yr (Early Bird: ₹37,800)', desc: 'Flexible 2-meal schedule (Breakfast + Dinner OR Lunch + Dinner) tailored for senior project students.' },
+      { name: 'Special Multi-Cuisine / À la carte Mess', fee: '₹58,000 / yr', desc: 'Enhanced menu featuring live counters, North & South Indian, Continental, and Chinese spreads.' },
+      { name: 'Pay-As-You-Eat / Campus Food Courts', fee: 'Variable (₹0 Mandatory)', desc: 'Students can choose not to opt for mess and dine at 40+ campus cafes, Subway, Dominos, and Uni-Mall food courts.' },
+    ],
+  },
+  {
+    category: 'University Laundry Service',
+    icon: ShieldCheck,
+    duration: 'Annual Service (10 Months Session)',
+    bg: 'rgba(59,130,246,0.1)',
+    color: '#3B82F6',
+    items: [
+      { name: 'Standard Automated Laundry Facility', fee: '₹5,400 / yr', desc: 'Up to 70 garments per month. Washed, steam-ironed, and packed within 48 hours with barcode tracking.' },
+      { name: 'Self-Service Laundromat', fee: '₹50 / wash cycle', desc: 'Coin/card-operated automatic washing machines and tumble dryers located in each residential tower basement.' },
+    ],
+  },
+];
+
+const HOSTEL_RATES = {
+  none: { name: 'Day Scholar / Off-Campus', cost: 0 },
+  'studio-1': { name: '1-Seater Studio Apartment (AC + Kitchenette)', cost: 190000 },
+  'studio-2': { name: '2-Seater Studio Apartment (AC + Kitchenette)', cost: 140000 },
+  'studio-3': { name: '3-Seater Studio Apartment (AC + Kitchenette)', cost: 120000 },
+  'studio-4': { name: '4-Seater Studio Apartment (AC + Kitchenette)', cost: 100000 },
+  'ac-1': { name: '1-Seater Standard Room (AC)', cost: 153000 },
+  'ac-2': { name: '2-Seater Room (AC)', cost: 133000 },
+  'ac-3': { name: '3-Seater Room (AC)', cost: 113000 },
+  'ac-4': { name: '4-Seater Room (AC)', cost: 93000 },
+  'standard-2': { name: '2-Seater Standard (Air-Cooled)', cost: 113000 },
+  'standard-3': { name: '3-Seater Standard (Air-Cooled)', cost: 98000 },
+  'standard-4': { name: '4-Seater Standard (Air-Cooled)', cost: 83000 },
+};
+
+const MESS_RATES = {
+  none: { name: 'No Mess / Food Court (₹0)', cost: 0 },
+  'std-4': { name: 'Standard 4-Meal Mess (₹50,000 / yr)', cost: 50000 },
+  'std-3': { name: 'Standard 3-Meal Mess (₹46,000 / yr)', cost: 46000 },
+  'std-2': { name: 'Standard 2-Meal Mess (₹42,000 / yr)', cost: 42000 },
+  special: { name: 'Special Multi-Cuisine Mess (₹58,000 / yr)', cost: 58000 },
+};
+
+const LAUNDRY_RATE = 5400;
+const ANNUAL_EXAM_FEE = 5000; // Taken once annually in the 2nd semester of each year
+
 export default function Fees({ ask, onOpenCompare, go }) {
-  const [activeTab, setActiveTab] = useState('program-fees'); // Default to full programme tuition catalog view
+  const [activeTab, setActiveTab] = useState('degree-planner'); // Default to full tenure fee planner
   const initialPrefs = useMemo(() => getStoredItem('lpu_fee_preferences'), []);
   const [selectedCourseId, setSelectedCourseId] = useState(initialPrefs.selectedCourseId || 'btech-cse');
   const [calcSlab, setCalcSlab] = useState(initialPrefs.calcSlab || 'cat1'); // 'none' | 'cat1' | 'cat2' | 'cat3' | 'custom'
@@ -74,24 +140,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
     }));
   };
 
-  const activeCourse = useMemo(() => {
-    return programs.find((p) => p.id === selectedCourseId) || programs[0];
-  }, [selectedCourseId]);
-
-  const tenureYears = useMemo(() => {
-    if (!activeCourse?.duration) return 4;
-    const yearMatch = activeCourse.duration.match(/(\d+)\s*(?:year|yr)/i);
-    if (yearMatch) {
-      return parseInt(yearMatch[1], 10);
-    }
-    const semMatch = activeCourse.duration.match(/(\d+)\s*sem/i);
-    if (semMatch) {
-      return Math.max(1, Math.ceil(parseInt(semMatch[1], 10) / 2));
-    }
-    return 4;
-  }, [activeCourse]);
-
-  const activeFee = mockFees[activeCourse?.id || 'btech-cse'] || {
+  const activeFee = mockFees[activeCourse.id] || {
     tuition: '₹1,60,000 / semester (Base)',
     other: '₹5,000 / semester (Examination Fee)',
     scholarship: 'Category I: up to 50% waiver',
@@ -182,20 +231,14 @@ export default function Fees({ ask, onOpenCompare, go }) {
       if (selectedDiscipline !== 'All Disciplines') {
         if (selectedDiscipline === 'Computer Science & IT' && !(p.tags?.includes('Computer Science') || p.id.startsWith('btech-cse') || p.id.startsWith('bca') || p.id.startsWith('mca'))) return false;
         if (selectedDiscipline === 'Engineering' && !p.tags?.includes('Engineering')) return false;
-        if (selectedDiscipline === 'Management & Commerce' && !(p.tags?.includes('Management') || p.tags?.includes('Commerce') || p.id.startsWith('bba') || p.id.startsWith('mba') || p.id.startsWith('bcom'))) return false;
-        if (selectedDiscipline === 'Law' && !(p.tags?.includes('Law') || p.id.includes('llb') || p.id.includes('llm'))) return false;
-        if (selectedDiscipline === 'Pharmacy & Healthcare' && !(p.tags?.includes('Pharmacy') || p.tags?.includes('Healthcare') || p.tags?.includes('Medical') || p.id.startsWith('bpharm') || p.id.startsWith('bpt') || p.id.startsWith('mpharm'))) return false;
-        if (selectedDiscipline === 'Agriculture & Science' && !(p.tags?.includes('Agriculture') || p.tags?.includes('Science') || p.id.startsWith('bsc-') || p.id.startsWith('msc-'))) return false;
-        if (selectedDiscipline === 'Design & Architecture' && !(p.tags?.includes('Design') || p.tags?.includes('Architecture') || p.id.startsWith('bdes') || p.id.startsWith('barch') || p.id.startsWith('bsc-animation'))) return false;
+        if (selectedDiscipline === 'Management & Commerce' && !(p.tags?.includes('Management') || p.tags?.includes('Commerce'))) return false;
+        if (selectedDiscipline === 'Law' && !p.tags?.includes('Law')) return false;
+        if (selectedDiscipline === 'Pharmacy & Healthcare' && !(p.tags?.includes('Pharmacy') || p.tags?.includes('Healthcare') || p.tags?.includes('Medical'))) return false;
+        if (selectedDiscipline === 'Agriculture & Science' && !(p.tags?.includes('Agriculture') || p.tags?.includes('Science'))) return false;
       }
       if (query) {
         const q = query.toLowerCase();
-        return (
-          p.name.toLowerCase().includes(q) ||
-          p.short.toLowerCase().includes(q) ||
-          p.id.toLowerCase().includes(q) ||
-          (p.description && p.description.toLowerCase().includes(q))
-        );
+        return p.name.toLowerCase().includes(q) || p.short.toLowerCase().includes(q);
       }
       return true;
     });
@@ -220,10 +263,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
         <PageHead
           title="Tuition, Scholarships & Living Fee Planner"
           text="Complete financial transparency across 44 LPU degree programmes with customizable multi-year living calculators, scholarship fee concessions, and education loan assistance."
-          badge="LPU fee structure · 2026-27"
+          badge="Official LPU Structure 2026-27"
         >
           <button
-            onClick={() => ask(`Can you help me calculate the total ${tenureYears}-year expenditure and hostel fees for ${activeCourse.short}?`)}
+            onClick={() => ask(`Can you help me calculate the total 4-year expenditure and hostel fees for ${activeCourse.short}?`)}
             className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer"
           >
             <Sparkles size={14} />
@@ -232,26 +275,36 @@ export default function Fees({ ask, onOpenCompare, go }) {
         </PageHead>
 
                 {/* ── Official Estimation Notice Banner (Session 2026-27) ── */}
-        <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-500/30 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Info size={15} />
+        <div className="rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+              <Info size={18} />
             </div>
-            <p className="text-amber-900/90 dark:text-amber-200/90 leading-snug">
-              <strong className="font-extrabold">Estimated Budget (Session 2026-27):</strong> Figures represent estimated LPU academic, hostel & dining expenditures. Annual exam fee (₹5,000) is levied in 2nd semester.
-            </p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-amber-900 dark:text-amber-200 text-sm">
+                  Estimated Fee Calculation Notice
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white font-bold text-[10px] uppercase tracking-wider">
+                  Session 2026-27
+                </span>
+              </div>
+              <p className="text-amber-800/90 dark:text-amber-300/80 leading-relaxed text-xs">
+                All figures displayed are estimated calculations of Lovely Professional University (LPU) academic tuition, scholarships, examination, and hostel expenditures. Charges are subject to revision as per official notifications and candidate profile verification. Examination fee (₹5,000) is levied once annually in the 2nd semester of each year.
+              </p>
+            </div>
           </div>
-          <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 dark:bg-amber-900/40 border border-amber-500/20 text-amber-800 dark:text-amber-200 font-bold text-[11px]">
-            <Clock size={12} className="text-amber-600 dark:text-amber-400" />
-            <span>Session 2026-27 Verified</span>
+          <div className="shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 dark:bg-amber-900/40 border border-amber-500/30 text-amber-900 dark:text-amber-200 font-bold text-[11px]">
+            <Clock size={13} className="text-amber-600 dark:text-amber-400" />
+            <span>Last Updated: Session 2026-27 Data</span>
           </div>
         </div>
 
         {/* ── Main Category Switcher (Pill Style) ── */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-3xl">
+        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-2xl">
           {[
-            { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet, badge: `${programs.length} Courses` },
-            { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator, badge: 'Interactive' },
+            { id: 'degree-planner', label: 'Tenure Fee Calculator', icon: Calculator, badge: 'New' },
+            { id: 'program-fees', label: 'Programme Tuition & Slabs', icon: Wallet },
             { id: 'residential-fees', label: 'Hostel, Mess & Laundry Rates', icon: BedDouble },
             { id: 'scholarships', label: 'Scholarship Policies', icon: Award },
           ].map(({ id, label, icon: Icon, badge }) => {
@@ -288,25 +341,19 @@ export default function Fees({ ask, onOpenCompare, go }) {
             <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                 <div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
-                      {activeCourse.degree} • {activeCourse.short}
+                      Multi-Year Living &amp; Tuition Planner
                     </span>
                     <span className="text-xs text-slate-400 font-semibold">
                       Tenure: <strong>{activeCourse.duration}</strong>
                     </span>
-                    <button
-                      onClick={() => setActiveTab('program-fees')}
-                      className="text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer ml-auto"
-                    >
-                      Browse All {programs.length} Programmes →
-                    </button>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1">
-                    {activeCourse.name}
+                    Expected Fee Calculator ({tenureYears} Years Total Budget)
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                    {activeCourse.description}
+                    Customize your accommodation, mess dining, and laundry services year-by-year (e.g. Year 1 with Mess, Year 2 Day Scholar or without Mess) to calculate your exact expected expenditure.
                   </p>
                 </div>
 
@@ -318,11 +365,11 @@ export default function Fees({ ask, onOpenCompare, go }) {
                   <select
                     value={selectedCourseId}
                     onChange={(e) => setSelectedCourseId(e.target.value)}
-                    className="w-full md:w-80 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:border-orange-500"
+                    className="w-full md:w-72 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none cursor-pointer focus:border-orange-500"
                   >
                     {programs.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} ({p.short})
+                        {p.short} ({p.duration})
                       </option>
                     ))}
                   </select>
@@ -488,76 +535,63 @@ export default function Fees({ ask, onOpenCompare, go }) {
                   </span>
                 </div>
 
-                <div className={`grid gap-4 ${
-                  tenureYears === 2 ? 'grid-cols-1 md:grid-cols-2' :
-                  tenureYears === 3 ? 'grid-cols-1 md:grid-cols-3' :
-                  tenureYears === 5 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' :
-                  'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
-                }`}>
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   {yearlyBreakdowns.map((item) => {
                     const currentPlan = yearPlans[item.year] || { hostel: 'none', mess: 'none', laundry: false };
                     return (
                       <div
                         key={item.year}
-                        className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-orange-300 dark:hover:border-slate-700 transition-all shadow-xs"
+                        className="rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-orange-300 dark:hover:border-slate-600 transition-all"
                       >
                         <div>
                           {/* Year Header */}
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                            <div>
-                              <span className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-white block">
-                                Year {item.year}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-semibold">
-                                Sem {item.year * 2 - 1} &amp; {item.year * 2}
-                              </span>
-                            </div>
-                            <div className="text-right">
-                              <span className="font-extrabold text-orange-600 dark:text-orange-400 text-sm sm:text-base font-display block">
-                                ₹{item.total.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] text-slate-400">Total / yr</span>
-                            </div>
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+                            <span className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                              Academic Year {item.year}
+                            </span>
+                            <span className="font-extrabold text-orange-600 dark:text-orange-400 text-xs sm:text-sm">
+                              ₹{item.total.toLocaleString()}
+                            </span>
                           </div>
 
                           {/* Control 1: Hostel Room */}
                           <div className="mt-3 space-y-1">
-                            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                               <BedDouble size={12} className="text-orange-500" />
-                              Accommodation:
+                              Hostel Room:
                             </label>
                             <select
                               value={currentPlan.hostel}
                               onChange={(e) => updateYearPlan(item.year, 'hostel', e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
+                              className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500"
                             >
                               <option value="none">Day Scholar / Off-Campus (₹0)</option>
-                              <option value="studio-1">1-Seater Studio Apartment (₹1,90,000)</option>
-                              <option value="studio-2">2-Seater Studio Apartment (₹1,40,000)</option>
-                              <option value="studio-3">3-Seater Studio Apartment (₹1,20,000)</option>
-                              <option value="studio-4">4-Seater Studio Apartment (₹1,00,000)</option>
-                              <option value="ac-1">1-Seater Standard Room AC (₹1,53,000)</option>
-                              <option value="ac-2">2-Seater Room AC (₹1,33,000)</option>
-                              <option value="ac-3">3-Seater Room AC (₹1,13,000)</option>
-                              <option value="ac-4">4-Seater Room AC (₹93,000)</option>
-                              <option value="standard-2">2-Seater Standard Cooler (₹1,13,000)</option>
-                              <option value="standard-3">3-Seater Standard Cooler (₹98,000)</option>
-                              <option value="standard-4">4-Seater Standard Cooler (₹83,000)</option>
+                              <option value="studio-1">1-Seater Studio Apartment (AC + Kitchenette) (₹1,90,000)</option>
+                              <option value="studio-2">2-Seater Studio Apartment (AC + Kitchenette) (₹1,40,000)</option>
+                              <option value="studio-3">3-Seater Studio Apartment (AC + Kitchenette) (₹1,20,000)</option>
+                              <option value="studio-4">4-Seater Studio Apartment (AC + Kitchenette) (₹1,00,000)</option>
+                              <option value="ac-1">1-Seater Standard Room (AC) (₹1,53,000)</option>
+                              <option value="ac-2">2-Seater Room (AC) (₹1,33,000)</option>
+                              <option value="ac-3">3-Seater Room (AC) (₹1,13,000)</option>
+                              <option value="ac-4">4-Seater Room (AC) (₹93,000)</option>
+                              <option value="standard-2">2-Seater Standard (Air-Cooled) (₹1,13,000)</option>
+                              <option value="standard-3">3-Seater Standard (Air-Cooled) (₹98,000)</option>
+                              <option value="standard-4">4-Seater Standard (Air-Cooled) (₹83,000)</option>
                             </select>
                           </div>
 
                           {/* Control 2: Mess Dining */}
                           <div className="mt-3 space-y-1">
-                            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
                               <Coffee size={12} className="text-emerald-500" />
-                              Food &amp; Mess:
+                              Mess Food Plan:
                             </label>
-                            <select
+                                                        <select
                               value={currentPlan.mess}
                               onChange={(e) => updateYearPlan(item.year, 'mess', e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
+                              className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500"
                             >
-                              <option value="none">No Mess / Pay-As-You-Eat (₹0)</option>
+                              <option value="none">No Mess / Food Court (₹0)</option>
                               <option value="std-4">Standard 4-Meal Mess (₹50,000)</option>
                               <option value="std-3">Standard 3-Meal Mess (₹46,000)</option>
                               <option value="std-2">Standard 2-Meal Mess (₹42,000)</option>
@@ -566,10 +600,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
                           </div>
 
                           {/* Control 3: Laundry Service Toggle */}
-                          <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
                             <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1 cursor-pointer">
                               <Shirt size={12} className="text-blue-500" />
-                              Automated Laundry (₹5,400):
+                              Uni-Laundry Automated Facility (₹5,400/yr):
                             </label>
                             <input
                               type="checkbox"
@@ -580,10 +614,30 @@ export default function Fees({ ask, onOpenCompare, go }) {
                           </div>
                         </div>
 
-                        {/* Streamlined summary chip */}
-                        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                          <span>Tuition + Exam:</span>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">₹{(item.tuition + item.exam).toLocaleString()}</span>
+                        {/* Breakdown summary for this Year */}
+                        <div className="pt-3 border-t border-slate-200 dark:border-slate-700 text-[11px] space-y-1 text-slate-500 dark:text-slate-400">
+                          <div className="flex justify-between">
+                            <span>Annual Tuition (2 Sems):</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">₹{item.tuition.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Exam Fee (2nd Sem only):</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">₹{item.exam.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Hostel Accommodation:</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{item.hostel > 0 ? `₹${item.hostel.toLocaleString()}` : '₹0 (Day Scholar)'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Mess &amp; Dining:</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-200">{item.mess > 0 ? `₹${item.mess.toLocaleString()}` : '₹0 (No Mess)'}</span>
+                          </div>
+                          {item.laundry > 0 && (
+                            <div className="flex justify-between">
+                              <span>Laundry Service:</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">₹{item.laundry.toLocaleString()}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -592,7 +646,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
               </div>
 
               {/* Overall Total Tenure Expenditure Banner */}
-              <div className="rounded-lg bg-slate-900 text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 sm:p-7 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-orange-600 text-white uppercase tracking-wider">
@@ -620,15 +674,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
 
                 <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
                   <button
-                    onClick={() => {
-                      go('admissions');
-                      setTimeout(() => {
-                        const el = document.getElementById('education-loans');
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 120);
-                    }}
+                    onClick={() => go('admissions')}
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold bg-white text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shadow-md"
-                    title="View LPU Financial Aid & Education Loan Process"
                   >
                     <Landmark size={14} className="text-orange-600" />
                     <span>Apply for Education Loan</span>
@@ -724,7 +771,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       Fee Breakdown ({activeCourse.short})
                     </span>
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                      {effectiveWaiverPercent}% Scholarship Applied
+                      {waiverPercent}% Scholarship Applied
                     </span>
                   </div>
 
@@ -736,10 +783,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       </span>
                     </div>
 
-                    {effectiveWaiverPercent > 0 && (
+                    {waiverPercent > 0 && (
                       <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Scholarship Concession ({effectiveWaiverPercent}%):</span>
-                        <span className="font-bold">-₹{totalConcessionPerSem.toLocaleString()} / sem</span>
+                        <span>Scholarship Concession ({waiverPercent}%):</span>
+                        <span className="font-bold">-₹{concessionAmt.toLocaleString()} / sem</span>
                       </div>
                     )}
 
@@ -882,27 +929,20 @@ export default function Fees({ ask, onOpenCompare, go }) {
                 {filteredCourses.map((p) => {
                   const f = mockFees[p.id] || { tuition: '₹1,60,000 / semester (Base)' };
                   const isSelected = selectedCourseId === p.id;
-                  const mainDeg = getMainDegree(p);
-                  const degTheme = getDegreeTheme(mainDeg);
                   return (
                     <div
                       key={p.id}
-                      className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-300 flex flex-col justify-between group ${
+                      className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] transition-all duration-200 flex flex-col justify-between group ${
                         isSelected
-                          ? `ring-2 ${degTheme.ringColor} border-transparent shadow-md`
-                          : `border-slate-200/90 dark:border-slate-800 ${degTheme.hoverBorder} ${degTheme.hoverGlow}`
+                          ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-md'
+                          : 'border-slate-200/90 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-2.5">
-                          <div className={`relative inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider overflow-hidden shadow-xs ${degTheme.glow} select-none transition-transform duration-300 group-hover:scale-105`}>
-                            <div className={`absolute inset-0 bg-gradient-to-r ${degTheme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
-                            <GraduationCap size={11} className="relative z-10 text-white drop-shadow-xs" />
-                            <span className="relative z-10 text-white font-extrabold tracking-wide drop-shadow-xs">
-                              {mainDeg}
-                            </span>
-                          </div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+                            {p.short}
+                          </span>
                           <span className="text-[11px] font-medium text-slate-400">{p.duration}</span>
                         </div>
                         <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">

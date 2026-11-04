@@ -1,6 +1,3 @@
-import re
-
-from app import db
 from app.models import Program, CurriculumCourse, KnowledgeEntry
 from app.services.intent_detector import IntentDetector
 from app.services.slot_filling import SlotFilling
@@ -39,57 +36,43 @@ class RuleEngine:
         Process a user message through the rule engine.
         Returns: (reply, intent, confidence, requires_slot, slot, suggestions)
         """
-        context = self.slot_filling.get_context(conversation_id)
-        try:
-            return self._process(message, context)
-        finally:
-            # Whatever this turn established (a programme, a semester, a pending
-            # intent) is remembered for the next turn, including the turns that
-            # answered straight away.
-            self.slot_filling.save_context(conversation_id, context)
-
-    def _process(self, message, context):
-        """Apply the IF-THEN rules for one turn, updating `context` in place."""
         # Detect intent
         intent, confidence, pattern = self.intent_detector.detect_intent(message)
-
+        
+        # Get conversation context
+        context = self.slot_filling.get_context(conversation_id)
+        
         # Extract entities
         program = self.intent_detector.extract_program(message)
         semester = self.intent_detector.extract_semester(message)
         fee_type = self.intent_detector.extract_fee_type(message)
-
-        # Update context with extracted entities. Only the programme id is stored:
-        # the row itself must be re-read per request (see _resolve_program).
+        
+        # Update context with extracted entities
         if program:
-            context['program'] = program.id
+            context['program'] = program
         if semester:
             context['semester'] = semester
         if fee_type:
             context['fee_type'] = fee_type
-
+        
         # Check if we have a pending intent from previous turn
         if context.get('pending_intent') and program:
             intent = context['pending_intent']
             context['pending_intent'] = None
-
+        
         # Handle greetings & exits
         if intent == 'greeting':
             return self._handle_greeting(), intent, confidence, False, None, ['Available Programmes', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities']
-
+        
         if intent == 'goodbye':
             return self._handle_goodbye(), intent, confidence, False, None, []
-
+        
         if intent == 'unknown':
             # Check if user mentioned a program directly
             if program:
                 return self._format_program_info(program), 'program_query', 0.92, False, None, [f'Fee for {program.short_name}', f'Eligibility for {program.short_name}', 'Admission Process']
-            # A short follow-up ("and the eligibility?") stays on the programme the
-            # conversation is already about instead of falling back to "I don't know".
-            carried = self._answer_from_context(message, context)
-            if carried:
-                return carried
             return self._handle_unknown(), intent, confidence, False, None, ['Available Programmes', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities', 'Placements']
-
+        
         # Check for missing slots (e.g. asking for fee without specifying program)
         missing_slots = self.slot_filling.get_missing_slots(intent, context)
         if missing_slots:
@@ -97,68 +80,12 @@ class RuleEngine:
             question, suggestions = self.slot_filling.generate_slot_question(slot, context)
             context['pending_intent'] = intent
             return question, intent, confidence, True, slot, suggestions
-
+        
         # Generate response based on intent and resolved context
         response = self._generate_response(intent, context)
         suggestions = self._get_suggestions(intent, context)
-
+        
         return response, intent, confidence, False, None, suggestions
-
-    def _resolve_program(self, context):
-        """
-        Re-read the programme this conversation is about.
-
-        The context stores a programme id, so every turn loads its own row from
-        the current session instead of reusing one loaded by an earlier request.
-        """
-        program_id = (context or {}).get('program')
-        if not program_id:
-            return None
-        if not isinstance(program_id, str):
-            program_id = getattr(program_id, 'id', None)
-        if not program_id:
-            return None
-        return db.session.get(Program, program_id)
-
-    def _answer_from_context(self, message, context):
-        """
-        Answer a bare follow-up about the programme under discussion.
-
-        "Tell me about MBA" then "and the eligibility?" carries no intent keyword
-        at all, so the question is read as a question about that programme.
-        """
-        program = self._resolve_program(context)
-        if not program:
-            return None
-
-        follow_up = re.sub(r'[^a-z0-9\s]', '', message.lower()).strip()
-        words = follow_up.split()
-        if not words or len(words) > 6:
-            return None
-        if not re.match(r'^(and|what about|how about|whats|what is|tell me|also|then|ok|okay)\b', follow_up):
-            return None
-
-        if self._mentions(follow_up, ('fee', 'fees', 'cost', 'tuition', 'charges', 'price')):
-            return self._format_fee_info(program, context.get('fee_type')), 'fee_query', 0.88, False, None, self._get_suggestions('fee_query', {'program': program.id})
-        if self._mentions(follow_up, ('eligib', 'criteria', 'qualification', 'qualif', 'cutoff', 'cut off', 'marks')):
-            return self._format_eligibility_info(program), 'eligibility_query', 0.88, False, None, self._get_suggestions('eligibility_query', {'program': program.id})
-        if self._mentions(follow_up, ('hostel', 'room', 'mess', 'accommodation')):
-            return self._generate_response('hostel_query', context), 'hostel_query', 0.88, False, None, self._get_suggestions('hostel_query', context)
-        if self._mentions(follow_up, ('placement', 'package', 'salary', 'job')):
-            return self._generate_response('placements', context), 'placements', 0.88, False, None, self._get_suggestions('placements', context)
-        if self._mentions(follow_up, ('curriculum', 'syllabus', 'subjects', 'course')):
-            return self._generate_response('curriculum_query', context), 'curriculum_query', 0.88, False, None, self._get_suggestions('curriculum_query', context)
-        if self._mentions(follow_up, ('scholarship', 'scholar', 'waiver')):
-            return self._generate_response('scholarship_query', context), 'scholarship_query', 0.88, False, None, self._get_suggestions('scholarship_query', context)
-        if self._mentions(follow_up, ('more', 'details', 'info', 'information', 'tell me')):
-            return self._format_program_info(program), 'program_query', 0.88, False, None, self._get_suggestions('program_query', context)
-
-        return None
-
-    @staticmethod
-    def _mentions(text, keywords):
-        return any(keyword in text for keyword in keywords)
-
     
     def _handle_greeting(self):
         return (
@@ -174,7 +101,7 @@ class RuleEngine:
     def _handle_unknown(self):
         return (
             "I'm sorry, I couldn't identify the exact information you requested.\n\n"
-            "I can help with Lovely Professional University details on:\n"
+            "I can assist you with official Lovely Professional University details on:\n"
             "• **Programmes & Specializations** (B.Tech CSE, AI & ML, MBA, BCA, MCA, B.Sc Agri)\n"
             "• **LPUNEST & Admissions** (Dates, Steps, Proctored Exam)\n"
             "• **Fee Structure & Expenses**\n"
@@ -187,17 +114,14 @@ class RuleEngine:
     
     def _generate_response(self, intent, context):
         """Generate authentic LPU response based on intent and context"""
-        program = self._resolve_program(context)
-
+        program = context.get('program')
+        
         if intent == 'program_query':
             if program:
                 return self._format_program_info(program)
             return self._list_programs()
         
         if intent == 'fee_query':
-            if context.get('fee_type') == 'hostel' and not program:
-                # Hostel fees are the same whichever programme the student takes.
-                return self._format_hostel_fee_info()
             if program:
                 return self._format_fee_info(program, context.get('fee_type'))
             return self._list_programs() + "\n\nWhich programme's fee information would you like to check?"
@@ -269,7 +193,7 @@ class RuleEngine:
                 f"• **Email:** {lpu_contact['email']}\n"
                 f"• **Office Hours:** {lpu_contact['hours']}\n"
                 f"• **Campus Address:** {lpu_contact['address']}\n"
-                f"• **Website:** {lpu_contact['website']}"
+                f"• **Official Website:** {lpu_contact['website']}"
             )
         
         if intent == 'entrance_exam':
@@ -299,107 +223,9 @@ class RuleEngine:
                 f"• **Top Recruiter Network:** 2,000+ recruiting companies including Google, Microsoft, Amazon, Cisco, Apple, Cognizant, and Deloitte.\n"
                 f"• **Super Dream Offers:** Over 1,000+ Fortune 500 companies actively hire LPU engineering and management graduates."
             )
-
-        if intent == 'loan_query':
-            return (
-                "**Education Loan Facilitation at Lovely Professional University:**\n\n"
-                "LPU provides comprehensive institutional loan support with premier nationalized and private banking partners:\n\n"
-                "• **Tie-Up Banks:** State Bank of India (SBI), Punjab National Bank (PNB), Canara Bank, Union Bank of India, and HDFC Bank.\n"
-                "• **On-Campus Bank Branches:** SBI and PNB operate full-service branches and ATMs directly inside the Uni-Mall on campus.\n"
-                "• **Step 1 - Admission Offer:** Secure your provisional seat allotment at [admission.lpu.in](https://admission.lpu.in).\n"
-                "• **Step 2 - Loan Letter:** Download your **Loan Estimation & Bonafide Letter** from your LPU UMS student portal.\n"
-                "• **Step 3 - National Vidya Lakshmi Portal:** Apply online through the Ministry of Education's [vidyalakshmi.co.in](https://www.vidyalakshmi.co.in) portal.\n"
-                "• **Disbursement:** Banks disburse tuition fees directly to the University and residential allowances to your student account."
-            )
-
-        if intent == 'hostel_tier_query':
-            return (
-                "**LPU Hostel Accommodation Tiers & Tariff Categories (Session 2026-27):**\n\n"
-                "Lovely Professional University offers three distinct residential tiers for a standard 10-month academic tenure:\n\n"
-                "1. **Standard Hostels (1, 2, 3, 4-Seater Rooms):**\n"
-                "   • Available in both AC and Air-Cooled formats with study tables, cupboards, and attached washrooms.\n"
-                "   • Tariffs range from ~₹80,000 to ₹1,60,000 / year (tenure of 10 months).\n\n"
-                "2. **Apartment Hostels:**\n"
-                "   • Modern multi-room apartment suites featuring air-conditioning, geysers, study lounge, and shared pantry access.\n"
-                "   • Designed for students seeking higher privacy and independent study spaces.\n\n"
-                "3. **Studio Apartments:**\n"
-                "   • Self-contained studio suites with private kitchenette space, personal refrigerator/microwave provision, attached washroom, and dedicated high-speed Wi-Fi.\n\n"
-                "⚡ **Electricity Policy:** Monthly kilowatt-hour quota is provided free of charge; excess units are billed at commercial Punjab State Power Corporation (PSPCL) slab rates (~₹10.50/unit)."
-            )
-
-        if intent == 'exam_fee_query':
-            return (
-                "**LPU examination fee schedule:**\n\n"
-                "• **Fee Amount:** ₹4,500 per academic year.\n"
-                "• **Collection Schedule:** Billed strictly **once per year in the even (second) semester** of each respective academic year (i.e., Semester 2, Semester 4, Semester 6, Semester 8).\n"
-                "• **Odd Semesters:** No examination fee is assessed in odd semesters (1st, 3rd, 5th, 7th)."
-            )
-
-        if intent == 'laundry_query':
-            return (
-                "**LPU Laundry Services & Charges:**\n\n"
-                "• **Standard Package:** ₹5,400 per academic year.\n"
-                "• **Service Coverage:** Includes 40 washes/bundles per year with automated washing and professional steam ironing.\n"
-                "• **Collection & Delivery:** Convenient drop-off and pickup counters inside each residential hostel tower."
-            )
-
-        if intent == 'mess_query':
-            return (
-                "**LPU Mess & Dining Charges:**\n\n"
-                "• **Standard Vegetarian Mess:** ~₹40,000 / year - the default meal plan covering the residential tenure.\n"
-                "• **Special Mess:** ~₹55,000 / year - extended multi-cuisine menu alongside the standard plan.\n"
-                "• **South Indian Meal Plan:** Available as an add-on in the dining halls.\n"
-                "• **Uni-Mall Food Courts:** Domino's, Subway, CCD, and Haldiram's outlets are available on campus for pay-as-you-eat options.\n\n"
-                "Mess charges are billed along with the hostel fee, not as part of the academic tuition fee. "
-                "You can combine tuition, hostel, mess, laundry, and scholarship figures in the **Fees & Calculator** page."
-            )
-
-        if intent == 'transport_query':
-            return (
-                "**Reaching LPU Campus & Transit Options:**\n\n"
-                "• **Location:** Lovely Professional University, Jalandhar-Delhi G.T. Road (NH-1), Phagwara, Punjab - 144411.\n"
-                "• **Nearest Railway Station:** Phagwara Railway Station is about 5 km from campus; Jalandhar City Station is about 22 km.\n"
-                "• **Nearest Airport:** Sri Guru Ram Dass Jee International Airport, Amritsar (approx. 100 km) and Adampur Airport (approx. 30 km) serve the region.\n"
-                "• **On Arrival:** Report to the Central Welcome Center at Main Gate 1 - guided electric buggy shuttles take visitors to the Admissions Block 30.\n"
-                "• **University Transport:** LPU runs its own bus service for students and staff covering Phagwara, Jalandhar, Kapurthala, and nearby towns.\n"
-                "• **Parking:** Visitor and student parking is available at the main gates.\n\n"
-                f"For current bus routes, timings, and pickup points, confirm with the helpdesk on {lpu_contact['toll_free']} or {lpu_contact['phone']}."
-            )
-
-        if intent == 'total_fee_query':
-            if program:
-                return self._format_total_fee_estimate(program)
-            return (
-                "To calculate your comprehensive 4-year degree fee (tuition, hostel, mess, laundry, and scholarships), "
-                "which programme at Lovely Professional University are you planning to pursue?"
-            )
-
-        if intent == 'compare_query':
-            return (
-                "**Compare Degree Programmes at LPU:**\n\n"
-                "You can compare academic disciplines, total credits, curriculum tracks, eligibility criteria, and fee structures side-by-side.\n\n"
-                "💡 Visit our **Compare Degrees** tool in the navigation bar to select and compare any programmes, or ask me e.g. *'Compare B.Tech CSE and B.Tech AI & ML'*."
-            )
-
+        
         return self._handle_unknown()
     
-    def _format_hostel_fee_info(self):
-        """Hostel tariffs straight from the knowledge base (room-based, not degree-based)."""
-        room_lines = "\n".join([
-            f"• **{name}:** {detail}"
-            for name, detail in lpu_hostel.get('rooms', [])
-        ])
-        return (
-            "**LPU Hostel Fee Structure (Session 2026-27):**\n\n"
-            f"{room_lines}\n\n"
-            "🏠 **Billed in addition to the academic fee:**\n"
-            "• **Standard Vegetarian Mess:** ~₹40,000 / year | **Special Mess:** ~₹55,000 / year\n"
-            "• **Laundry:** ₹5,400 / year (40 washes/bundles)\n"
-            "• **Electricity:** monthly free quota; excess billed at PSPCL slab rates.\n\n"
-            "The academic tuition fee is charged separately per programme - ask e.g. *'fee for B.Tech CSE'*. "
-            "You can combine both in the **Fees & Calculator** page."
-        )
-
     def _format_program_info(self, program):
         return (
             f"**{program.name} ({program.short_name})**\n\n"
@@ -469,55 +295,16 @@ class RuleEngine:
             f"You can view complete course descriptions, credits, and electives on the **Curriculum** page."
         )
     
-    def _format_total_fee_estimate(self, program):
-        f = lpu_fees.get(program.id, {'tuition': '₹1,60,000 / semester (Base)'})
-        numbers = re.findall(r'[\d,]+', f['tuition'])
-        base_num = int(numbers[0].replace(',', '')) if numbers else 160000
-        duration_years = 4 if '4' in program.duration else (3 if '3' in program.duration else (2 if '2' in program.duration else 4))
-        total_semesters = duration_years * 2
-        total_tuition = base_num * total_semesters
-        exam_total = 4500 * duration_years
-
-        return (
-            f"**Estimated Comprehensive Degree Fee Breakdown for {program.name} ({program.short_name}):**\n\n"
-            f"• **Duration:** {program.duration} ({total_semesters} Semesters)\n"
-            f"• **Base Tuition:** ₹{base_num:,} / semester\n"
-            f"• **Total Base Tuition ({duration_years} Years):** ₹{total_tuition:,}\n"
-            f"• **Total Examination Fees ({duration_years} × ₹4,500 collected in even semesters):** ₹{exam_total:,}\n\n"
-            f"🏠 **Residential Options & Living Expenses (Per Year):**\n"
-            f"• **Standard Hostel (2/3 Seater):** ~₹90,000 - ₹1,20,000 / year (10-month tenure)\n"
-            f"• **Apartment / Studio Hostels:** ~₹1,50,000 - ₹2,10,000 / year (AC, attached bath, pantry access)\n"
-            f"• **Standard Mess Meal Plan:** ~₹40,000 / year (4 daily meals)\n"
-            f"• **Laundry Allowance:** ₹5,400 / year (40 bundles/washes)\n\n"
-            f"🎓 **Merit Scholarship Reductions (LPUNEST / 12th Board):**\n"
-            f"• **Category I (~30-48% Fee Waiver):** Saves up to ₹{(base_num * 0.48 * total_semesters):,.0f} across {duration_years} years!\n\n"
-            f"You can also use our interactive **Fees & Calculator** page to configure custom mess, laundry, and scholarship parameters."
-        )
-
     def _get_suggestions(self, intent, context=None):
         """Get relevant suggestions based on intent and context"""
-        program = self._resolve_program(context) if context else None
-
+        program = context.get('program') if context else None
+        
         if intent == 'fee_query':
             return [f'Eligibility for {program.short_name}' if program else 'LPUNEST Scholarship', 'Hostel Facilities', 'Admission Process']
-        elif intent == 'total_fee_query':
-            return ['Hostel Tiers & Pricing', 'Education Loan Process', 'LPUNEST Scholarships', 'Admission Steps']
         elif intent == 'eligibility_query':
             return [f'Fee for {program.short_name}' if program else 'Fee Structure', 'Admission Process', 'Required Documents']
-        elif intent == 'hostel_query' or intent == 'hostel_tier_query':
-            return ['Apartment Hostels', 'Studio Apartments', 'Laundry Charges', 'Mess Meal Plans']
-        elif intent == 'exam_fee_query':
-            return ['Fee Structure', 'LPUNEST Dates', 'Admission Procedure', 'Total 4-Year Cost']
-        elif intent == 'laundry_query':
-            return ['Hostel Room Tiers', 'Mess Facilities', 'Campus Amenities', 'Fee Structure']
-        elif intent == 'mess_query':
-            return ['Hostel Room Tiers', 'Laundry Charges', 'Total 4-Year Cost', 'Fee Structure']
-        elif intent == 'transport_query':
-            return ['Campus Location & Address', 'Contact Admission Office', 'Hostel Facilities', 'Admission Process']
-        elif intent == 'loan_query':
-            return ['Admission Offer Steps', 'Vidya Lakshmi Portal', 'Campus Bank Branches', 'Total Fee Calculator']
-        elif intent == 'compare_query':
-            return ['B.Tech CSE vs AI & ML', 'Compare Degrees Tool', 'Placements Comparison', 'Curriculum Breakdown']
+        elif intent == 'hostel_query':
+            return ['1-Seater Room', '2-Seater Room', 'Mess Facilities', 'Uni-Hospital']
         elif intent == 'scholarship_query':
             return ['LPUNEST Category I', 'Sports Scholarship', 'Defense Concession', 'Eligibility Checker']
         elif intent == 'admission_query':
@@ -526,7 +313,7 @@ class RuleEngine:
             return ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4']
         elif intent == 'program_query':
             return ['B.Tech CSE', 'B.Tech AI & ML', 'MBA', 'BCA', 'MCA']
-        elif intent in ('placements', 'placement_query'):
+        elif intent == 'placement_query':
             return ['B.Tech CSE Placements', 'Top Recruiters', 'Fee Structure', 'Available Programmes']
         
         return ['Available Programmes', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities']

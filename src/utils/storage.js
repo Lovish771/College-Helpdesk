@@ -52,17 +52,6 @@ const STORAGE_SCHEMAS = {
     validate: (val) => Array.isArray(val) && val.every((id) => typeof id === 'string'),
     default: () => ['btech-cse', 'btech-aiml'],
   },
-  // Session credentials. Without a schema these fell through to the generic
-  // branch below, which ran JSON.parse() on the raw JWT: that throws, so the
-  // token was read back as null on every reload and the user was signed out.
-  lpu_auth_token: {
-    validate: (val) => val === null || (typeof val === 'string' && val.trim() !== ''),
-    default: () => null,
-  },
-  lpu_auth_user: {
-    validate: (val) => val === null || (typeof val === 'object' && !Array.isArray(val)),
-    default: () => null,
-  },
 };
 
 /**
@@ -75,14 +64,7 @@ export function getStoredItem(key) {
   if (!schema) {
     try {
       const raw = localStorage.getItem(key);
-      if (!raw) return null;
-      try {
-        return JSON.parse(raw);
-      } catch {
-        // Values written as bare strings (tokens, ids) are not valid JSON.
-        // Returning the raw string beats the old behaviour of returning null.
-        return raw;
-      }
+      return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
     }
@@ -122,7 +104,7 @@ export function setStoredItem(key, value) {
       console.warn(`[storage] Attempted to store invalid payload for key "${key}"`);
       return;
     }
-    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+    const serialized = typeof value === 'string' ? JSON.stringify(value) : JSON.stringify(value);
     localStorage.setItem(key, serialized);
   } catch (err) {
     // Silent fail if quota exceeded or private browsing restrictions

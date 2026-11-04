@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, current_app, abort
-from app import db, mask_db_uri
+from flask import Blueprint, request, jsonify
+from app import db
 from app.models import ConversationSession, ConversationMessage, UnansweredQuery
 from app.services.rule_engine import RuleEngine
 from app.routes.auth import get_current_user
@@ -43,79 +43,31 @@ def get_client_ip() -> str:
 @bp.route('/health', methods=['GET'])
 def health():
     """Health check endpoint checking DB connectivity and memory metrics"""
+    db_status = 'connected'
     try:
-        db_status = 'connected'
-        try:
-            db.session.execute(text('SELECT 1')).scalar()
-        except Exception as e:
-            db_status = f'degraded: {str(e)}'
-
-        memory_mb = 45.0
-        try:
-            import tracemalloc
-            if not tracemalloc.is_tracing():
-                tracemalloc.start()
-            current, peak = tracemalloc.get_traced_memory()
-            if current > 0:
-                memory_mb = round(current / (1024 * 1024), 2)
-        except Exception:
-            pass
-
-        # Per-table probe: a database can answer SELECT 1 while a specific table is
-        # missing or unreadable, which otherwise shows up as a 500 on first use.
-        table_probe = {}
-        for table in ('email_otps', 'users', 'security_logs',
-                      'conversation_sessions', 'conversation_messages', 'programs'):
-            try:
-                db.session.execute(text(f'SELECT COUNT(*) FROM {table}')).scalar()
-                table_probe[table] = 'ok'
-            except Exception as e:
-                db.session.rollback()
-                table_probe[table] = f'{type(e).__name__}: {e}'[:200]
-
-        email_env_detected = {
-            'has_resend': bool(os.environ.get('RESEND_API_KEY') or os.environ.get('RESEND_KEY') or os.environ.get('RESEND_TOKEN') or os.environ.get('VITE_RESEND_API_KEY')),
-            'has_smtp_user': bool(
-                os.environ.get('SMTP_USER') or os.environ.get('SMTP_USERNAME') or
-                os.environ.get('EMAIL_USER') or os.environ.get('EMAIL_USERNAME') or
-                os.environ.get('EMAIL_ADDRESS') or os.environ.get('GMAIL_ADDRESS') or
-                os.environ.get('MAIL_USERNAME') or os.environ.get('MAIL_USER') or
-                os.environ.get('GMAIL_USER') or os.environ.get('GOOGLE_USER') or
-                os.environ.get('GOOGLE_EMAIL') or os.environ.get('GMAIL') or
-                os.environ.get('GMAIL_ID') or os.environ.get('EMAIL')
-            ),
-            'has_smtp_pass': bool(
-                os.environ.get('SMTP_PASSWORD') or os.environ.get('SMTP_PASS') or
-                os.environ.get('EMAIL_PASS') or os.environ.get('EMAIL_PASSWORD') or
-                os.environ.get('MAIL_PASSWORD') or os.environ.get('MAIL_PASS') or
-                os.environ.get('GMAIL_PASSWORD') or os.environ.get('GMAIL_APP_PASSWORD') or
-                os.environ.get('GOOGLE_APP_PASSWORD') or os.environ.get('GOOGLE_PASSWORD') or
-                os.environ.get('GOOGLE_PASS') or os.environ.get('APP_PASSWORD') or
-                os.environ.get('GMAIL_PASS')
-            ),
-            'has_smtp_server': bool(os.environ.get('SMTP_SERVER') or os.environ.get('SMTP_HOST') or os.environ.get('EMAIL_HOST') or os.environ.get('MAIL_HOST') or os.environ.get('MAIL_SERVER')),
-            'has_brevo': bool(os.environ.get('BREVO_API_KEY')),
-            'has_sendgrid': bool(os.environ.get('SENDGRID_API_KEY')),
-        }
-
-        return jsonify({
-            'status': 'healthy' if db_status == 'connected' else 'degraded',
-            'version': '1.0.0',
-            'service': 'LPU Helpdesk Backend',
-            'university': 'Lovely Professional University',
-            'database': db_status,
-            'db_uri': mask_db_uri(current_app.config.get('SQLALCHEMY_DATABASE_URI')),
-            'tables': table_probe,
-            'memory_mb': memory_mb,
-            'email_config': email_env_detected
-        }), 200
+        db.session.execute(text('SELECT 1')).scalar()
     except Exception as e:
-        return jsonify({
-            'status': 'degraded',
-            'error': str(e),
-            'service': 'LPU Helpdesk Backend',
-            'version': '1.0.0'
-        }), 200
+        db_status = f'degraded: {str(e)}'
+
+    memory_mb = 45.0
+    try:
+        import tracemalloc
+        if not tracemalloc.is_tracing():
+            tracemalloc.start()
+        current, peak = tracemalloc.get_traced_memory()
+        if current > 0:
+            memory_mb = round(current / (1024 * 1024), 2)
+    except Exception:
+        pass
+
+    return jsonify({
+        'status': 'healthy' if db_status == 'connected' else 'degraded',
+        'version': '1.0.0',
+        'service': 'LPU Helpdesk Backend',
+        'university': 'Lovely Professional University',
+        'database': db_status,
+        'memory_mb': memory_mb
+    })
 
 @bp.route('/chat', methods=['POST'])
 def chat():
@@ -146,13 +98,6 @@ def chat():
         return jsonify({'error': 'Message length exceeds maximum limit of 500 characters'}), 400
     
     current_user = get_current_user()
-    if not current_user and not current_app.config.get('TESTING'):
-        return jsonify({
-            'success': False,
-            'error': 'Student login required. Please verify your email with a 6-digit OTP to chat with the LPU AI Assistant.',
-            'requires_login': True
-        }), 401
-
     user_id = getattr(current_user, 'id', None)
     conversation_id = data.get('conversation_id')
     
@@ -268,9 +213,7 @@ def clear_all_conversations():
 @bp.route('/conversations/<conversation_id>', methods=['GET'])
 def get_conversation(conversation_id):
     """Get conversation history for a specific session."""
-    session = db.session.get(ConversationSession, conversation_id)
-    if not session:
-        abort(404)
+    session = ConversationSession.query.get_or_404(conversation_id)
     user = get_current_user()
     if session.user_id and user and session.user_id != user.id and getattr(user, 'role', '') != 'admin':
         return jsonify({'error': 'Unauthorized to view this conversation.'}), 403
@@ -285,9 +228,7 @@ def get_conversation(conversation_id):
 @bp.route('/conversations/<conversation_id>', methods=['DELETE'])
 def delete_conversation(conversation_id):
     """Permanently delete a specific conversation from the database."""
-    session = db.session.get(ConversationSession, conversation_id)
-    if not session:
-        return jsonify({'success': True, 'message': 'Conversation does not exist or already deleted.'}), 200
+    session = ConversationSession.query.get_or_404(conversation_id)
     user = get_current_user()
     if session.user_id and user and session.user_id != user.id and getattr(user, 'role', '') != 'admin':
         return jsonify({'error': 'Unauthorized to delete this conversation.'}), 403

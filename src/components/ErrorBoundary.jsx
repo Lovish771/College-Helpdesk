@@ -13,39 +13,20 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('LPU Helpdesk UI Error Boundary caught an exception:', error, errorInfo);
-    const isChunkError =
-      error?.message?.includes('Failed to fetch dynamically imported module') ||
-      error?.message?.includes('Importing a module script failed') ||
-      error?.name === 'ChunkLoadError';
-
-    if (isChunkError && typeof window !== 'undefined') {
-      const alreadyReloaded = window.sessionStorage.getItem('eb_chunk_auto_reload');
-      if (!alreadyReloaded) {
-        window.sessionStorage.setItem('eb_chunk_auto_reload', 'true');
-        window.location.reload();
-      }
-    }
   }
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    try {
-      window.sessionStorage.removeItem('eb_chunk_auto_reload');
-    } catch {}
     if (this.props.onReset) {
       this.props.onReset();
     } else {
+      window.location.hash = '#/home';
       window.location.reload();
     }
   };
 
   render() {
     if (this.state.hasError) {
-      const isChunkError =
-        this.state.error?.message?.includes('Failed to fetch dynamically imported module') ||
-        this.state.error?.message?.includes('Importing a module script failed') ||
-        this.state.error?.name === 'ChunkLoadError';
-
       return (
         <div
           role="alert"
@@ -57,27 +38,18 @@ export default class ErrorBoundary extends React.Component {
               <AlertTriangle size={28} />
             </div>
             <h2 className="text-xl font-bold font-display text-slate-900 dark:text-white mb-2">
-              {isChunkError ? 'New Update Available' : 'Something went wrong — Reload Page'}
+              Something went wrong — Reload Page
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-              {isChunkError
-                ? 'A new version of the Student Helpdesk has been deployed. Please reload the page to get the latest features and updates.'
-                : 'An unexpected display issue occurred in this section. You can reload the page or safely return to the home screen without losing saved preferences.'}
+              An unexpected display issue occurred in this section. You can reload the page or safely return to the home screen without losing saved preferences.
             </p>
-            {this.state.error?.message && !isChunkError && (
-              <div className="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-left">
-                <p className="text-xs font-mono text-red-600 dark:text-red-400 break-words">
-                  {this.state.error.message}
-                </p>
-              </div>
-            )}
             <div className="flex gap-3 justify-center">
               <button
                 onClick={this.handleReset}
                 className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
               >
                 <RotateCcw size={14} />
-                <span>{isChunkError ? 'Update & Reload' : 'Reload Page'}</span>
+                <span>Reload Page</span>
               </button>
               <button
                 onClick={() => {

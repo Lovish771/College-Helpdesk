@@ -1,12 +1,6 @@
 from datetime import datetime
 from app import db
-from app.models.user import utc_now
-import hashlib
-import secrets
-try:
-    import bcrypt
-except ImportError:
-    bcrypt = None
+import bcrypt
 
 class AdminUser(db.Model):
     __tablename__ = 'admin_users'
@@ -16,29 +10,14 @@ class AdminUser(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=utc_now)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
     
     def set_password(self, password):
-        if bcrypt:
-            self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        else:
-            salt = secrets.token_hex(16)
-            h = hashlib.sha256((salt + password).encode('utf-8')).hexdigest()
-            self.password_hash = f"sha256${salt}${h}"
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     def check_password(self, password):
-        if self.password_hash.startswith('sha256$'):
-            parts = self.password_hash.split('$')
-            if len(parts) == 3:
-                _, salt, h = parts
-                return hashlib.sha256((salt + password).encode('utf-8')).hexdigest() == h
-        if bcrypt:
-            try:
-                return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
-            except Exception:
-                return False
-        return False
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
     
     def to_dict(self):
         return {
@@ -46,11 +25,6 @@ class AdminUser(db.Model):
             'username': self.username,
             'email': self.email,
             'is_active': self.is_active,
-            # A row in this table is an administrator by definition. Marking it
-            # here keeps the client's admin gate on a server-supplied flag
-            # instead of making it infer privilege from the email domain.
-            'role': 'admin',
-            'isAdmin': True,
             'created_at': self.created_at.isoformat(),
             'last_login': self.last_login.isoformat() if self.last_login else None,
         }
@@ -66,7 +40,7 @@ class AuditLog(db.Model):
     old_value = db.Column(db.JSON)
     new_value = db.Column(db.JSON)
     ip_address = db.Column(db.String(50))
-    timestamp = db.Column(db.DateTime, default=utc_now)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
         return {

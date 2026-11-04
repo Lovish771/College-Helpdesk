@@ -3,7 +3,7 @@ export const college = {
   name: 'Lovely Professional University',
   short: 'LPU',
   location: 'Phagwara, Punjab',
-  note: 'Admission and campus information for Lovely Professional University',
+  note: 'Official Admission & Information Helpdesk for Lovely Professional University',
   campus_size: '600+ Acres',
   naac_grade: 'A++ Grade (3.68/4)',
   nirf_rank: 'Top 30 in India (NIRF)',
@@ -1013,6 +1013,22 @@ export const quickActions = [
   'Eligibility',
   'Placements',
 ];
+
+export const analytics = {
+  totals: { conversations: 2480, answered: 2362, rate: 95.2, unanswered: 118 },
+  topics: [
+    ['Fees & Costs', 820],
+    ['Hostel & Living', 560],
+    ['Admissions & LPUNEST', 490],
+    ['Scholarships & Aid', 340],
+    ['Placements & Careers', 270],
+  ],
+  recent: [
+    ['Can I transfer credits from another university in second year?', 'unknown', 'Needs review', '2026-10-26'],
+    ['Are there student exchange programs with UK universities?', 'exchange_query', 'Unanswered', '2026-10-26'],
+    ['What is the syllabus for LPUNEST offline exam?', 'unknown', 'Needs review', '2026-10-25'],
+  ],
+};
 
 export const curriculum = {
   terms: {

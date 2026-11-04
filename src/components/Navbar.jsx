@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, ChevronDown, Moon, Sun,
   Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
-  UserCheck, Wallet, BedDouble, Scale, PhoneCall,
+  UserCheck, Wallet, BedDouble, BarChart3, Scale, PhoneCall,
   User as UserIcon, LogOut, ShieldCheck, KeyRound
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
@@ -31,13 +31,11 @@ export default function Navbar({
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   const lastScrollY = useRef(0);
   const moreRef = useRef(null);
-  const moreTimeoutRef = useRef(null);
   const userRef = useRef(null);
 
   const isChat = page === 'chat';
@@ -48,35 +46,27 @@ export default function Navbar({
     ['admissions', 'Admissions & LPUNEST', UserCheck, 'Application process, eligibility & dates'],
     ['curriculum', 'Curriculum & Syllabi', BookOpen, 'Semester courses & lab outlines'],
     ['knowledge', 'Knowledge Base & FAQs', HelpCircle, 'UMS, 75% attendance rule & guidelines'],
-    ['contact', 'DSR & Admissions Desk', PhoneCall, 'Block 29 and Block 30 contacts'],
-    ...(isAdmin ? [
-      ['admin', 'Admin Dashboard', ShieldCheck, 'Real-time metrics, users & security logs']
-    ] : []),
+    ['contact', 'DSR & Admissions Desk', PhoneCall, 'Official Block 29 & Block 30 contacts'],
+    ['analytics', 'Telemetry & Audits', BarChart3, 'Query trends & resolution stats'],
+    ...(isAdmin ? [['admin', 'Admin Dashboard', ShieldCheck, 'Real-time metrics, users & security logs']] : []),
   ];
 
-  // Auto-hide navbar on scroll down on standard pages with rAF throttling for 60fps smoothness
+  // Auto-hide navbar on scroll down on standard pages
   useEffect(() => {
     if (isChat) return;
 
-    let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          setScrolled(currentScrollY > 15);
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 15);
 
-          if (!open && !moreOpen && !userDropdownOpen) {
-            if (currentScrollY > 90 && currentScrollY > lastScrollY.current + 6) {
-              setHidden(true);
-            } else if (currentScrollY < lastScrollY.current - 6 || currentScrollY <= 40) {
-              setHidden(false);
-            }
-          }
-          lastScrollY.current = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
+      if (open || moreOpen || userDropdownOpen) return;
+
+      if (currentScrollY > 70 && currentScrollY > lastScrollY.current + 4) {
+        setHidden(true);
+      } else if (currentScrollY < lastScrollY.current - 4 || currentScrollY <= 40) {
+        setHidden(false);
       }
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -123,29 +113,29 @@ export default function Navbar({
       >
         <nav
           aria-label="Main Navigation"
-          className={`mx-auto max-w-7xl flex items-center justify-between gap-2 px-3.5 sm:px-5 py-2 rounded-full border transition-all duration-300 backdrop-blur-2xl ${
+          className={`mx-auto max-w-7xl flex items-center justify-between gap-2 px-3.5 sm:px-5 py-2 rounded-full border transition-all duration-300 backdrop-blur-xl ${
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/95 dark:bg-[#080D1A]/95 border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.5)]'
-              : 'bg-white/90 dark:bg-[#080D1A]/85 border-slate-200/80 dark:border-slate-800/80 text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
+              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)]'
+              : 'bg-white/90 dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
           }`}
         >
-          {/* Brand: Mascot Logo + Title */}
+          {/* Brand: Real LPU Logo + Stacked Title */}
           <button
             onClick={() => to('home')}
-            aria-label="Student Helpdesk"
+            aria-label="Lovely Professional University Student Helpdesk"
             className="flex items-center gap-2.5 outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl group transition-transform active:scale-95 shrink-0 cursor-pointer text-left pr-2"
           >
             <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <LpuLogo variant={isDark ? 'dark' : 'light'} size={32} />
+              <LpuLogo variant={isDark ? 'dark' : 'light'} size={34} />
             </div>
-            <div className="flex flex-col justify-center leading-none text-left">
-              <span className="font-display font-extrabold text-xs sm:text-base tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                Student Helpdesk
+            <div className="flex flex-col justify-center leading-none">
+              <span className="font-display font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                LPU
               </span>
-              <span className="hidden sm:block text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
-                LPU Support Portal
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 mt-0.5 leading-tight">
+                Student Helpdesk
               </span>
             </div>
           </button>
@@ -161,8 +151,8 @@ export default function Navbar({
                     aria-current={active ? 'page' : undefined}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer group active:scale-95 ${
                       active
-                        ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/50 shadow-xs dark:shadow-[0_0_12px_rgba(249,115,22,0.15)] font-bold'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium'
+                        ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800 shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                     }`}
                   >
                     <Icon
@@ -180,26 +170,14 @@ export default function Navbar({
             })}
 
             {/* Resources & Academic Tools Dropdown */}
-            <li
-              className="relative"
-              ref={moreRef}
-              onMouseEnter={() => {
-                if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
-                setMoreOpen(true);
-              }}
-              onMouseLeave={() => {
-                moreTimeoutRef.current = setTimeout(() => {
-                  setMoreOpen(false);
-                }, 180);
-              }}
-            >
+            <li className="relative" ref={moreRef}>
               <button
                 type="button"
                 onClick={() => setMoreOpen(!moreOpen)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 ${
                   isMoreActive
-                    ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/50 shadow-xs dark:shadow-[0_0_12px_rgba(249,115,22,0.15)] font-bold'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80 font-medium'
+                    ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800/80'
                 }`}
                 aria-expanded={moreOpen}
               >
@@ -212,13 +190,7 @@ export default function Navbar({
 
               {/* Dropdown Panel */}
               {moreOpen && (
-                <div
-                  className={`absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-2 animate-fade-in z-50 backdrop-blur-2xl transition-colors ${
-                    isDark
-                      ? 'bg-slate-900 border-slate-800 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.7)]'
-                      : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
-                  }`}
-                >
+                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl backdrop-blur-2xl border shadow-2xl p-2 animate-fade-in z-50 bg-white/95 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
                   <div className="space-y-1">
                     {moreNavItems.map(([id, label, Icon, desc, isSpecial]) => {
                       const active = page === id;
@@ -229,23 +201,15 @@ export default function Navbar({
                           onClick={() => to(id, isSpecial)}
                           className={`w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition-colors cursor-pointer ${
                             active
-                              ? isDark
-                                ? 'bg-orange-950/60 text-orange-400'
-                                : 'bg-orange-50 text-orange-600'
-                              : isDark
-                              ? 'hover:bg-slate-800 text-slate-200 hover:text-white'
-                              : 'hover:bg-slate-50 text-slate-700 hover:text-slate-900'
+                              ? 'bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
                           }`}
                         >
                           <span
-                            className={`p-2 rounded-lg shrink-0 mt-0.5 transition-colors ${
+                            className={`p-2 rounded-lg shrink-0 mt-0.5 ${
                               active
-                                ? isDark
-                                  ? 'bg-orange-900/60 text-orange-400'
-                                  : 'bg-orange-100 text-orange-600'
-                                : isDark
-                                ? 'bg-slate-800 text-slate-300'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-orange-100 dark:bg-orange-900/60 text-orange-600 dark:text-orange-400'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                             }`}
                           >
                             <Icon size={14} />
@@ -253,18 +217,12 @@ export default function Navbar({
                           <div>
                             <p
                               className={`text-xs font-bold leading-none ${
-                                active
-                                  ? isDark ? 'text-orange-400' : 'text-orange-600'
-                                  : isDark ? 'text-white' : 'text-slate-900'
+                                active ? 'text-orange-600 dark:text-orange-400' : 'text-slate-900 dark:text-white'
                               }`}
                             >
                               {label}
                             </p>
-                            <p
-                              className={`text-[11px] mt-1 leading-tight ${
-                                isDark ? 'text-slate-400' : 'text-slate-500'
-                              }`}
-                            >
+                            <p className="text-[11px] mt-1 leading-tight text-slate-500 dark:text-slate-400">
                               {desc}
                             </p>
                           </div>
@@ -279,41 +237,39 @@ export default function Navbar({
 
           {/* Right Action Elements */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Spotlight Search Pill Button */}
+            {/* Spotlight Search Modal Button */}
             <button
               type="button"
               onClick={onOpenSearch}
-              className="hidden lg:flex items-center gap-2 w-44 xl:w-52 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-all active:scale-98 cursor-pointer shadow-xs"
-              title="Search"
+              className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full text-xs font-semibold border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700"
+              title="Search programmes, fees, hostels & rules (Ctrl+K)"
             >
-              <Search size={13} className="text-slate-400 shrink-0" />
-              <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
-            </button>
-
-            {/* Mobile / Tablet search icon button */}
-            <button
-              type="button"
-              onClick={onOpenSearch}
-              className="lg:hidden w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors cursor-pointer"
-              title="Search"
-              aria-label="Search"
-            >
-              <Search size={14} />
+              <Search size={14} className="text-orange-500 shrink-0" />
+              <span className="hidden md:inline">Search</span>
+              <kbd className="hidden 2xl:inline text-[9px] font-semibold px-1.5 py-0.5 rounded text-slate-400 dark:text-slate-400 bg-slate-200/80 dark:bg-slate-700">
+                ⌘K
+              </kbd>
             </button>
 
             {/* Dark / Light Theme Toggler */}
             {onToggleTheme && (
               <button
                 type="button"
-                onClick={(e) => onToggleTheme && onToggleTheme(e)}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center justify-center text-slate-700 dark:text-amber-400 transition-colors cursor-pointer shadow-xs shrink-0"
+                onClick={onToggleTheme}
+                className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border-slate-200 dark:border-slate-700"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
               >
                 {isDark ? (
-                  <Sun size={14} className="text-amber-400 shrink-0" />
+                  <>
+                    <Sun size={15} className="text-amber-400 shrink-0" />
+                    <span className="hidden sm:inline text-xs font-bold text-amber-300">Light</span>
+                  </>
                 ) : (
-                  <Moon size={14} className="text-slate-700 shrink-0" />
+                  <>
+                    <Moon size={15} className="text-slate-700 shrink-0" />
+                    <span className="hidden sm:inline text-xs font-bold text-slate-800">Dark</span>
+                  </>
                 )}
               </button>
             )}
@@ -324,21 +280,18 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-900/60 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-bold shadow-2xs hover:bg-orange-100 active:scale-95 transition-all cursor-pointer"
                   aria-expanded={userDropdownOpen}
-                  title={user.name || user.email}
                 >
-                  {(user.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AD')}
+                  <div className="w-5 h-5 rounded-full bg-orange-600 text-white flex items-center justify-center text-[10px] font-extrabold uppercase">
+                    {(user.name || user.email || 'U')[0]}
+                  </div>
+                  <span className="hidden md:inline max-w-[100px] truncate">{user.name || user.email}</span>
+                  <ChevronDown size={11} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {userDropdownOpen && (
-                  <div
-                    className={`absolute right-0 top-full mt-2 w-56 rounded-2xl border shadow-2xl p-2 z-50 text-xs animate-fade-in backdrop-blur-2xl transition-colors ${
-                      isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.7)]'
-                        : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
-                    }`}
-                  >
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-2 z-50 text-xs animate-fade-in">
                     <div className="p-2.5 border-b border-slate-100 dark:border-slate-800/80 mb-1">
                       <p className="font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
                       <p className="text-[11px] text-slate-400 font-mono truncate">{user.email}</p>
@@ -386,9 +339,9 @@ export default function Navbar({
                         type="button"
                         onClick={() => {
                           setUserDropdownOpen(false);
-                          setShowSignOutConfirm(true);
+                          logout();
                         }}
-                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors cursor-pointer"
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors"
                       >
                         <LogOut size={14} />
                         <span>Sign Out</span>
@@ -401,18 +354,34 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => onOpenAuth && onOpenAuth()}
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-md ring-2 ring-orange-500/30 cursor-pointer active:scale-95 transition-all"
-                title="Sign In / Register"
-                aria-label="Sign In"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs active:scale-95 transition-all cursor-pointer"
               >
-                AD
+                <UserIcon size={13} className="text-orange-500" />
+                <span>Sign In</span>
               </button>
             )}
+
+            {/* AI Assistant Pill Button */}
+            <button
+              type="button"
+              onClick={() => to('chat')}
+              className={`hidden md:inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all duration-200 active:scale-95 cursor-pointer shrink-0 ${
+                page === 'chat'
+                  ? 'ring-2 ring-orange-500 ring-offset-2 dark:ring-offset-slate-900 brightness-105'
+                  : 'hover:shadow-md hover:shadow-orange-500/20 hover:brightness-105'
+              }`}
+              style={{
+                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+              }}
+            >
+              <Sparkles size={13} className="shrink-0" />
+              <span>AI Assistant</span>
+            </button>
 
             {/* Mobile Menu Toggle */}
             <button
               type="button"
-              className="p-1 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label={open ? 'Close navigation' : 'Open navigation'}
               onClick={() => setOpen(!open)}
             >
@@ -423,7 +392,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="xl:hidden mt-2 p-3 sm:p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-[80vh] overflow-y-auto no-scrollbar">
+          <div className="xl:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu
@@ -433,9 +402,9 @@ export default function Navbar({
                   type="button"
                   onClick={() => {
                     setOpen(false);
-                    setShowSignOutConfirm(true);
+                    logout();
                   }}
-                  className="text-xs font-bold text-rose-600 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-rose-600 flex items-center gap-1"
                 >
                   <LogOut size={12} />
                   <span>Sign Out</span>
@@ -482,52 +451,7 @@ export default function Navbar({
             </ul>
           </div>
         )}
-        {/* Sign Out Confirmation Modal */}
-      {showSignOutConfirm && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setShowSignOutConfirm(false)}
-        >
-          <div
-            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-scale-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="h-12 w-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-sm">
-              <LogOut size={22} />
-            </div>
-            <div className="text-center space-y-1.5">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                Sign Out of Helpdesk?
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Are you sure you want to end your current verified session? You can sign back in anytime with your registered email.
-              </p>
-            </div>
-            <div className="flex gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowSignOutConfirm(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowSignOutConfirm(false);
-                  logout();
-                }}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/25 transition-all cursor-pointer"
-              >
-                Yes, Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
+      </header>
     </>
   );
 }

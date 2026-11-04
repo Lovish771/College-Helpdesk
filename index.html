@@ -3,27 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Student Helpdesk — LPU student information</title>
-    <meta name="description" content="Fee structures, hostel tariffs, eligibility and admission details for Lovely Professional University, compiled from public sources by students." />
-    <meta name="theme-color" content="#EA580C" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Student Helpdesk" />
-    <meta property="og:title" content="Student Helpdesk — LPU student information" />
-    <meta property="og:description" content="Fee structures, hostel tariffs, eligibility and admission details for Lovely Professional University, compiled from public sources by students." />
-    <meta property="og:image" content="/images/lpu-mascot-logo.png" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <title>Lovely Professional University Student Helpdesk (Unofficial)</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Delius&family=Fjalla+One&family=Imprima&display=swap" rel="stylesheet" />
     <script>
       (function() {
         try {
           var t = localStorage.getItem('lpu_theme');
-          if (t && typeof t === 'string' && t.startsWith('"')) {
-            try { t = JSON.parse(t); } catch (e) {}
-          }
           var isDark = t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
           if (isDark) {
             document.documentElement.classList.add('dark');

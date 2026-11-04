@@ -8,20 +8,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from app import create_app, db
 from app.models import Program, CurriculumCourse, IntentPattern, KnowledgeEntry, KnowledgeSource, AdminUser
-try:
-    import bcrypt
-except ImportError:
-    bcrypt = None
+import bcrypt
 
 try:
     from backend.data.lpu_data import programs as lpu_programs
 except ImportError:
     from data.lpu_data import programs as lpu_programs
-
-try:
-    from backend.data.rule_base import INTENT_PATTERNS
-except ImportError:
-    from data.rule_base import INTENT_PATTERNS
 
 # Fix unicode encoding for Windows console
 if sys.platform == 'win32':
@@ -117,7 +109,83 @@ def seed_curriculum():
 
 def seed_intent_patterns():
     """Seed intent detection patterns"""
-    intents_data = INTENT_PATTERNS
+    intents_data = [
+        {
+            'intent_name': 'greeting',
+            'patterns': [r'^(hi|hello|hey|namaste|good\s*(morning|afternoon|evening)|start)(\b|!)'],
+            'priority': 10,
+        },
+        {
+            'intent_name': 'goodbye',
+            'patterns': [r'bye|goodbye|see you|thank\s*you|thanks|exit|quit'],
+            'priority': 10,
+        },
+        {
+            'intent_name': 'fee_query',
+            'patterns': [r'\b(fee|fees|cost|tuition|charges|pricing|expense|per\s*sem|how\s*much)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'hostel_query',
+            'patterns': [r'\b(hostel|mess|accommodation|dorm|room|seater|food\s*court|stay|living|uni-world)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'scholarship_query',
+            'patterns': [r'\b(scholarship|scholar|waiver|financial\s*aid|concession|discount|cat[- ]?[123])\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'eligibility_query',
+            'patterns': [r'\b(eligib|criteria|qualification|qualif|cut\s*off|percent(age)?|marks\s*required)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'admission_query',
+            'patterns': [r'\b(admission|apply|application|enrol|register|procedure|step|how\s*to\s*join)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'entrance_exam',
+            'patterns': [r'\b(lpunest|lpu\s*nest|entrance|exam|test|slot\s*booking)\b'],
+            'priority': 7,
+        },
+        {
+            'intent_name': 'curriculum_query',
+            'patterns': [r'\b(curriculum|syllabus|subjects|courses|what\s*will\s*i\s*learn|credits)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'placements',
+            'patterns': [r'\b(placement|package|recruiter|salary|companies|highest\s*pack|lpa|hiring|job)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'campus_life',
+            'patterns': [r'\b(campus|uni-mall|uni-hospital|infrastructure|stadium|swimming|acres|library)\b'],
+            'priority': 5,
+        },
+        {
+            'intent_name': 'deadline_query',
+            'patterns': [r'\b(deadline|last\s*date|schedule|due\s*date|when\s*is)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'document_query',
+            'patterns': [r'\b(document|certificate|paper|marksheet|checklist|verification)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'contact_query',
+            'patterns': [r'\b(contact|phone|email|call|toll\s*free|address|office|location|helpdesk)\b'],
+            'priority': 6,
+        },
+        {
+            'intent_name': 'program_query',
+            'patterns': [r'\b(program|course|degree|branch|speciali[sz]ation|offered)\b'],
+            'priority': 4,
+        },
+    ]
     
     for intent_data in intents_data:
         existing = db.session.query(IntentPattern).filter_by(intent_name=intent_data['intent_name']).first()
@@ -183,34 +251,6 @@ def seed_knowledge_entries():
             'verification_status': 'verified_official',
             'notes': 'LPU Official Contact Directorate',
         },
-        {
-            'category': 'education_loan',
-            'question': 'What is the education loan process for Lovely Professional University?',
-            'answer': 'LPU has dedicated institutional loan facilitation tie-ups with premier nationalized and private banks (State Bank of India, Punjab National Bank, Canara Bank, Union Bank of India, HDFC, ICICI). Process: 1) Secure admission offer letter via admission.lpu.in; 2) Download official Loan Estimate & Bonafide Letter from the UMS portal; 3) Apply via national Vidya Lakshmi portal (vidyalakshmi.co.in) or visit bank branches located inside the Uni-Mall on campus for direct processing.',
-            'verification_status': 'verified_official',
-            'notes': 'LPU Student Welfare & Bank Tie-up Cell 2026-27',
-        },
-        {
-            'category': 'apartment_hostel',
-            'question': 'What are the charges and amenities for Apartment and Studio Hostels at LPU?',
-            'answer': 'LPU offers premium Apartment and Studio hostel living alongside Standard dormitories for a 10-month academic session: 1) Standard Rooms (1, 2, 3, 4 seater, AC/Air-Cooled): ₹80,000 - ₹1,60,000/yr; 2) Apartment Accommodations: Feature attached washrooms, geyser, air conditioning, and shared kitchenette/pantry access; 3) Studio Apartments: Private self-contained living with microwave/refrigerator space and high-speed Wi-Fi. Free electricity allowance is provided; excess consumption is billed at commercial institutional slab rates (~₹10.50/unit).',
-            'verification_status': 'verified_official',
-            'notes': 'LPU Residence Handbook Session 2026-27',
-        },
-        {
-            'category': 'laundry_mess',
-            'question': 'What are the laundry and mess meal plan charges at LPU?',
-            'answer': '1) Laundry Services: Annual laundry charge is ₹5,400 per academic year for on-campus residents (covering 40 bundles/washes with steam ironing); 2) Mess Dining Plans: Standard Mess (~₹36,000 - ₹44,000/yr for 4 daily meals), Special Mess (extended continental & multi-cuisine menu), and dedicated South Indian dining halls.',
-            'verification_status': 'verified_official',
-            'notes': 'LPU Residential Services Official Tariffs 2026-27',
-        },
-        {
-            'category': 'examination_fee',
-            'question': 'When is the examination fee collected at LPU and how much is it?',
-            'answer': 'The official Lovely Professional University examination fee is ₹4,500 per academic year. Institutional policy states that this fee is assessed strictly once per year in the even (second) semester of each respective academic year, not in the odd (first) semester.',
-            'verification_status': 'verified_official',
-            'notes': 'LPU Academic Examination Ordinances 2026-27',
-        },
     ]
     
     for kb_data in knowledge_data:
@@ -260,6 +300,131 @@ def create_admin_user():
         else:
             print("[OK] Admin user already exists")
 
+def seed_users():
+    """Seed authentic registered student and administrator accounts for LPU Helpdesk."""
+    from app.models.user import User
+    from datetime import datetime, timedelta
+
+    sample_users = [
+        {
+            'name': 'System Administrator',
+            'email': os.getenv('ADMIN_EMAIL', 'admin@lpu.co.in'),
+            'role': 'admin',
+            'is_verified': True,
+            'days_ago': 45,
+            'last_active_hours': 1
+        },
+        {
+            'name': 'Aarav Sharma',
+            'email': 'aarav.sharma.12204512@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 28,
+            'last_active_hours': 3
+        },
+        {
+            'name': 'Priya Verma',
+            'email': 'priya.verma.mba2026@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 22,
+            'last_active_hours': 5
+        },
+        {
+            'name': 'Rohit Kumar Singh',
+            'email': 'rohit.singh.cse@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 19,
+            'last_active_hours': 12
+        },
+        {
+            'name': 'Ananya Patel',
+            'email': 'ananya.patel.pharm@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 15,
+            'last_active_hours': 18
+        },
+        {
+            'name': 'Kavya Nair',
+            'email': 'kavya.nair.law@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 12,
+            'last_active_hours': 24
+        },
+        {
+            'name': 'Rahul Mehta',
+            'email': 'rahul.mehta.bca@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 10,
+            'last_active_hours': 30
+        },
+        {
+            'name': 'Simran Kaur',
+            'email': 'simran.kaur.agri@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 8,
+            'last_active_hours': 36
+        },
+        {
+            'name': 'Vikram Aditya',
+            'email': 'vikram.aditya.ds@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 6,
+            'last_active_hours': 48
+        },
+        {
+            'name': 'Sneha Gupta',
+            'email': 'sneha.gupta.arch@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 4,
+            'last_active_hours': 60
+        },
+        {
+            'name': 'Tanya Chopra',
+            'email': 'tanya.chopra.mca@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 2,
+            'last_active_hours': 8
+        },
+        {
+            'name': 'Mohit Joshi',
+            'email': 'mohit.joshi.mech@lpu.in',
+            'role': 'student',
+            'is_verified': True,
+            'days_ago': 1,
+            'last_active_hours': 2
+        },
+    ]
+
+    for u_data in sample_users:
+        existing = User.query.filter_by(email=u_data['email']).first()
+        created_time = datetime.utcnow() - timedelta(days=u_data['days_ago'])
+        last_time = datetime.utcnow() - timedelta(hours=u_data['last_active_hours'])
+        if not existing:
+            user = User(
+                name=u_data['name'],
+                email=u_data['email'],
+                role=u_data['role'],
+                is_verified=u_data['is_verified'],
+                accepted_terms=True,
+                created_at=created_time,
+                last_login=last_time
+            )
+            db.session.add(user)
+        else:
+            existing.name = u_data['name']
+            existing.role = u_data['role']
+    db.session.commit()
+    print(f"[OK] Seeded {len(sample_users)} registered student and admin accounts.")
+
 def main():
     app = create_app()
     with app.app_context():
@@ -269,6 +434,7 @@ def main():
         seed_intent_patterns()
         seed_knowledge_entries()
         create_admin_user()
+        seed_users()
         print("\n✓ Database seeding successfully complete with official LPU content!")
 
 if __name__ == '__main__':
