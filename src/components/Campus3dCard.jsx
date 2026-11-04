@@ -1,15 +1,13 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  ZoomIn, ZoomOut, Maximize2, X, Sparkles, MapPin, Compass, Building2,
-  Eye, Layers
+  Maximize2, X, MapPin, Building2, ZoomIn, ZoomOut
 } from 'lucide-react';
 
 /**
  * Campus3dCard: Interactive 3D Zoom & Tilt Showcase for LPU Central Amphitheater & Unipolis
  * Features:
  * - 3D Perspective Tilt on Mouse Movement with Dynamic Specular Glare
- * - Smooth 3D Zoom In & Zoom Out interaction (Toggle & Hover)
- * - Ultra-realistic depth layers, floating glassmorphic information pill
+ * - Smooth 3D Zoom In & Zoom Out on click and hover (clean image, no text overlays)
  * - Fullscreen 3D inspect modal with deep pan and zoom
  * - Fully responsive on desktop and mobile with touch support
  */
@@ -36,9 +34,9 @@ export default function Campus3dCard({
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    // Smooth tilt angles (max +/- 10 deg)
-    const rotY = ((x - centerX) / centerX) * 9;
-    const rotX = -((y - centerY) / centerY) * 9;
+    // Smooth tilt angles (max +/- 9 deg)
+    const rotY = ((x - centerX) / centerX) * 8;
+    const rotX = -((y - centerY) / centerY) * 8;
 
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
@@ -110,53 +108,22 @@ export default function Campus3dCard({
             }}
           />
 
-          {/* ── Layer 3: Top Navigation & Zoom Controls ── */}
+          {/* ── Layer 3: Discreet Expand Trigger ── */}
           <div
-            className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10"
+            className="absolute top-3.5 right-3.5 z-10"
             style={{ transform: 'translateZ(26px)' }}
           >
-            {/* 3D Interactive Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/75 backdrop-blur-md border border-white/20 text-white shadow-lg text-[11px] font-bold">
-              <Sparkles size={12} className="text-orange-400 fill-orange-400 animate-pulse" />
-              <span>3D Campus View</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 ml-0.5 animate-ping" />
-            </div>
-
-            {/* Interactive Zoom & Fullscreen Controls */}
-            <div className="flex items-center gap-1.5">
-              {/* Zoom In / Zoom Out Toggle Button */}
-              <button
-                type="button"
-                onClick={toggleZoom}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/75 hover:bg-orange-500 backdrop-blur-md border border-white/20 hover:border-orange-400 text-white text-[11px] font-bold shadow-lg transition-all active:scale-95 cursor-pointer"
-                title={isZoomed ? 'Zoom Out' : 'Zoom In (3D)'}
-              >
-                {isZoomed ? (
-                  <>
-                    <ZoomOut size={12} className="text-orange-300 group-hover:text-white" />
-                    <span>Zoom Out</span>
-                  </>
-                ) : (
-                  <>
-                    <ZoomIn size={12} className="text-orange-300 group-hover:text-white" />
-                    <span>Zoom In</span>
-                  </>
-                )}
-              </button>
-
-              {/* Fullscreen Expand Button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsModalOpen(true);
-                }}
-                className="w-7 h-7 rounded-full bg-slate-950/75 hover:bg-orange-500 backdrop-blur-md border border-white/20 hover:border-orange-400 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer"
-                title="Expand Full 3D View"
-              >
-                <Maximize2 size={12} />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              className="w-7 h-7 rounded-full bg-slate-950/60 hover:bg-orange-500 backdrop-blur-md border border-white/20 hover:border-orange-400 text-white flex items-center justify-center shadow-lg transition-all active:scale-95 cursor-pointer opacity-70 hover:opacity-100"
+              title="Expand Full View"
+            >
+              <Maximize2 size={12} />
+            </button>
           </div>
 
           {/* ── Layer 4: Bottom Glassmorphism Landmark Caption ── */}
@@ -164,26 +131,16 @@ export default function Campus3dCard({
             className="absolute bottom-3 left-3 right-3 p-3.5 rounded-2xl bg-slate-950/80 backdrop-blur-xl border border-white/15 text-white shadow-2xl z-10 transition-transform duration-300"
             style={{ transform: 'translateZ(30px)' }}
           >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="flex items-center gap-1.5 text-orange-400 text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
-                  <MapPin size={11} className="text-orange-400 shrink-0" />
-                  <span>Unipolis &amp; Amphitheater · Central Campus</span>
-                </div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-white font-display tracking-tight leading-snug">
-                  {title}
-                </h3>
-                <p className="text-[10px] sm:text-[11px] text-slate-300 mt-0.5 line-clamp-1">
-                  {subtitle}
-                </p>
-              </div>
-
-              {/* Interactive Status Pill */}
-              <span className="shrink-0 px-2 py-0.5 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[10px] font-bold flex items-center gap-1">
-                <Layers size={10} />
-                <span>{isZoomed ? 'Zoomed 1.35x' : 'Interactive'}</span>
-              </span>
+            <div className="flex items-center gap-1.5 text-orange-400 text-[10px] font-extrabold uppercase tracking-wider mb-0.5">
+              <MapPin size={11} className="text-orange-400 shrink-0" />
+              <span>Unipolis &amp; Amphitheater · Central Campus</span>
             </div>
+            <h3 className="text-xs sm:text-sm font-extrabold text-white font-display tracking-tight leading-snug">
+              {title}
+            </h3>
+            <p className="text-[10px] sm:text-[11px] text-slate-300 mt-0.5 line-clamp-1">
+              {subtitle}
+            </p>
           </div>
         </div>
 
@@ -269,12 +226,9 @@ export default function Campus3dCard({
 
             {/* Modal Footer Info */}
             <div className="p-3.5 sm:p-4 border-t border-white/10 bg-slate-950/60 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <Sparkles size={13} className="text-orange-400" />
-                <span>600+ Acres Campus · High-Definition Unipolis Architecture</span>
-              </span>
+              <span>600+ Acres Campus · High-Definition Unipolis Architecture</span>
               <span className="text-[11px] text-slate-500">
-                Use controls to zoom in/out or click outside to close
+                Click outside to close
               </span>
             </div>
           </div>
