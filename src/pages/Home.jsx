@@ -8,10 +8,10 @@ import {
 const CAMPUS_HIGHLIGHTS = [
   {
     id: 'chancellery',
-    title: 'Admissions & Chancellery (Block 30)',
+    title: 'Academic Block & Chancellery',
     location: 'Block 30 · Admissions Division',
     desc: 'Central counselling, document verification, and international admissions paperwork hub.',
-    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1000&auto=format&fit=crop&q=80',
+    image: '/images/lpu-academic-block.jpg',
   },
   {
     id: 'library',
@@ -116,7 +116,7 @@ export default function Home({ go, ask, onOpenCompare }) {
         <div
           className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-20 mix-blend-luminosity scale-105 pointer-events-none"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&auto=format&fit=crop&q=80')`,
+            backgroundImage: `url('/images/lpu-academic-block.jpg')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-[#070B14] dark:via-[#070B14]/90 dark:to-[#070B14]/75 pointer-events-none" />
