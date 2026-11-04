@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Campus3dCard from '../components/Campus3dCard';
 import {
   ArrowRight, Search, GraduationCap, Wallet, CheckCircle2, BedDouble,
   FileText, PhoneCall, Scale, Building2, MapPin, Sparkles,
@@ -183,46 +184,9 @@ export default function Home({ go, ask, onOpenCompare }) {
             </div>
           </div>
 
-          {/* Right Column: Key Navigation Hub Card + Institutional Highlights */}
+          {/* Right Column: 3D Interactive Campus Landmark Showcase + Institutional Highlights */}
           <div className="lg:col-span-5 space-y-3">
-            <div className="rounded-2xl p-5 bg-white dark:bg-[#0D1322]/85 border border-slate-200/90 dark:border-white/10 shadow-sm dark:shadow-xl">
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
-                <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Compass size={14} />
-                  Quick Action Portals
-                </span>
-                <span className="text-[11px] text-slate-400">Direct Navigation</span>
-              </div>
-
-              <div className="mt-2.5 space-y-1.5">
-                {[
-                  ['Explore 44 Programmes', 'programs', GraduationCap, 'B.Tech, Management, Law & Health'],
-                  ['Tuition & Scholarship Calculator', 'fees', Wallet, 'Calculate per-sem costs with waivers'],
-                  ['Instant Eligibility Check', 'eligibility', CheckCircle2, 'Check marks & qualification match'],
-                  ['Hostel Living & Mess Plans', 'hostel', BedDouble, 'Tariffs for 1 to 4 seater rooms'],
-                ].map(([label, target, Icon, sub]) => (
-                  <button
-                    key={target}
-                    type="button"
-                    onClick={() => go(target)}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] hover:bg-orange-50 dark:hover:bg-orange-500/10 border border-slate-200/70 dark:border-white/[0.06] hover:border-orange-500/30 text-left transition-all duration-200 group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                        <Icon size={16} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                          {label}
-                        </p>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">{sub}</p>
-                      </div>
-                    </div>
-                    <ArrowRight size={13} className="text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-all shrink-0 ml-2" />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <Campus3dCard onExplore={() => go('contact')} />
 
             {/* 4 Mini Stat Badges */}
             <div className="grid grid-cols-2 gap-2.5">
