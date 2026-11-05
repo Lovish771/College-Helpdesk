@@ -63,9 +63,81 @@ function AppContent() {
     } catch {}
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  }, []);
+  const toggleTheme = useCallback((event) => {
+    const isDark = theme === 'dark';
+    const nextTheme = isDark ? 'light' : 'dark';
+
+    // Bidirectional circular view transition if supported
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      try {
+        const x = event?.clientX ?? (window.innerWidth - 80);
+        const y = event?.clientY ?? 30;
+        const endRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y)
+        );
+
+        const transition = document.startViewTransition(() => {
+          setTheme(nextTheme);
+          if (nextTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.body.classList.remove('dark');
+          }
+        });
+
+        transition.ready.then(() => {
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`
+          ];
+          document.documentElement.animate(
+            {
+              clipPath,
+            },
+            {
+              duration: 400,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            }
+          );
+        });
+        return;
+      } catch {}
+    }
+
+    // Smooth fallback with global transition class
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.add('theme-transitioning');
+      setTheme(nextTheme);
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 400);
+    } else {
+      setTheme(nextTheme);
+    }
+  }, [theme]);
+
+  // Clean document title matching page name
+  useEffect(() => {
+    const PAGE_TITLES = {
+      home: 'Home',
+      chat: 'AI Assistant',
+      programs: 'Programmes',
+      curriculum: 'Curriculum',
+      knowledge: 'Knowledge Base',
+      admissions: 'Admissions',
+      fees: 'Fees & Slabs',
+      hostel: 'Hostel & Living',
+      eligibility: 'Eligibility',
+      contact: 'Contact',
+      analytics: 'Analytics',
+      admin: 'Admin Dashboard',
+    };
+    document.title = PAGE_TITLES[page] || 'Home';
+  }, [page]);
 
   const chat = useChat();
 

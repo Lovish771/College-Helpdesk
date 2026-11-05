@@ -280,41 +280,30 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
           </div>
         </div>
 
-        {/* Legal & Bottom Navigation Bar */}
-        <div className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <p>© {new Date().getFullYear()} Lovely Professional University Student Helpdesk.</p>
-            <span className="hidden sm:inline w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-            <span className="text-amber-600 dark:text-amber-400 font-semibold">Student-Developed Project (Unofficial)</span>
-          </div>
+        {/* Legal & Clean Bottom Bar */}
+        <div className="mt-10 pt-5 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <p>© {new Date().getFullYear()} LPU Student Helpdesk • Unofficial Student Project.</p>
 
-          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
+          <div className="flex items-center gap-4 text-xs">
             <button
               onClick={() => handleLegal('disclaimer')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline-offset-4 hover:underline"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
             >
               Disclaimer
             </button>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
             <button
               onClick={() => handleLegal('privacy')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline-offset-4 hover:underline"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
             >
-              Privacy Policy
+              Privacy
             </button>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
             <button
               onClick={() => handleLegal('terms')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline-offset-4 hover:underline"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
             >
-              Terms of Use
-            </button>
-            <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-            <button
-              onClick={() => handleLegal('sources')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors underline-offset-4 hover:underline"
-            >
-              Data Sources &amp; Verification
+              Terms
             </button>
             <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
             <a
@@ -323,7 +312,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
               rel="noopener noreferrer"
               className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors flex items-center gap-1"
             >
-              <span>Official University Portal</span>
+              <span>Official Portal</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>

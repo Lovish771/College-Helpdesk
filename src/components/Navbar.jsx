@@ -255,7 +255,7 @@ export default function Navbar({
             {onToggleTheme && (
               <button
                 type="button"
-                onClick={onToggleTheme}
+                onClick={(e) => onToggleTheme(e)}
                 className="flex h-8 sm:h-9 items-center justify-center gap-1.5 px-2.5 sm:px-3 rounded-full border transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 border-slate-200 dark:border-slate-700"
                 title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
                 aria-label={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
@@ -275,37 +275,49 @@ export default function Navbar({
             )}
 
             {/* Authentication Button / User Dropdown */}
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <div className="relative" ref={userRef}>
-                <button
-                  type="button"
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-900/60 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-bold shadow-2xs hover:bg-orange-100 active:scale-95 transition-all cursor-pointer"
-                  aria-expanded={userDropdownOpen}
-                >
-                  <div className="w-5 h-5 rounded-full bg-orange-600 text-white flex items-center justify-center text-[10px] font-extrabold uppercase">
-                    {(user.name || user.email || 'U')[0]}
-                  </div>
-                  <span className="hidden md:inline max-w-[100px] truncate">{user.name || user.email}</span>
-                  <ChevronDown size={11} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
+                {(() => {
+                  const displayName = (user.name && user.name.trim() !== '' && user.name.toLowerCase() !== 'student')
+                    ? user.name.trim()
+                    : (user.email ? user.email.split('@')[0] : (user.username || 'User'));
+                  const avatarLetter = (user.name && user.name.trim() !== '' && user.name.toLowerCase() !== 'student')
+                    ? user.name.trim()[0].toUpperCase()
+                    : (user.email ? user.email[0].toUpperCase() : (user.username ? user.username[0].toUpperCase() : 'U'));
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-200 dark:border-orange-900/60 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-bold shadow-2xs hover:bg-orange-100 active:scale-95 transition-all cursor-pointer"
+                      aria-expanded={userDropdownOpen}
+                    >
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center text-[10px] font-extrabold uppercase shadow-2xs">
+                        {avatarLetter}
+                      </div>
+                      <span className="hidden md:inline max-w-[110px] truncate">{displayName}</span>
+                      <ChevronDown size={11} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  );
+                })()}
 
                 {userDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-2 z-50 text-xs animate-fade-in">
                     <div className="p-2.5 border-b border-slate-100 dark:border-slate-800/80 mb-1">
-                      <p className="font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-                      <p className="text-[11px] text-slate-400 font-mono truncate">{user.email}</p>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                        isAdmin ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                      }`}>
-                        {isAdmin ? 'Administrator' : 'Student (Verified)'}
-                      </span>
+                      <p className="font-bold text-slate-900 dark:text-white truncate">
+                        {(user.name && user.name.trim() !== '' && user.name.toLowerCase() !== 'student')
+                          ? user.name.trim()
+                          : (user.email ? user.email.split('@')[0] : (user.username || 'User'))}
+                      </p>
+                      {user.email && (
+                        <p className="text-[11px] text-slate-400 font-mono truncate">{user.email}</p>
+                      )}
                     </div>
 
                     <button
                       type="button"
                       onClick={() => to('chat')}
-                      className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
                     >
                       <Sparkles size={14} className="text-orange-500" />
                       <span>My Saved Chats</span>
@@ -315,24 +327,12 @@ export default function Navbar({
                       <button
                         type="button"
                         onClick={() => to('admin')}
-                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold"
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-bold cursor-pointer"
                       >
                         <ShieldCheck size={14} className="text-purple-600" />
                         <span>Admin Dashboard</span>
                       </button>
                     )}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserDropdownOpen(false);
-                        if (onOpenLegal) onOpenLegal('privacy');
-                      }}
-                      className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                    >
-                      <BookOpen size={14} className="text-slate-400" />
-                      <span>Privacy &amp; Data Rights</span>
-                    </button>
 
                     <div className="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800">
                       <button
@@ -341,7 +341,7 @@ export default function Navbar({
                           setUserDropdownOpen(false);
                           logout();
                         }}
-                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors"
+                        className="w-full flex items-center gap-2 p-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors cursor-pointer"
                       >
                         <LogOut size={14} />
                         <span>Sign Out</span>
@@ -354,7 +354,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => onOpenAuth && onOpenAuth()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs active:scale-95 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-orange-500/30 bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-600 dark:text-orange-400 text-xs font-bold shadow-2xs active:scale-95 transition-all cursor-pointer"
               >
                 <UserIcon size={13} className="text-orange-500" />
                 <span>Sign In</span>

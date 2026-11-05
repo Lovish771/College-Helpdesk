@@ -423,6 +423,74 @@ def seed_users():
             existing.name = u_data['name']
             existing.role = u_data['role']
     db.session.commit()
+
+    # Seed sample realistic conversation sessions and an unanswered query
+    from app.models.conversation import ConversationSession, ConversationMessage
+    from app.models.feedback import UnansweredQuery
+
+    aarav = User.query.filter_by(email='aarav.sharma.12204512@lpu.in').first()
+    if aarav and ConversationSession.query.filter_by(user_id=aarav.id).count() == 0:
+        session1 = ConversationSession(
+            id='sess_aarav_001',
+            user_id=aarav.id,
+            started_at=datetime.utcnow() - timedelta(days=2),
+            last_activity=datetime.utcnow() - timedelta(days=2, hours=1),
+            message_count=4
+        )
+        db.session.add(session1)
+        db.session.flush()
+
+        db.session.add_all([
+            ConversationMessage(
+                session_id=session1.id,
+                role='user',
+                content='What is the tuition fee for B.Tech Computer Science and Engineering for 2026-27?',
+                detected_intent='fees_inquiry',
+                confidence=0.96,
+                answer_status='answered',
+                timestamp=datetime.utcnow() - timedelta(days=2, minutes=50)
+            ),
+            ConversationMessage(
+                session_id=session1.id,
+                role='bot',
+                content='For B.Tech CSE (Session 2026-27), the standard tuition fee is ₹1,60,000 per semester. With LPUNEST merit scholarship (Category 1, 90%+ marks or top 10% percentile), you can receive up to ₹80,000 waiver per semester, reducing tuition to ₹80,000/sem.',
+                detected_intent='fees_inquiry',
+                confidence=0.96,
+                answer_status='answered',
+                timestamp=datetime.utcnow() - timedelta(days=2, minutes=49)
+            ),
+            ConversationMessage(
+                session_id=session1.id,
+                role='user',
+                content='Is there an electric scooter charging station in BH-4 hostel parking lot?',
+                detected_intent='unknown',
+                confidence=0.32,
+                answer_status='unanswered',
+                timestamp=datetime.utcnow() - timedelta(days=2, minutes=30)
+            ),
+            ConversationMessage(
+                session_id=session1.id,
+                role='bot',
+                content="I don't have enough verified information about EV two-wheeler charging stations specifically inside Boys Hostel 4 (BH-4) parking. Please reach out to the Chief Warden's Office or Division of Student Relations (DSR, Block 29) for verified campus infrastructure details.",
+                detected_intent='unknown',
+                confidence=0.32,
+                answer_status='unanswered',
+                timestamp=datetime.utcnow() - timedelta(days=2, minutes=29)
+            ),
+        ])
+
+        db.session.add(UnansweredQuery(
+            query_text='Is there an electric scooter charging station in BH-4 hostel parking lot?',
+            detected_intent='unknown',
+            session_id=session1.id,
+            occurrence_count=1,
+            status='pending',
+            first_seen=datetime.utcnow() - timedelta(days=2, minutes=30),
+            last_seen=datetime.utcnow() - timedelta(days=2, minutes=30),
+            notes='Student inquired about specific EV charging plug points in BH-4.'
+        ))
+        db.session.commit()
+
     print(f"[OK] Seeded {len(sample_users)} registered student and admin accounts.")
 
 def main():

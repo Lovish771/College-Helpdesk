@@ -104,7 +104,7 @@ def verify_otp():
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip().lower()
     otp = str(data.get('otp') or '').strip()
-    name = (data.get('name') or '').strip() or 'Student'
+    name = (data.get('name') or '').strip()
     accepted_terms = bool(data.get('acceptedTerms', True))
     
     if not email or not otp:
@@ -140,7 +140,7 @@ def verify_otp():
         )
         db.session.add(user)
     else:
-        if name and name != 'Student':
+        if name:
             user.name = name
         if role == 'admin':
             user.role = 'admin'

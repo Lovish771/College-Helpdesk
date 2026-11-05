@@ -8,7 +8,7 @@ class User(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
-    name = db.Column(db.String(150), default='Student')
+    name = db.Column(db.String(150), default='')
     role = db.Column(db.String(50), default='student')  # 'student', 'admin'
     is_verified = db.Column(db.Boolean, default=True)
     accepted_terms = db.Column(db.Boolean, default=True)

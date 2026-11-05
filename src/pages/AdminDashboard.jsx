@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   ShieldAlert, ShieldCheck, Users, MessageSquare, AlertTriangle,
   Activity, RefreshCw, Search, Trash2, Calendar, Database,
-  CheckCircle2, ArrowUpDown, ChevronLeft, ChevronRight, Lock, KeyRound
+  CheckCircle2, ArrowUpDown, ChevronLeft, ChevronRight, Lock, KeyRound,
+  Eye, X, Bot, Sparkles, Clock, HelpCircle, AlertCircle
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import { PageHead } from '../utils/useAsync';
@@ -30,6 +31,32 @@ export default function AdminDashboard({ go, onOpenAuth }) {
   // Delete confirmation modal state
   const [userToDelete, setUserToDelete] = useState(null);
   const [deletingUser, setDeletingUser] = useState(false);
+
+  // User detail, analytics & AI chat logs modal state
+  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+  const [loadingUserDetail, setLoadingUserDetail] = useState(false);
+  const [detailError, setDetailError] = useState('');
+
+  const fetchUserDetail = useCallback(async (userId) => {
+    if (!token) return;
+    setLoadingUserDetail(true);
+    setDetailError('');
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/details`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSelectedUserDetail(data);
+      } else {
+        setDetailError(data.error || 'Failed to fetch user analytics');
+      }
+    } catch (err) {
+      setDetailError('Network error while fetching user details');
+    } finally {
+      setLoadingUserDetail(false);
+    }
+  }, [token]);
 
   const fetchMetrics = useCallback(async () => {
     if (!token) return;
@@ -385,8 +412,19 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {users.length > 0 ? (
                   users.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{u.name}</td>
+                    <tr
+                      key={u.id}
+                      className="hover:bg-orange-50/40 dark:hover:bg-slate-800/60 cursor-pointer transition-colors group"
+                      onClick={() => fetchUserDetail(u.id)}
+                    >
+                      <td className="py-3 px-4 font-bold text-slate-900 dark:text-white group-hover:text-orange-600 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {(u.name && u.name.trim() !== '' ? u.name[0] : (u.email ? u.email[0] : 'U')).toUpperCase()}
+                          </div>
+                          <span>{u.name || (u.email ? u.email.split('@')[0] : 'Student')}</span>
+                        </div>
+                      </td>
                       <td className="py-3 px-4 text-slate-600 dark:text-slate-300 font-mono text-[11px]">{u.email}</td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
@@ -403,16 +441,26 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                       <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
                         {u.last_login ? new Date(u.last_login).toLocaleDateString() : 'N/A'}
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        {u.email !== user?.email && (
+                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
                           <button
-                            onClick={() => setUserToDelete(u)}
-                            className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title="Delete account"
+                            onClick={() => fetchUserDetail(u.id)}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 text-[11px] font-bold hover:bg-orange-100 dark:hover:bg-orange-900/60 transition-colors cursor-pointer"
+                            title="View user analytics & chat logs"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Logs</span>
                           </button>
-                        )}
+                          {u.email !== user?.email && (
+                            <button
+                              onClick={() => setUserToDelete(u)}
+                              className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                              title="Delete account"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -561,6 +609,224 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                 {deletingUser ? 'Deleting...' : 'Permanently Delete'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Intelligence, Analytics & AI Chat Logs Modal */}
+      {(selectedUserDetail || loadingUserDetail) && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/75 backdrop-blur-md animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up">
+            {loadingUserDetail ? (
+              <div className="p-12 flex flex-col items-center justify-center text-center">
+                <RefreshCw className="w-8 h-8 text-orange-500 animate-spin mb-3" />
+                <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                  Retrieving user analytics and chat transcripts...
+                </p>
+              </div>
+            ) : selectedUserDetail ? (
+              <>
+                {/* Modal Header */}
+                <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-extrabold text-base shadow-sm">
+                      {(selectedUserDetail.user.name && selectedUserDetail.user.name.trim() !== ''
+                        ? selectedUserDetail.user.name[0]
+                        : (selectedUserDetail.user.email ? selectedUserDetail.user.email[0] : 'U')).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                          {selectedUserDetail.user.name || (selectedUserDetail.user.email ? selectedUserDetail.user.email.split('@')[0] : 'Student')}
+                        </h3>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          selectedUserDetail.user.role === 'admin'
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300'
+                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        }`}>
+                          {selectedUserDetail.user.role}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                        {selectedUserDetail.user.email} • Joined {selectedUserDetail.user.created_at ? new Date(selectedUserDetail.user.created_at).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedUserDetail(null)}
+                    className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-5 overflow-y-auto space-y-5 text-xs">
+                  {/* Quick Analytics Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+                      <span className="text-slate-400 font-medium block">Total Queries</span>
+                      <span className="text-xl font-extrabold text-slate-900 dark:text-white font-display mt-0.5 block">
+                        {selectedUserDetail.analytics.totalQueries}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+                      <span className="text-slate-400 font-medium block">AI Chat Sessions</span>
+                      <span className="text-xl font-extrabold text-slate-900 dark:text-white font-display mt-0.5 block">
+                        {selectedUserDetail.analytics.totalSessions}
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+                      <span className="text-slate-400 font-medium block">Resolution Rate</span>
+                      <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-display mt-0.5 block">
+                        {selectedUserDetail.analytics.resolutionRate}%
+                      </span>
+                    </div>
+
+                    <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50">
+                      <span className="text-rose-600 dark:text-rose-400 font-medium block">Unanswered by Bot</span>
+                      <span className="text-xl font-extrabold text-rose-700 dark:text-rose-300 font-display mt-0.5 block">
+                        {selectedUserDetail.analytics.unansweredCount}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ── CRITICAL SECTION: UNANSWERED / FAILED QUERIES ── */}
+                  <div className="rounded-2xl p-4 border transition-colors bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                        Questions The AI Bot Was Not Able To Answer ({selectedUserDetail.unansweredQueries.length})
+                      </h4>
+                    </div>
+
+                    {selectedUserDetail.unansweredQueries.length > 0 ? (
+                      <div className="space-y-2.5">
+                        {selectedUserDetail.unansweredQueries.map((uq, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/50 shadow-2xs space-y-1.5"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="font-bold text-slate-900 dark:text-white">
+                                "{uq.query}"
+                              </span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 shrink-0">
+                                Unresolved
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                              <strong className="text-slate-700 dark:text-slate-300">Bot Response:</strong> {uq.botResponse}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 pt-1 text-[10px] text-slate-400">
+                              <span>Reason: <strong className="text-amber-700 dark:text-amber-300">{uq.reason}</strong></span>
+                              <span>•</span>
+                              <span>Intent: {uq.intent}</span>
+                              {uq.timestamp && (
+                                <>
+                                  <span>•</span>
+                                  <span>{new Date(uq.timestamp).toLocaleString()}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span>All questions asked by this student have been successfully resolved by the AI.</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── AI CHAT TRANSCRIPT ── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-orange-500" />
+                        <span>Full AI Conversation Transcript</span>
+                      </h4>
+                      <span className="text-[11px] text-slate-400">
+                        {selectedUserDetail.sessions.length} recorded session(s)
+                      </span>
+                    </div>
+
+                    {selectedUserDetail.sessions.length > 0 ? (
+                      <div className="space-y-4">
+                        {selectedUserDetail.sessions.map((sess, sIdx) => (
+                          <div
+                            key={sess.sessionId}
+                            className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-3"
+                          >
+                            <div className="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-200/80 dark:border-slate-800 pb-2">
+                              <span className="font-mono">Session #{sIdx + 1} ({sess.sessionId})</span>
+                              <span>{sess.startedAt ? new Date(sess.startedAt).toLocaleString() : ''}</span>
+                            </div>
+
+                            <div className="space-y-2.5">
+                              {sess.messages.map((msg, mIdx) => (
+                                <div
+                                  key={mIdx}
+                                  className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                                >
+                                  <div
+                                    className={`max-w-[85%] rounded-2xl p-3 leading-relaxed ${
+                                      msg.role === 'user'
+                                        ? 'bg-orange-600 text-white rounded-br-xs'
+                                        : msg.is_unanswered
+                                        ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-slate-800 dark:text-slate-100 rounded-bl-xs'
+                                        : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-xs'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between gap-3 text-[10px] mb-1 opacity-75">
+                                      <span className="font-bold uppercase tracking-wider">
+                                        {msg.role === 'user' ? 'Student' : 'LPU AI Helpdesk'}
+                                      </span>
+                                      {msg.confidence !== undefined && (
+                                        <span>Confidence: {Math.round((msg.confidence || 0) * 100)}%</span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs whitespace-pre-wrap">{msg.content}</p>
+                                    {msg.is_unanswered && (
+                                      <div className="mt-2 pt-1 border-t border-rose-200 dark:border-rose-900/60 flex items-center gap-1 text-[10px] text-rose-600 dark:text-rose-400 font-bold">
+                                        <AlertTriangle className="w-3 h-3" />
+                                        <span>Bot was unable to fully resolve this inquiry</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center text-slate-400 italic bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        This student has not initiated any live AI conversations yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end bg-slate-50/70 dark:bg-slate-800/40 shrink-0">
+                  <button
+                    onClick={() => setSelectedUserDetail(null)}
+                    className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       )}

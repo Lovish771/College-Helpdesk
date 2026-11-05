@@ -70,10 +70,6 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
       setError('Please provide a valid email address.');
       return;
     }
-    if (!acceptedTerms) {
-      setError('Please accept the Terms of Use and Privacy Policy to continue.');
-      return;
-    }
 
     setLoading(true);
     try {
@@ -101,8 +97,8 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
       await verifyOtp({
         email,
         otp: otp.trim(),
-        name: name.trim() || 'Student',
-        acceptedTerms
+        name: name.trim() || '',
+        acceptedTerms: true
       });
       if (onLoginSuccess) onLoginSuccess();
       onClose();
@@ -249,38 +245,8 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                     />
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                    We will send a 6-digit cryptographic code valid for 10 minutes.
+                    We will send a 6-digit verification code valid for 10 minutes.
                   </p>
-                </div>
-
-                <div className="pt-1">
-                  <label className="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="mt-0.5 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
-                    />
-                    <span className="leading-tight">
-                      I agree to the{' '}
-                      <button
-                        type="button"
-                        onClick={() => onOpenLegal && onOpenLegal('terms')}
-                        className="text-orange-600 dark:text-orange-400 underline font-medium hover:text-orange-700"
-                      >
-                        Terms of Use
-                      </button>{' '}
-                      and{' '}
-                      <button
-                        type="button"
-                        onClick={() => onOpenLegal && onOpenLegal('privacy')}
-                        className="text-orange-600 dark:text-orange-400 underline font-medium hover:text-orange-700"
-                      >
-                        Privacy Policy
-                      </button>
-                      .
-                    </span>
-                  </label>
                 </div>
 
                 <button
