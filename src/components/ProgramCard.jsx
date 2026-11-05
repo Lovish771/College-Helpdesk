@@ -172,7 +172,6 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
               <ArrowRight size={13} />
             </button>
 
-<<<<<<< HEAD
             <button
               type="button"
               onClick={() => onAsk(`Tell me about admission, fees, and eligibility for ${p.short}`)}
@@ -208,20 +207,6 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
               {showQuickGlimpse ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
           </div>
-=======
-          {/* View Details Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onView) onView(p);
-            }}
-            className={`px-3.5 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${isSelected ? "bg-gradient-to-r from-orange-500 to-amber-500 border-orange-500 text-white shadow-md shadow-orange-500/30" : "border-orange-500/70 hover:bg-orange-600 bg-orange-500/5 hover:text-white text-orange-600 dark:text-orange-400 hover:dark:text-white"}`}
-          >
-            <span>View Details</span>
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-          </button>
->>>>>>> be034f3740ee9725758bb84793758f072e96217e
         </div>
       </div>
     </div>

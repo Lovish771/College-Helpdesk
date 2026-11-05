@@ -3,12 +3,7 @@ import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
   Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
-<<<<<<< HEAD
   Cpu, Code, Terminal, HeartPulse, Sprout, Landmark
-=======
-  Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List,
-  Activity, ChevronsUpDown, SlidersHorizontal
->>>>>>> be034f3740ee9725758bb84793758f072e96217e
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
@@ -285,14 +280,7 @@ export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
-<<<<<<< HEAD
 // Map each program to an Academic School
-=======
-  const [sortBy, setSortBy] = useState('popularity');
-  const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'grid'
-
-  // Map each program to an Academic School
->>>>>>> be034f3740ee9725758bb84793758f072e96217e
   const getProgramSchool = (p) => {
     for (const school of ACADEMIC_SCHOOLS) {
       if (school.programPrefixes.some((prefix) => p.id.startsWith(prefix))) {
@@ -443,7 +431,6 @@ export default function Programs({ ask, onOpenCompare }) {
             )}
           </div>
 
-<<<<<<< HEAD
           <div className="flex items-center gap-2">
             {onOpenCompare && (
               <button
@@ -453,39 +440,6 @@ export default function Programs({ ask, onOpenCompare }) {
               >
                 <Scale size={14} />
                 <span>Compare Degrees</span>
-=======
-          <div className="flex items-center gap-3">
-            {/* Sort by dropdown */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-              <span className="font-medium hidden sm:inline">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-              >
-                <option value="popularity">Popularity</option>
-                <option value="fee-asc">Fee: Low to High</option>
-                <option value="fee-desc">Fee: High to Low</option>
-                <option value="name">Alphabetical (A-Z)</option>
-              </select>
-            </div>
-
-            {/* View Mode Switcher: 3D Horizontal Slide Carousel vs Static Grid */}
-            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => setViewMode('carousel')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'carousel'
-                    ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-                title="Smooth Horizontal Slide Carousel View"
-                aria-label="Horizontal Slide Carousel View"
-              >
-                <SlidersHorizontal size={14} className="text-orange-500" />
-                <span className="hidden sm:inline">Slide Carousel</span>
->>>>>>> be034f3740ee9725758bb84793758f072e96217e
               </button>
             )}
           </div>
@@ -508,7 +462,6 @@ export default function Programs({ ask, onOpenCompare }) {
               Reset All Filters
             </button>
           </div>
-<<<<<<< HEAD
         ) : !q.trim() ? (
           /* ── Hierarchical School View (Eliminates flat crowded feeling) ── */
           <div className="space-y-12">
@@ -554,17 +507,6 @@ export default function Programs({ ask, onOpenCompare }) {
               </div>
             ))}
           </div>
-=======
-        ) : viewMode === 'carousel' ? (
-          /* ── Premium Smooth Horizontal Slide Carousel ── */
-          <ProgramsCarousel
-            programs={sortedFiltered}
-            onView={(prog) => handleViewProgram(prog)}
-            onAsk={ask}
-            onCompare={(id) => handleToggleCompareQueue(id)}
-            compareQueue={compareQueue}
-          />
->>>>>>> be034f3740ee9725758bb84793758f072e96217e
         ) : (
           /* ── Flat Filtered Catalog Grid ── */
           <div className="space-y-4">
