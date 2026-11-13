@@ -228,7 +228,7 @@ const ROOM_OPTIONS = [
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Triple-sharing luxury studio flat layout featuring air-conditioning, attached modern washroom, shared kitchenette & refrigerator space, and ergonomic workstations.',
-    highlights: ['Modular Pantry Space', 'Climate Controlled AC', '85 Free Power Units/Month', 'Tri-Sharing Cost Advantage']
+    highlights: ['Modular Pantry Space', 'Hot & Cold Split AC', '85 Free Power Units/Month', 'Tri-Sharing Cost Advantage']
   },
   {
     type: '4-Seater Studio Apartment (AC + Kitchenette)',
@@ -274,7 +274,7 @@ const ROOM_OPTIONS = [
     freePower: '50 Units / Month (500 Units / 10-Month Session)',
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
-    desc: 'Climate-controlled dual occupancy suite with attached bathroom, water heater, split AC, and individual study units.',
+    desc: 'Dual occupancy suite with attached bathroom, water heater, split AC, and individual study units.',
     highlights: ['Dual Occupancy AC', 'Attached Bath with Geyser', '50 Free Power Units/Month', 'Study Tables with Book Racks']
   },
   {
@@ -290,7 +290,7 @@ const ROOM_OPTIONS = [
     excessRate: '₹10.50 / excess unit (PSPCL tariff)',
     securityDeposit: '₹5,000 (Refundable at session end)',
     desc: 'Air-conditioned 3-person room layout with individual study setups, wardrobes, and attached bath with water heater.',
-    highlights: ['Triple Sharing AC', 'Attached Washroom', '45 Free Power Units/Month', 'Comfortable Climate Control']
+    highlights: ['Triple Sharing AC', 'Attached Washroom', '45 Free Power Units/Month', 'Comfortable Split AC']
   },
   {
     type: '4-Seater Room (AC)',
@@ -354,6 +354,81 @@ const ROOM_OPTIONS = [
     desc: 'Affordable 4-student dormitory suite with attached washroom, personal study racks, and centralized duct air cooling.',
     highlights: ['Lowest Annual Living Cost', 'Attached Bathroom', 'Lockable Almirahs', 'Duct Air Cooling']
   },
+  {
+    type: '5-Seater Standard Room (Air-Cooled)',
+    seater: '5-Seater',
+    category: 'Air-Cooled',
+    fee: '₹72,000 / year',
+    regularFee: '₹72,000 / yr',
+    term: 'Price for 10 months (Academic Session)',
+    badge: '5-Seater Value',
+    isLuxury: false,
+    freePower: '300 Free Electricity Units (per academic session)',
+    excessRate: '₹10.50 / excess unit (PSPCL tariff)',
+    securityDeposit: '₹5,000 (Refundable at session end)',
+    desc: 'Economical 5-student shared standard room with air cooling, attached bathroom, separate study desks, and wardrobes.',
+    highlights: ['Air Cooled Comfort', '300 Free Electricity Units', 'Proportionate Charges ₹72,000/-', 'Dedicated Storage']
+  },
+  {
+    type: '5-Seater Standard Room (AC)',
+    seater: '5-Seater',
+    category: 'AC',
+    fee: '₹81,000 / year',
+    regularFee: '₹81,000 / yr',
+    term: 'Price for 10 months (Academic Session)',
+    badge: '5-Seater AC',
+    isLuxury: false,
+    freePower: '400 Free Electricity Units (per academic session)',
+    excessRate: '₹10.50 / excess unit (PSPCL tariff)',
+    securityDeposit: '₹5,000 (Refundable at session end)',
+    desc: 'Budget-friendly 5-student air-conditioned dormitory with split AC unit, attached washroom, and individual study spaces.',
+    highlights: ['Split AC Air Conditioning', '400 Free Electricity Units', 'Proportionate Charges ₹81,000/-', 'Attached Washroom']
+  },
+  {
+    type: '6/7/8-Seater Standard Room (Air-Cooled)',
+    seater: '6/7/8-Seater',
+    category: 'Air-Cooled',
+    fee: '₹72,000 / year',
+    regularFee: '₹72,000 / yr',
+    term: 'Price for 10 months (Academic Session)',
+    badge: 'Community Dormitory',
+    isLuxury: false,
+    freePower: '250 Free Electricity Units (per academic session)',
+    excessRate: '₹10.50 / excess unit (PSPCL tariff)',
+    securityDeposit: '₹5,000 (Refundable at session end)',
+    desc: 'Spacious 6/7/8 multi-sharing dormitory accommodation with centralized air cooling, personal study units, and lockable wardrobes.',
+    highlights: ['Air Cooled Living', '250 Free Electricity Units', 'Proportionate Charges ₹72,000/-', 'Community Learning Environment']
+  },
+  {
+    type: '6/7/8-Seater Standard Room (AC)',
+    seater: '6/7/8-Seater',
+    category: 'AC',
+    fee: '₹81,000 / year',
+    regularFee: '₹81,000 / yr',
+    term: 'Price for 10 months (Academic Session)',
+    badge: 'Community AC Dormitory',
+    isLuxury: false,
+    freePower: '350 Free Electricity Units (per academic session)',
+    excessRate: '₹10.50 / excess unit (PSPCL tariff)',
+    securityDeposit: '₹5,000 (Refundable at session end)',
+    desc: 'Multi-sharing air-conditioned room for 6, 7, or 8 occupants with split AC units, attached washrooms, and individual workstations.',
+    highlights: ['Air Conditioned Multi-Sharing', '350 Free Electricity Units', 'Proportionate Charges ₹81,000/-', 'Personal Study Station']
+  },
+  {
+    type: '4x2-Seater Standard Room (Air-Cooled)',
+    seater: '4x2-Seater',
+    category: 'Air-Cooled',
+    fee: '₹72,000 / year',
+    regularFee: '₹72,000 / yr',
+    term: 'Price for 10 months (Academic Session)',
+    badge: '4x2 Suite',
+    isLuxury: false,
+    freePower: '250 Free Electricity Units (per academic session)',
+    excessRate: '₹10.50 / excess unit (PSPCL tariff)',
+    securityDeposit: '₹5,000 (Refundable at session end)',
+    desc: 'Connected 4x2 apartment cluster arrangement with centralized air cooling, shared foyer, attached bathroom, and personal study desks.',
+    highlights: ['Air Cooled Suite Cluster', '250 Free Electricity Units', 'Proportionate Charges ₹72,000/-', 'Cluster Privacy']
+  },
 ];
 
 const DINING_SERVICES = [
@@ -416,7 +491,7 @@ const AMENITIES = [
 ];
 
 export default function Hostel({ go, ask }) {
-  const [activeSection, setActiveSection] = useState('matrix'); // 'matrix' | 'studio' | 'standard' | 'electricity' | 'dining' | 'amenities'
+  const [activeSection, setActiveSection] = useState('standard'); // 'standard' | 'studio' | 'matrix' | 'electricity' | 'dining' | 'amenities'
   const [seaterFilter, setSeaterFilter] = useState('All');
   const [coolingFilter, setCoolingFilter] = useState('All');
   const [search, setSearch] = useState('');
@@ -523,9 +598,9 @@ export default function Hostel({ go, ask }) {
         {/* ── Navigation Pill Tabs ── */}
         <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-5xl overflow-x-auto">
           {[
-            { id: 'matrix', label: 'Facilities Comparison Matrix', icon: SlidersHorizontal, badge: 'Official' },
+            { id: 'standard', label: 'Standard Rooms (AC / Air-Cooled)', icon: BedDouble, badge: 'Popular' },
             { id: 'studio', label: '1 BHK & Studio Apartments', icon: Building, badge: 'Premium' },
-            { id: 'standard', label: 'Standard Rooms (AC / Air-Cooled)', icon: BedDouble },
+            { id: 'matrix', label: 'Facilities Comparison Matrix', icon: SlidersHorizontal },
             { id: 'electricity', label: 'Free Electricity Quota & Tariffs', icon: Zap, badge: 'PSPCL' },
             { id: 'dining', label: 'Dining & Mess Plans', icon: Utensils },
             { id: 'amenities', label: 'Uni-Laundry & Life', icon: Shirt },
@@ -836,7 +911,7 @@ export default function Hostel({ go, ask }) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 mr-2">Occupancy:</span>
-                {['All', '1-Seater', '2-Seater', '3-Seater', '4-Seater'].map((s) => (
+                {['All', '1-Seater', '2-Seater', '3-Seater', '4-Seater', '5-Seater', '6/7/8-Seater', '4x2-Seater'].map((s) => (
                   <button
                     key={s}
                     onClick={() => setSeaterFilter(s)}

@@ -204,6 +204,20 @@
   animation: dot 1.2s infinite;
 }
 
+/* ── Metallic Shimmer / Shine Keyframe ── */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-15deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
 /* ── Custom Cursor Ripple Animation ── */
 @keyframes cursorRipple {
   0% {
@@ -236,7 +250,7 @@ input, textarea, [contenteditable="true"], .cursor-text {
   }
 }
 
-/* ── Bidirectional Circular View Transitions for Theme Switching ── */
+/* ── Circular Expanding View Transitions for Theme Switching (Bidirectional) ── */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

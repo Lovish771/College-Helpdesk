@@ -1,16 +1,135 @@
 import { useState } from 'react';
 import {
   Clock, GraduationCap, ArrowRight, Sparkles, BookOpen,
-  Wallet, Award, Scale, ChevronDown, ChevronUp, Briefcase, Trophy
+  Wallet, Award, Scale, ChevronDown, ChevronUp, Briefcase, Trophy, Check
 } from 'lucide-react';
 import { PROGRAM_IMAGES } from '../data/programImages';
 import { fees } from '../data/mockData';
 import { getProgramEnrichment } from '../data/programDetails';
 
-export default function ProgramCard({ p, onView, onAsk, onCompare }) {
+/**
+ * Categorize program into its canonical main degree with tailored premium color palette and glowing hover aura.
+ */
+function getMainDegreeInfo(p) {
+  const short = (p.short || '').toLowerCase();
+  const name = (p.name || '').toLowerCase();
+  const combined = `${short} ${name}`;
+
+  if (combined.includes('b.tech') || combined.includes('btech')) {
+    return {
+      degree: 'B.Tech',
+      badgeClass: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 text-white shadow-blue-500/25',
+      glowClass: 'hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-[0_12px_32px_-4px_rgba(59,130,246,0.4)]',
+      textAccent: 'text-blue-600 dark:text-blue-400',
+    };
+  }
+  if (combined.includes('m.tech') || combined.includes('mtech')) {
+    return {
+      degree: 'M.Tech',
+      badgeClass: 'bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-500 text-white shadow-purple-500/25',
+      glowClass: 'hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-[0_12px_32px_-4px_rgba(168,85,247,0.4)]',
+      textAccent: 'text-purple-600 dark:text-purple-400',
+    };
+  }
+  if (combined.includes('mca')) {
+    return {
+      degree: 'MCA',
+      badgeClass: 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 text-white shadow-sky-500/25',
+      glowClass: 'hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-[0_12px_32px_-4px_rgba(14,165,233,0.4)]',
+      textAccent: 'text-sky-600 dark:text-sky-400',
+    };
+  }
+  if (combined.includes('bca')) {
+    return {
+      degree: 'BCA',
+      badgeClass: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-cyan-500/25',
+      glowClass: 'hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-[0_12px_32px_-4px_rgba(6,182,212,0.4)]',
+      textAccent: 'text-cyan-600 dark:text-cyan-400',
+    };
+  }
+  if (combined.includes('mba')) {
+    return {
+      degree: 'MBA',
+      badgeClass: 'bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 text-white shadow-amber-500/25',
+      glowClass: 'hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-[0_12px_32px_-4px_rgba(245,158,11,0.4)]',
+      textAccent: 'text-amber-600 dark:text-amber-400',
+    };
+  }
+  if (combined.includes('bba') || combined.includes('b.b.a')) {
+    return {
+      degree: 'BBA',
+      badgeClass: 'bg-gradient-to-r from-orange-500 via-amber-600 to-yellow-500 text-white shadow-orange-500/25',
+      glowClass: 'hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-[0_12px_32px_-4px_rgba(249,115,22,0.4)]',
+      textAccent: 'text-orange-600 dark:text-orange-400',
+    };
+  }
+  if (combined.includes('b.sc') || combined.includes('bsc')) {
+    return {
+      degree: 'B.Sc',
+      badgeClass: 'bg-gradient-to-r from-emerald-600 via-green-600 to-teal-500 text-white shadow-emerald-500/25',
+      glowClass: 'hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-[0_12px_32px_-4px_rgba(16,185,129,0.4)]',
+      textAccent: 'text-emerald-600 dark:text-emerald-400',
+    };
+  }
+  if (combined.includes('m.sc') || combined.includes('msc')) {
+    return {
+      degree: 'M.Sc',
+      badgeClass: 'bg-gradient-to-r from-teal-600 via-emerald-600 to-green-600 text-white shadow-teal-500/25',
+      glowClass: 'hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-[0_12px_32px_-4px_rgba(20,184,166,0.4)]',
+      textAccent: 'text-teal-600 dark:text-teal-400',
+    };
+  }
+  if (combined.includes('pharm') || combined.includes('bpt')) {
+    const isPharm = combined.includes('pharm');
+    const degreeLabel = isPharm ? (combined.includes('m.pharm') ? 'M.Pharm' : 'B.Pharm') : 'BPT';
+    return {
+      degree: degreeLabel,
+      badgeClass: 'bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-500 text-white shadow-rose-500/25',
+      glowClass: 'hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-[0_12px_32px_-4px_rgba(244,63,94,0.4)]',
+      textAccent: 'text-rose-600 dark:text-rose-400',
+    };
+  }
+  if (combined.includes('b.com') || combined.includes('bcom')) {
+    return {
+      degree: 'B.Com',
+      badgeClass: 'bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white shadow-teal-500/25',
+      glowClass: 'hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-[0_12px_32px_-4px_rgba(20,184,166,0.4)]',
+      textAccent: 'text-teal-600 dark:text-teal-400',
+    };
+  }
+  if (combined.includes('law') || combined.includes('llb') || combined.includes('ll.b') || combined.includes('llm') || combined.includes('ll.m')) {
+    const degreeLabel = combined.includes('llm') || combined.includes('ll.m') ? 'LL.M' : 'LL.B';
+    return {
+      degree: degreeLabel,
+      badgeClass: 'bg-gradient-to-r from-amber-700 via-yellow-700 to-stone-800 text-white shadow-amber-600/25',
+      glowClass: 'hover:border-amber-500 dark:hover:border-amber-500 hover:shadow-[0_12px_32px_-4px_rgba(217,119,6,0.4)]',
+      textAccent: 'text-amber-600 dark:text-amber-400',
+    };
+  }
+  if (combined.includes('arch') || combined.includes('des')) {
+    const degreeLabel = combined.includes('arch') ? 'B.Arch' : 'B.Des';
+    return {
+      degree: degreeLabel,
+      badgeClass: 'bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white shadow-violet-500/25',
+      glowClass: 'hover:border-violet-400 dark:hover:border-violet-500 hover:shadow-[0_12px_32px_-4px_rgba(139,92,246,0.4)]',
+      textAccent: 'text-violet-600 dark:text-violet-400',
+    };
+  }
+
+  const fallback = p.short ? p.short.split(' ')[0] : 'Degree';
+  return {
+    degree: fallback,
+    badgeClass: 'bg-gradient-to-r from-orange-600 via-amber-500 to-orange-500 text-white shadow-orange-500/25',
+    glowClass: 'hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-[0_12px_32px_-4px_rgba(249,115,22,0.4)]',
+    textAccent: 'text-orange-600 dark:text-orange-400',
+  };
+}
+
+export default function ProgramCard({ p, onView, onAsk, onCompare, isCompared = false }) {
   const [showQuickGlimpse, setShowQuickGlimpse] = useState(false);
   const image = PROGRAM_IMAGES[p.id] || PROGRAM_IMAGES['btech-cse'];
   const enrichment = getProgramEnrichment(p.id);
+  const degreeInfo = getMainDegreeInfo(p);
 
   const programFee = fees[p.id] || {
     tuition: '₹1,60,000 / semester (Base)',
@@ -20,39 +139,52 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
 
   return (
     <div
-      className="group relative flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-xl hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-200 active:scale-[0.99] overflow-hidden"
+      onClick={() => onView && onView(p)}
+      className={`group relative flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.99] overflow-hidden cursor-pointer ${degreeInfo.glowClass}`}
       tabIndex={0}
-      aria-label={`${p.name} program card`}
+      role="article"
+      aria-label={`${p.name} - Click to view complete details`}
     >
-      {/* Top Banner Image with Overlay */}
-      <div className="relative h-48 w-full overflow-hidden bg-slate-900">
+      {/* Top Banner Image with Gradient Overlay */}
+      <div className="relative h-48 w-full overflow-hidden bg-slate-900 shrink-0">
         <img
           src={image}
           alt={p.name}
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
 
-        {/* Floating Badges */}
+        {/* Floating Badges Header */}
         <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1 rounded-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 shadow-sm border border-slate-200/50 dark:border-slate-700">
-            <GraduationCap size={13} />
-            {p.degree}
+          {/* Main Canonical Degree Badge with Animated Metallic Shining Sweep */}
+          <span
+            className={`relative overflow-hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider shadow-md border border-white/20 select-none ${degreeInfo.badgeClass}`}
+          >
+            <span className="relative z-10 flex items-center gap-1.5">
+              <GraduationCap size={13} className="shrink-0" />
+              <span>{degreeInfo.degree}</span>
+            </span>
+            {/* Holographic / Metallic Shimmer Light Sweep */}
+            <span
+              aria-hidden="true"
+              className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none"
+            />
           </span>
 
-          <span className="inline-flex items-center gap-1 rounded-lg bg-slate-900/85 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-white border border-white/20">
-            <Clock size={12} className="text-orange-400" />
-            {p.duration}
+          {/* Duration Badge */}
+          <span className="inline-flex items-center gap-1 rounded-lg bg-slate-900/85 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-white border border-white/20 shadow-xs">
+            <Clock size={12} className="text-orange-400 shrink-0" />
+            <span>{p.duration}</span>
           </span>
         </div>
 
-        {/* Stream / Tag Pill on bottom of image */}
-        <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between">
-          <span className="rounded-md bg-orange-600/95 backdrop-blur-sm text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-xs">
+        {/* Stream / Branch Indicator at bottom of image */}
+        <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between gap-2">
+          <span className="rounded-md bg-slate-950/80 backdrop-blur-md text-slate-200 border border-white/10 px-2.5 py-0.5 text-[11px] font-bold truncate max-w-[170px] shadow-xs">
             {p.short}
           </span>
-          <span className="text-[11px] font-medium text-slate-200 drop-shadow-sm truncate max-w-[150px]">
+          <span className="text-[11px] font-semibold text-slate-300 drop-shadow-sm truncate max-w-[140px]">
             {p.tags?.[0] || 'Engineering'}
           </span>
         </div>
@@ -103,6 +235,7 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
           {showQuickGlimpse && (
             <div
               id={`quick-glimpse-${p.id}`}
+              onClick={(e) => e.stopPropagation()}
               className="mt-3.5 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/80 text-xs text-slate-700 dark:text-slate-200 animate-fade-in space-y-3"
             >
               {/* NIRF Rank Badge */}
@@ -161,7 +294,10 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => onView(p)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView(p);
+              }}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-bold text-white shadow-sm transition-all duration-200 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
               style={{
                 background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
@@ -174,7 +310,10 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
 
             <button
               type="button"
-              onClick={() => onAsk(`Tell me about admission, fees, and eligibility for ${p.short}`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAsk(`Tell me about admission, fees, and eligibility for ${p.short}`);
+              }}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-200 active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
               aria-label={`Ask AI about ${p.short}`}
             >
@@ -187,18 +326,28 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
             {onCompare && (
               <button
                 type="button"
-                onClick={() => onCompare(p.id)}
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors py-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCompare(p.id);
+                }}
+                className={`inline-flex items-center gap-1 text-[11px] font-bold py-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 rounded transition-colors ${
+                  isCompared
+                    ? 'text-emerald-600 dark:text-emerald-400 font-extrabold'
+                    : 'text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300'
+                }`}
                 aria-label={`Add ${p.short} to comparison matrix`}
               >
-                <Scale size={12} />
-                <span>+ Compare Degree</span>
+                {isCompared ? <Check size={12} className="text-emerald-600" /> : <Scale size={12} />}
+                <span>{isCompared ? 'In Comparison' : '+ Compare Degree'}</span>
               </button>
             )}
 
             <button
               type="button"
-              onClick={() => setShowQuickGlimpse((prev) => !prev)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowQuickGlimpse((prev) => !prev);
+              }}
               aria-expanded={showQuickGlimpse}
               aria-controls={`quick-glimpse-${p.id}`}
               className="inline-flex items-center gap-1 text-right text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors py-1 cursor-pointer ml-auto focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
@@ -212,4 +361,3 @@ export default function ProgramCard({ p, onView, onAsk, onCompare }) {
     </div>
   );
 }
-

@@ -381,7 +381,7 @@ export default function Navbar({
             {/* Mobile Menu Toggle */}
             <button
               type="button"
-              className="p-1.5 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 sm:p-2 rounded-full lg:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label={open ? 'Close navigation' : 'Open navigation'}
               onClick={() => setOpen(!open)}
             >
@@ -392,7 +392,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="xl:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
+          <div className="lg:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu

@@ -72,8 +72,12 @@ function AppContent() {
     // Bidirectional circular view transition if supported
     if (typeof document !== 'undefined' && document.startViewTransition) {
       try {
-        const x = event?.clientX ?? (window.innerWidth - 80);
-        const y = event?.clientY ?? 30;
+        const x = (event && typeof event.clientX === 'number' && event.clientX > 0)
+          ? event.clientX
+          : (window.innerWidth - 80);
+        const y = (event && typeof event.clientY === 'number' && event.clientY > 0)
+          ? event.clientY
+          : 30;
         const endRadius = Math.hypot(
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)
@@ -94,16 +98,15 @@ function AppContent() {
         });
 
         transition.ready.then(() => {
-          const clipPath = [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`
-          ];
           document.documentElement.animate(
             {
-              clipPath,
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${endRadius}px at ${x}px ${y}px)`,
+              ],
             },
             {
-              duration: 400,
+              duration: 450,
               easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
               pseudoElement: '::view-transition-new(root)',
             }
@@ -306,17 +309,6 @@ function AppContent() {
 
       {/* Draggable Floating AI Assistant Button */}
       <FloatingAiAssistant go={go} page={page} ask={ask} chat={chat} />
-
-      {/* Legal & Unofficial Disclaimer / Terms Modal - Placed after AuthModal with z-[80] to layer on top */}
-      {legalModalOpen && (
-        <Suspense fallback={null}>
-          <LegalModal
-            isOpen={legalModalOpen}
-            onClose={() => setLegalModalOpen(false)}
-            initialTab={legalInitialTab}
-          />
-        </Suspense>
-      )}
     </div>
   );
 }

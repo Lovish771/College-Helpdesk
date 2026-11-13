@@ -335,11 +335,19 @@ export default function Programs({ ask, onOpenCompare }) {
 
   const handleToggleCompareQueue = (id) => {
     setCompareQueue((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((item) => item !== id);
-      }
-      return [...prev, id];
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      return next;
     });
+
+    if (onOpenCompare) {
+      // Intelligently open the comparison matrix immediately with the selected degree
+      const activeList = compareQueue.includes(id)
+        ? compareQueue
+        : (compareQueue.length > 0
+            ? [...compareQueue, id]
+            : [id, id.startsWith('btech') && id !== 'btech-cse' ? 'btech-cse' : (id === 'btech-cse' ? 'btech-aiml' : id)]);
+      onOpenCompare(activeList);
+    }
   };
 
   const handleLaunchComparison = () => {
@@ -501,6 +509,7 @@ export default function Programs({ ask, onOpenCompare }) {
                       onView={(prog) => setSelectedProgram(prog)}
                       onAsk={ask}
                       onCompare={(id) => handleToggleCompareQueue(id)}
+                      isCompared={compareQueue.includes(p.id)}
                     />
                   ))}
                 </div>
@@ -514,12 +523,12 @@ export default function Programs({ ask, onOpenCompare }) {
               <span>
                 Showing <strong className="text-slate-900 dark:text-white font-bold">{filtered.length}</strong> programmes
               </span>
-              {selectedSchoolId !== 'all' && (
+              {q && (
                 <button
-                  onClick={() => setSelectedSchoolId('all')}
+                  onClick={() => setQ('')}
                   className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer"
                 >
-                  View All Faculties
+                  Clear Search &amp; View All Faculties
                 </button>
               )}
             </div>
@@ -532,6 +541,7 @@ export default function Programs({ ask, onOpenCompare }) {
                   onView={(prog) => setSelectedProgram(prog)}
                   onAsk={ask}
                   onCompare={(id) => handleToggleCompareQueue(id)}
+                  isCompared={compareQueue.includes(p.id)}
                 />
               ))}
             </div>
