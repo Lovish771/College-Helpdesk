@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
+import { flushSync } from 'react-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingAiAssistant from './components/FloatingAiAssistant';
 import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
@@ -78,7 +80,9 @@ function AppContent() {
         );
 
         const transition = document.startViewTransition(() => {
-          setTheme(nextTheme);
+          flushSync(() => {
+            setTheme(nextTheme);
+          });
           if (nextTheme === 'dark') {
             document.documentElement.classList.add('dark');
             document.body.classList.add('dark');
@@ -86,6 +90,7 @@ function AppContent() {
             document.documentElement.classList.remove('dark');
             document.body.classList.remove('dark');
           }
+          document.documentElement.setAttribute('data-theme', nextTheme);
         });
 
         transition.ready.then(() => {
@@ -295,6 +300,20 @@ function AppContent() {
                 window.location.reload();
               }
             }}
+          />
+        </Suspense>
+      )}
+
+      {/* Draggable Floating AI Assistant Button */}
+      <FloatingAiAssistant go={go} page={page} ask={ask} chat={chat} />
+
+      {/* Legal & Unofficial Disclaimer / Terms Modal - Placed after AuthModal with z-[80] to layer on top */}
+      {legalModalOpen && (
+        <Suspense fallback={null}>
+          <LegalModal
+            isOpen={legalModalOpen}
+            onClose={() => setLegalModalOpen(false)}
+            initialTab={legalInitialTab}
           />
         </Suspense>
       )}

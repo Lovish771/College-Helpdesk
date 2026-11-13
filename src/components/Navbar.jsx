@@ -117,7 +117,7 @@ export default function Navbar({
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)]'
+              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] ring-1 ring-black/5 dark:ring-white/5'
               : 'bg-white/90 dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
           }`}
         >
@@ -141,7 +141,7 @@ export default function Navbar({
           </button>
 
           {/* Primary Navigation Menu (Desktop) */}
-          <ul className="hidden xl:flex items-center gap-1 shrink-0" role="list">
+          <ul className="hidden lg:flex items-center gap-1 shrink-0" role="list">
             {PRIMARY_NAV.map(([id, label, Icon]) => {
               const active = page === id;
               return (
