@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Camera, Sparkles, Compass, CheckCircle2, ChevronRight, Layers } from 'lucide-react';
+import { Camera, Building2, Compass, CheckCircle2, ChevronRight, Layers } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 
 const PHOTOS = [
@@ -100,7 +100,7 @@ export default function HeroCampusShowcase() {
                     : {}
                 }
               >
-                {idx === 0 ? <Compass size={13} /> : <Sparkles size={13} />}
+                {idx === 0 ? <Compass size={13} /> : <Building2 size={13} />}
                 <span>{photo.label}</span>
                 {isCurrent && (
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse ml-0.5" />

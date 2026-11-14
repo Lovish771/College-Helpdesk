@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   BedDouble, Utensils, ShieldCheck, Wifi, Dumbbell, BookOpen,
-  MessageCircle, ArrowRight, Shirt, Sparkles, CheckCircle2, Search,
-  Home, Tv, Coffee, Sparkle, Building, Clock, Info, Check, X,
+  MessageCircle, ArrowRight, Shirt, CheckCircle2, Search,
+  Home, Tv, Coffee, Building, Clock, Info, Check, X,
   Maximize2, Wind, Bath, DoorClosed, SlidersHorizontal, Award, Layers,
   Zap, AlertCircle, RefreshCw, ChevronRight, CheckCircle, HelpCircle
 } from 'lucide-react';
@@ -810,7 +810,7 @@ export default function Hostel({ go, ask }) {
                     <span>Up to 100 Free Units/Mo</span>
                   </div>
                   <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5">
-                    <Sparkle size={16} className="text-emerald-400 shrink-0" />
+                    <ShieldCheck size={16} className="text-emerald-400 shrink-0" />
                     <span>Priority Maintenance</span>
                   </div>
                 </div>

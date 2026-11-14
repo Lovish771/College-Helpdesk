@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Plus, Menu, X, Trash2, HelpCircle,
-  MessageSquare, Sparkles, PhoneCall, Clock,
+  MessageSquare, PhoneCall, Clock,
   AlertTriangle, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import ChatWindow from '../components/ChatWindow';

@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
   Wallet, Award, BedDouble, ChevronRight, CheckCircle2,
-  Sparkles, ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
+  ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
   Building2, Users, Info, Scale, Check, Plus, Calculator, Landmark,
   Calendar, Layers, Clock, Coffee, Shirt, X
 } from 'lucide-react';
@@ -279,8 +279,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
             onClick={() => ask(`Can you help me calculate the total 4-year expenditure and hostel fees for ${activeCourse.short}?`)}
             className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer"
           >
-            <Sparkles size={14} />
-            <span>Calculate with AI</span>
+            <Calculator size={14} />
+            <span>Calculate Breakdown</span>
           </button>
         </PageHead>
 
@@ -699,8 +699,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
                     onClick={() => ask(`I planned my ${tenureYears}-year expenditure for ${activeCourse.name} at ₹${totalTenureCost.toLocaleString()}. What are the monthly EMI options and loan subsidy schemes available?`)}
                     className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold cursor-pointer"
                   >
-                    <Sparkles size={14} />
-                    <span>Ask AI for EMI Breakdown</span>
+                    <Calculator size={14} />
+                    <span>Ask for EMI Breakdown</span>
                   </button>
                 </div>
               </div>

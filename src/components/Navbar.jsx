@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, ChevronDown, Moon, Sun,
-  Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
+  Home, GraduationCap, BookOpen, HelpCircle, Bot,
   UserCheck, Wallet, BedDouble, BarChart3, Scale, PhoneCall,
-  User as UserIcon, LogOut, ShieldCheck, KeyRound
+  User as UserIcon, LogOut, ShieldCheck, KeyRound, MessageSquare
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 import useAuth from '../hooks/useAuth';
@@ -319,7 +319,7 @@ export default function Navbar({
                       onClick={() => to('chat')}
                       className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
                     >
-                      <Sparkles size={14} className="text-orange-500" />
+                      <MessageSquare size={14} className="text-orange-500" />
                       <span>My Saved Chats</span>
                     </button>
 
@@ -374,7 +374,7 @@ export default function Navbar({
                 background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
               }}
             >
-              <Sparkles size={13} className="shrink-0" />
+              <Bot size={13} className="shrink-0" />
               <span>AI Assistant</span>
             </button>
 
@@ -426,7 +426,7 @@ export default function Navbar({
 
             <ul className="space-y-1">
               {[
-                ['chat', 'AI Assistant (24/7 Chat)', Sparkles],
+                ['chat', 'AI Assistant (24/7 Chat)', Bot],
                 ...PRIMARY_NAV,
                 ...moreNavItems.map(([id, label, icon, , isSpecial]) => [id, label, icon, isSpecial]),
               ].map(([id, label, Icon, isSpecial]) => {

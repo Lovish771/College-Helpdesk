@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  X, Plus, Sparkles, Scale, Check, ArrowRight,
+  X, Plus, BarChart2, Scale, Check, ArrowRight,
   GraduationCap, Wallet, Award, Clock, BookOpen, Briefcase, ChevronDown, CheckCircle2,
   Trash2, AlertCircle, Code, Cpu, Layers, Laptop, ExternalLink, HelpCircle
 } from 'lucide-react';
@@ -144,7 +144,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
                   background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
                 }}
               >
-                <Sparkles size={13} />
+                <BarChart2 size={13} />
                 <span>Analyse All with AI</span>
               </button>
             )}
@@ -612,14 +612,14 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
         <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 shrink-0">
-              <Sparkles size={16} />
+              <Scale size={16} />
             </span>
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white">
                 Unsure which degree fits your future ambition best?
               </p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                Our AI Admission Engine can analyze syllabus difficulty, coding intensity, and placement histories side by side.
+                Compare curriculum depth, eligibility, and career outcomes side by side.
               </p>
             </div>
           </div>

@@ -2,11 +2,12 @@ import { useState, useMemo } from 'react';
 import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
-  Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
+  Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
   Cpu, Code, Terminal, HeartPulse, Sprout, Landmark
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
+import ProgramsCarousel from '../components/ProgramsCarousel';
 import { PROGRAM_IMAGES } from '../data/programImages';
 
 // Academic Schools / Faculties representing LPU's institutional hierarchy
@@ -251,8 +252,8 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
                 onClick={() => ask(`Give me the semester-wise subjects and credit breakdown for ${p.name}`)}
                 className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
               >
-                <Sparkles size={14} />
-                <span>Ask AI for Full Semester Syllabus</span>
+                <BookOpen size={14} />
+                <span>Enquire Full Semester Syllabus</span>
               </button>
             </div>
           )}
@@ -280,6 +281,12 @@ export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
+
+  // Flagship featured programs for the top carousel
+  const featuredPrograms = useMemo(() => {
+    const featuredIds = ['btech-cse', 'btech-aiml', 'btech-ds', 'mba', 'bca', 'bba', 'bpharm', 'barch'];
+    return programs.filter((p) => featuredIds.includes(p.id));
+  }, []);
 // Map each program to an Academic School
   const getProgramSchool = (p) => {
     for (const school of ACADEMIC_SCHOOLS) {
@@ -473,6 +480,17 @@ export default function Programs({ ask, onOpenCompare }) {
         ) : !q.trim() ? (
           /* ── Hierarchical School View (Eliminates flat crowded feeling) ── */
           <div className="space-y-12">
+            {/* ── Featured Flagship Programmes Carousel (3 visible cards, 3 dots, 5s autoplay) ── */}
+            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-2 sm:p-4 shadow-sm overflow-hidden">
+              <ProgramsCarousel
+                programs={featuredPrograms}
+                onView={(prog) => setSelectedProgram(prog)}
+                onAsk={ask}
+                onCompare={(id) => handleToggleCompareQueue(id)}
+                compareQueue={compareQueue}
+              />
+            </div>
+
             {groupedBySchool.map(({ school, programs: schoolProgs }) => (
               <div key={school.id} className="space-y-4">
                 

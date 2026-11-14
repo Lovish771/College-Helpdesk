@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Search, ChevronDown, ChevronUp, UserCheck, CreditCard,
   BookOpen, Bed, Briefcase, FileText, LifeBuoy, HelpCircle,
-  Sparkles, CheckCircle2, PhoneCall, Building
+  Bot, CheckCircle2, PhoneCall, Building
 } from 'lucide-react';
 import { mockCategories, mockArticles } from '../api/knowledgeApi';
 
@@ -60,8 +60,8 @@ export default function KnowledgeBase({ ask }) {
             onClick={() => ask && ask('What are the key admission deadlines and scholarship cutoffs for 2026-27?')}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md shadow-orange-600/25 transition-all cursor-pointer shrink-0 self-start sm:self-auto"
           >
-            <Sparkles size={14} />
-            <span>Ask AI Assistant</span>
+            <Bot size={14} />
+            <span>Ask Helpdesk Assistant</span>
           </button>
         </div>
 
@@ -214,8 +214,8 @@ export default function KnowledgeBase({ ask }) {
                           onClick={() => ask && ask(`Tell me more details about: ${art.title}`)}
                           className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                         >
-                          <Sparkles size={12} />
-                          <span>Ask AI Assistant for personalized guidance</span>
+                          <Bot size={12} />
+                          <span>Ask Helpdesk for guidance</span>
                         </button>
                       </div>
                     </div>

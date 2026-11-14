@@ -1,10 +1,69 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Bot, X, Maximize2, Send, Sparkles, MessageSquare, ChevronRight,
-  HelpCircle, ArrowUpRight, Zap
+  X, Maximize2, Send, MessageSquare, ChevronRight,
+  HelpCircle, ArrowUpRight, Zap, Bot
 } from 'lucide-react';
+import LpuLogo from './LpuLogo';
+import { sendMessage } from '../api/chatbotApi';
 
 const STORAGE_KEY = 'lpu_ai_assistant_pos';
+
+/**
+ * Format markdown bold, bullets, and strip unwanted raw code fences or JSON
+ */
+function FormatMiniMessage({ text }) {
+  if (!text) return null;
+
+  // Clean out any raw json or markdown code fences that might leak
+  let cleanText = text
+    .replace(/```[a-z]*\n[\s\S]*?```/gi, '')
+    .replace(/^```[a-z]*/gim, '')
+    .replace(/```$/gim, '')
+    .trim();
+
+  // If text looks like a raw JSON object string, extract the message/reply if possible
+  if (cleanText.startsWith('{') && cleanText.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(cleanText);
+      cleanText = parsed.reply || parsed.text || parsed.message || cleanText;
+    } catch {}
+  }
+
+  const lines = cleanText.split('\n');
+
+  return (
+    <div className="space-y-1.5 leading-relaxed font-sans text-xs">
+      {lines.map((line, idx) => {
+        if (!line.trim()) return <div key={idx} className="h-1" />;
+        const isBullet = line.trim().startsWith('•') || line.trim().startsWith('-');
+        const content = isBullet ? line.trim().replace(/^[•\-]\s*/, '') : line;
+
+        const parts = content.split(/(\*\*.*?\*\*)/g);
+        const rendered = parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        });
+
+        if (isBullet) {
+          return (
+            <div key={idx} className="flex items-start gap-1.5 pl-1">
+              <span className="text-orange-500 font-bold shrink-0 mt-0.5">•</span>
+              <span className="flex-1">{rendered}</span>
+            </div>
+          );
+        }
+
+        return <p key={idx}>{rendered}</p>;
+      })}
+    </div>
+  );
+}
 
 export default function FloatingAiAssistant({ go, page, ask, chat }) {
   // If user is already on the dedicated chat page, hide the floating widget
@@ -181,34 +240,21 @@ export default function FloatingAiAssistant({ go, page, ask, chat }) {
     setSending(true);
 
     try {
-      if (chat && chat.send) {
-        await chat.send(q);
-        // Get the latest reply from chat messages
-        const lastMsg = chat.messages?.[chat.messages.length - 1];
-        if (lastMsg && lastMsg.role === 'bot') {
-          setMiniMessages((prev) => [...prev, { id: `b-${Date.now()}`, role: 'bot', text: lastMsg.text }]);
-        } else {
-          setMiniMessages((prev) => [
-            ...prev,
-            {
-              id: `b-${Date.now()}`,
-              role: 'bot',
-              text: 'Got your query! Click "Open Full Dedicated Chat" to view complete detailed tables and breakdown.'
-            }
-          ]);
-        }
+      const res = await sendMessage(q);
+      if (res && res.reply) {
+        setMiniMessages((prev) => [
+          ...prev,
+          { id: `b-${Date.now()}`, role: 'bot', text: res.reply }
+        ]);
       } else {
-        // Fallback simulation
-        setTimeout(() => {
-          setMiniMessages((prev) => [
-            ...prev,
-            {
-              id: `b-${Date.now()}`,
-              role: 'bot',
-              text: `Here is the information for: "${q}". You can open the dedicated chat window for multi-turn answers and verified fee calculators.`
-            }
-          ]);
-        }, 500);
+        setMiniMessages((prev) => [
+          ...prev,
+          {
+            id: `b-${Date.now()}`,
+            role: 'bot',
+            text: 'I can help you with LPU programmes, fee structures, eligibility, and scholarships. Click "Open dedicated AI area" below for full breakdown tables!'
+          }
+        ]);
       }
     } catch (err) {
       setMiniMessages((prev) => [
@@ -216,7 +262,7 @@ export default function FloatingAiAssistant({ go, page, ask, chat }) {
         {
           id: `b-${Date.now()}`,
           role: 'bot',
-          text: 'Thank you! You can open the dedicated AI chat area for full details.'
+          text: 'Thank you for reaching out! You can open the dedicated AI helpdesk area for comprehensive details.'
         }
       ]);
     } finally {
@@ -393,8 +439,8 @@ export default function FloatingAiAssistant({ go, page, ask, chat }) {
                   className={`flex items-start gap-2 ${isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   {isBot && (
-                    <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot size={13} />
+                    <div className="shrink-0 mt-0.5">
+                      <LpuLogo size={22} variant="light" />
                     </div>
                   )}
                   <div
@@ -404,7 +450,7 @@ export default function FloatingAiAssistant({ go, page, ask, chat }) {
                         : 'bg-orange-600 text-white shadow-xs'
                     }`}
                   >
-                    {m.text}
+                    {isBot ? <FormatMiniMessage text={m.text} /> : m.text}
                   </div>
                 </div>
               );

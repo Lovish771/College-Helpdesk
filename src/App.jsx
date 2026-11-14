@@ -48,6 +48,7 @@ function AppContent() {
 
   // Dark / Light Theme management with schema-validated persistence
   const [theme, setTheme] = useState(() => getStoredItem('lpu_theme'));
+  const isThemeChangingRef = useRef(false);
 
   // Keep DOM root, body, and storage strictly synchronized with active theme
   useEffect(() => {
@@ -66,12 +67,14 @@ function AppContent() {
   }, [theme]);
 
   const toggleTheme = useCallback((event) => {
+    if (isThemeChangingRef.current) return;
     const isDark = theme === 'dark';
     const nextTheme = isDark ? 'light' : 'dark';
 
     // Bidirectional circular view transition if supported
     if (typeof document !== 'undefined' && document.startViewTransition) {
       try {
+        isThemeChangingRef.current = true;
         const x = (event && typeof event.clientX === 'number' && event.clientX > 0)
           ? event.clientX
           : (window.innerWidth - 80);
@@ -82,6 +85,14 @@ function AppContent() {
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)
         );
+
+        // Set CSS custom properties for GPU-accelerated circle reveal
+        document.documentElement.style.setProperty('--click-x', `${x}px`);
+        document.documentElement.style.setProperty('--click-y', `${y}px`);
+        document.documentElement.style.setProperty('--click-r', `${endRadius}px`);
+
+        // Disable CSS transitions during DOM mutation so clean, instant snapshot is taken
+        document.documentElement.classList.add('disable-transitions');
 
         const transition = document.startViewTransition(() => {
           flushSync(() => {
@@ -98,22 +109,32 @@ function AppContent() {
         });
 
         transition.ready.then(() => {
-          document.documentElement.animate(
-            {
-              clipPath: [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${endRadius}px at ${x}px ${y}px)`,
-              ],
-            },
-            {
-              duration: 450,
-              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-              pseudoElement: '::view-transition-new(root)',
-            }
-          );
+          try {
+            document.documentElement.animate(
+              {
+                clipPath: [
+                  `circle(0px at ${x}px ${y}px)`,
+                  `circle(${endRadius}px at ${x}px ${y}px)`,
+                ],
+              },
+              {
+                duration: 500,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                pseudoElement: '::view-transition-new(root)',
+              }
+            );
+          } catch (_) {}
+        }).catch(() => {});
+
+        transition.finished.finally(() => {
+          document.documentElement.classList.remove('disable-transitions');
+          isThemeChangingRef.current = false;
         });
         return;
-      } catch {}
+      } catch {
+        document.documentElement.classList.remove('disable-transitions');
+        isThemeChangingRef.current = false;
+      }
     }
 
     // Smooth fallback with global transition class

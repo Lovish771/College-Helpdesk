@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ArrowRight, Search, GraduationCap, Users, ShieldCheck, Clock,
-  Sparkles, Wallet, BedDouble, Scale, PhoneCall, BookOpen,
+  Bot, Wallet, BedDouble, Scale, PhoneCall, BookOpen,
   Building2, CheckCircle2, XCircle, ChevronRight, Award, Compass, HelpCircle
 } from 'lucide-react';
 import { programs, qualifications } from '../data/mockData';
@@ -130,8 +130,8 @@ export default function Home({ go, ask, onOpenCompare }) {
                       background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
                     }}
                   >
-                    <Sparkles size={13} />
-                    <span>Ask AI</span>
+                    <Bot size={13} />
+                    <span>Ask Helpdesk</span>
                   </button>
                 </div>
               </form>
@@ -293,7 +293,7 @@ export default function Home({ go, ask, onOpenCompare }) {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 text-xs font-bold uppercase tracking-wider mb-2">
-                <Sparkles size={14} />
+                <GraduationCap size={14} />
                 <span>Eligibility Verification</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white">
@@ -516,8 +516,8 @@ export default function Home({ go, ask, onOpenCompare }) {
           <div className="rounded-3xl bg-gradient-to-br from-orange-50/90 via-white to-amber-50/80 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 text-slate-900 dark:text-white p-8 sm:p-12 shadow-xl border border-orange-200/80 dark:border-slate-800 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 transition-colors">
             <div className="space-y-4 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/15 dark:bg-orange-600/30 border border-orange-500/30 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold">
-                <Sparkles size={14} />
-                <span>Instant University Guidance Engine</span>
+                <Bot size={14} />
+                <span>24/7 University Guidance</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-extrabold font-display leading-tight text-slate-900 dark:text-white">
@@ -525,7 +525,7 @@ export default function Home({ go, ask, onOpenCompare }) {
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Skip waiting in phone queues. The AI Helpdesk provides instant, verified answers trained on all official Lovely Professional University academic regulations, LPUNEST criteria, and residential policies.
+                Skip waiting in phone queues. The Helpdesk Assistant provides instant, verified answers trained on all official Lovely Professional University academic regulations, LPUNEST criteria, and residential policies.
               </p>
             </div>
 
@@ -537,8 +537,8 @@ export default function Home({ go, ask, onOpenCompare }) {
                   background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
                 }}
               >
-                <Sparkles size={16} />
-                <span>Open Instant AI Chat</span>
+                <Bot size={16} />
+                <span>Open Instant Chat</span>
               </button>
 
               <button
