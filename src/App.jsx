@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
+import React, { useCallback, useEffect, useState, useRef, Suspense, lazy } from 'react';
 import { flushSync } from 'react-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -75,18 +75,19 @@ function AppContent() {
     if (typeof document !== 'undefined' && document.startViewTransition) {
       try {
         isThemeChangingRef.current = true;
+        const rect = event?.currentTarget?.getBoundingClientRect?.() || event?.target?.getBoundingClientRect?.();
         const x = (event && typeof event.clientX === 'number' && event.clientX > 0)
           ? event.clientX
-          : (window.innerWidth - 80);
+          : (rect ? Math.round(rect.left + rect.width / 2) : (window.innerWidth - 80));
         const y = (event && typeof event.clientY === 'number' && event.clientY > 0)
           ? event.clientY
-          : 30;
+          : (rect ? Math.round(rect.top + rect.height / 2) : 30);
         const endRadius = Math.hypot(
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)
         );
 
-        // Set CSS custom properties for GPU-accelerated circle reveal
+        // Set CSS custom properties for GPU-accelerated circle reveal / shrink
         document.documentElement.style.setProperty('--click-x', `${x}px`);
         document.documentElement.style.setProperty('--click-y', `${y}px`);
         document.documentElement.style.setProperty('--click-r', `${endRadius}px`);
@@ -110,17 +111,25 @@ function AppContent() {
 
         transition.ready.then(() => {
           try {
+            const isDarkNext = nextTheme === 'dark';
             document.documentElement.animate(
               {
-                clipPath: [
-                  `circle(0px at ${x}px ${y}px)`,
-                  `circle(${endRadius}px at ${x}px ${y}px)`,
-                ],
+                clipPath: isDarkNext
+                  ? [
+                      `circle(${endRadius}px at ${x}px ${y}px)`,
+                      `circle(0px at ${x}px ${y}px)`,
+                    ]
+                  : [
+                      `circle(0px at ${x}px ${y}px)`,
+                      `circle(${endRadius}px at ${x}px ${y}px)`,
+                    ],
               },
               {
-                duration: 500,
+                duration: 450,
                 easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                pseudoElement: '::view-transition-new(root)',
+                pseudoElement: isDarkNext
+                  ? '::view-transition-old(root)'
+                  : '::view-transition-new(root)',
               }
             );
           } catch (_) {}

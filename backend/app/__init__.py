@@ -86,6 +86,15 @@ def create_app(config_name=None, **kwargs):
     app.register_blueprint(feedback.bp, url_prefix='/api')
     app.register_blueprint(admin.bp, url_prefix='/api')
     app.register_blueprint(analytics.bp, url_prefix='/api')
+
+    @app.route("/", methods=["GET"])
+    def root_info():
+        return {
+            "status": "online",
+            "service": "Lovely Professional University (LPU) Admission Helpdesk API",
+            "frontend_url": "http://localhost:5173",
+            "api_health": "/api/programs/health"
+        }, 200
     
     # Create tables and auto-seed users if empty
     with app.app_context():
