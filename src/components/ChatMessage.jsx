@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
 
@@ -21,13 +21,28 @@ function sanitizeInput(raw) {
 }
 
 /**
- * Format markdown bold **text**, bullet points, and links into clean, sanitized JSX
+ * Format markdown bold **text**, bullet points, and strip code wrappers into clean, sanitized JSX
  */
 function FormattedText({ text }) {
   if (!text) return null;
 
-  // Sanitize first
-  const sanitized = sanitizeInput(text);
+  // Filter out any unwanted generated code fences (```...```) or raw json
+  let cleanText = text
+    .replace(/```[a-z]*\n[\s\S]*?```/gi, '')
+    .replace(/^```[a-z]*/gim, '')
+    .replace(/```$/gim, '')
+    .trim();
+
+  // If text is serialized JSON string
+  if (cleanText.startsWith('{') && cleanText.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(cleanText);
+      cleanText = parsed.reply || parsed.text || parsed.message || cleanText;
+    } catch {}
+  }
+
+  // Sanitize
+  const sanitized = sanitizeInput(cleanText);
 
   // Split by newlines
   const lines = sanitized.split('\n');

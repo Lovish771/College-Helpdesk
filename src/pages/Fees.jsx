@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
   Wallet, Award, BedDouble, ChevronRight, CheckCircle2,
-  Sparkles, ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
+  ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
   Building2, Users, Info, Scale, Check, Plus, Calculator, Landmark,
   Calendar, Layers, Clock, Coffee, Shirt, X
 } from 'lucide-react';
@@ -33,12 +33,17 @@ const RESIDENTIAL_SERVICES = [
       { name: '3-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,20,000 / yr', desc: 'Triple-sharing studio flat layout with split AC, modular kitchenette, and modern attached bathroom.' },
       { name: '4-Seater Studio Apartment (AC + Kitchenette)', fee: '₹1,00,000 / yr', desc: 'Quad-sharing apartment flat living with split AC, modular pantry/kitchenette, and attached bathroom.' },
       { name: '1-Seater Standard Room (AC)', fee: '₹1,53,000 / yr', desc: 'Individual room with attached washroom, study desk, ergonomic chair, wooden wardrobe, geyser, and air conditioner.' },
-      { name: '2-Seater Room (AC)', fee: '₹1,33,000 / yr', desc: 'Climate-controlled dual occupancy suite with attached bathroom, water heater, and study units.' },
+      { name: '2-Seater Room (AC)', fee: '₹1,33,000 / yr', desc: 'Dual occupancy suite with attached bathroom, water heater, and study units.' },
       { name: '2-Seater Room (Air-Cooled)', fee: '₹1,13,000 / yr', desc: 'Twin sharing room designed for academic focus with air-cooling ducting.' },
       { name: '3-Seater Room (AC)', fee: '₹1,13,000 / yr', desc: 'Triple sharing room with dedicated 1.5-ton split AC and personal study stations.' },
       { name: '3-Seater Room (Air-Cooled)', fee: '₹98,000 / yr', desc: 'Triple sharing with natural ventilation, attached balcony, and individual lockable storage.' },
-      { name: '4-Seater Room (AC)', fee: '₹93,000 / yr', desc: 'Four occupancy climate-controlled room with high-efficiency split AC.' },
+      { name: '4-Seater Room (AC)', fee: '₹93,000 / yr', desc: 'Four occupancy room with high-efficiency split AC.' },
       { name: '4-Seater Room (Air-Cooled)', fee: '₹83,000 / yr', desc: 'Spacious 4-sharing room with individual study desk, wardrobe, and desert cooling ducts.' },
+      { name: '5-Seater Standard Room (Air-Cooled)', fee: '₹72,000 / yr', desc: '5-Seater Air-Cooled room with 300 free electricity units per academic session.' },
+      { name: '5-Seater Standard Room (AC)', fee: '₹81,000 / yr', desc: '5-Seater AC room with 400 free electricity units per academic session.' },
+      { name: '6/7/8-Seater Room (Air-Cooled)', fee: '₹72,000 / yr', desc: '6/7/8-Seater Air-Cooled room with 250 free electricity units per academic session.' },
+      { name: '6/7/8-Seater Room (AC)', fee: '₹81,000 / yr', desc: '6/7/8-Seater AC room with 350 free electricity units per academic session.' },
+      { name: '4x2-Seater Room (Air-Cooled)', fee: '₹72,000 / yr', desc: '4x2-Seater Air-Cooled cluster suite with 250 free electricity units per session.' },
     ],
   },
   {
@@ -81,6 +86,11 @@ const HOSTEL_RATES = {
   'standard-2': { name: '2-Seater Standard (Air-Cooled)', cost: 113000 },
   'standard-3': { name: '3-Seater Standard (Air-Cooled)', cost: 98000 },
   'standard-4': { name: '4-Seater Standard (Air-Cooled)', cost: 83000 },
+  'standard-5-cooler': { name: '5-Seater Standard (Air-Cooled) (300 Units Quota)', cost: 72000 },
+  'standard-5-ac': { name: '5-Seater Standard Room (AC) (400 Units Quota)', cost: 81000 },
+  'standard-678-cooler': { name: '6/7/8-Seater Standard (Air-Cooled) (250 Units Quota)', cost: 72000 },
+  'standard-678-ac': { name: '6/7/8-Seater Standard Room (AC) (350 Units Quota)', cost: 81000 },
+  'standard-4x2-cooler': { name: '4x2-Seater Standard (Air-Cooled) (250 Units Quota)', cost: 72000 },
 };
 
 const MESS_RATES = {
@@ -269,8 +279,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
             onClick={() => ask(`Can you help me calculate the total 4-year expenditure and hostel fees for ${activeCourse.short}?`)}
             className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer"
           >
-            <Sparkles size={14} />
-            <span>Calculate with AI</span>
+            <Calculator size={14} />
+            <span>Calculate Breakdown</span>
           </button>
         </PageHead>
 
@@ -577,6 +587,11 @@ export default function Fees({ ask, onOpenCompare, go }) {
                               <option value="standard-2">2-Seater Standard (Air-Cooled) (₹1,13,000)</option>
                               <option value="standard-3">3-Seater Standard (Air-Cooled) (₹98,000)</option>
                               <option value="standard-4">4-Seater Standard (Air-Cooled) (₹83,000)</option>
+                              <option value="standard-5-cooler">5-Seater Standard (Air-Cooled) (₹72,000)</option>
+                              <option value="standard-5-ac">5-Seater Standard Room (AC) (₹81,000)</option>
+                              <option value="standard-678-cooler">6/7/8-Seater Standard (Air-Cooled) (₹72,000)</option>
+                              <option value="standard-678-ac">6/7/8-Seater Standard Room (AC) (₹81,000)</option>
+                              <option value="standard-4x2-cooler">4x2-Seater Standard (Air-Cooled) (₹72,000)</option>
                             </select>
                           </div>
 
@@ -684,8 +699,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
                     onClick={() => ask(`I planned my ${tenureYears}-year expenditure for ${activeCourse.name} at ₹${totalTenureCost.toLocaleString()}. What are the monthly EMI options and loan subsidy schemes available?`)}
                     className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold cursor-pointer"
                   >
-                    <Sparkles size={14} />
-                    <span>Ask AI for EMI Breakdown</span>
+                    <Calculator size={14} />
+                    <span>Ask for EMI Breakdown</span>
                   </button>
                 </div>
               </div>

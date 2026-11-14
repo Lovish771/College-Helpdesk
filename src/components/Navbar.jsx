@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, ChevronDown, Moon, Sun,
-  Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
+  Home, GraduationCap, BookOpen, HelpCircle, Bot,
   UserCheck, Wallet, BedDouble, BarChart3, Scale, PhoneCall,
-  User as UserIcon, LogOut, ShieldCheck, KeyRound
+  User as UserIcon, LogOut, ShieldCheck, KeyRound, MessageSquare
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 import useAuth from '../hooks/useAuth';
@@ -117,7 +117,7 @@ export default function Navbar({
             isChat
               ? 'border-transparent bg-transparent shadow-none max-w-full'
               : scrolled
-              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)]'
+              ? 'bg-white/95 dark:bg-slate-900/95 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white shadow-[0_12px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] ring-1 ring-black/5 dark:ring-white/5'
               : 'bg-white/90 dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] text-slate-900 dark:text-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
           }`}
         >
@@ -141,7 +141,7 @@ export default function Navbar({
           </button>
 
           {/* Primary Navigation Menu (Desktop) */}
-          <ul className="hidden xl:flex items-center gap-1 shrink-0" role="list">
+          <ul className="hidden lg:flex items-center gap-1 shrink-0" role="list">
             {PRIMARY_NAV.map(([id, label, Icon]) => {
               const active = page === id;
               return (
@@ -319,7 +319,7 @@ export default function Navbar({
                       onClick={() => to('chat')}
                       className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
                     >
-                      <Sparkles size={14} className="text-orange-500" />
+                      <MessageSquare size={14} className="text-orange-500" />
                       <span>My Saved Chats</span>
                     </button>
 
@@ -374,14 +374,14 @@ export default function Navbar({
                 background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
               }}
             >
-              <Sparkles size={13} className="shrink-0" />
+              <Bot size={13} className="shrink-0" />
               <span>AI Assistant</span>
             </button>
 
             {/* Mobile Menu Toggle */}
             <button
               type="button"
-              className="p-1.5 sm:p-2 rounded-full xl:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="p-1.5 sm:p-2 rounded-full lg:hidden transition-colors active:scale-95 cursor-pointer shrink-0 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label={open ? 'Close navigation' : 'Open navigation'}
               onClick={() => setOpen(!open)}
             >
@@ -392,7 +392,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="xl:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
+          <div className="lg:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu
@@ -426,7 +426,7 @@ export default function Navbar({
 
             <ul className="space-y-1">
               {[
-                ['chat', 'AI Assistant (24/7 Chat)', Sparkles],
+                ['chat', 'AI Assistant (24/7 Chat)', Bot],
                 ...PRIMARY_NAV,
                 ...moreNavItems.map(([id, label, icon, , isSpecial]) => [id, label, icon, isSpecial]),
               ].map(([id, label, Icon, isSpecial]) => {

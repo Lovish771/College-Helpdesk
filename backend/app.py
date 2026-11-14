@@ -37,6 +37,16 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 init_db()
 
 
+@app.route("/", methods=["GET"])
+def root_info():
+    return jsonify({
+        "status": "online",
+        "service": "Lovely Professional University (LPU) Admission Helpdesk API",
+        "frontend_url": "http://localhost:5173",
+        "health": "/api/health"
+    }), 200
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({

@@ -3,7 +3,7 @@ import {
   ShieldAlert, ShieldCheck, Users, MessageSquare, AlertTriangle,
   Activity, RefreshCw, Search, Trash2, Calendar, Database,
   CheckCircle2, ArrowUpDown, ChevronLeft, ChevronRight, Lock, KeyRound,
-  Eye, X, Bot, Sparkles, Clock, HelpCircle, AlertCircle
+  Eye, X, Bot, Clock, HelpCircle, AlertCircle
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import { PageHead } from '../utils/useAsync';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Mail, Lock, KeyRound, ShieldCheck, ArrowRight,
-  RefreshCw, CheckCircle2, AlertCircle, Sparkles, User as UserIcon
+  RefreshCw, CheckCircle2, AlertCircle, User as UserIcon
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 

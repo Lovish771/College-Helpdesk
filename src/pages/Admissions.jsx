@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Calendar, HelpCircle, CheckCircle, ArrowRight, Sparkles,
+  Calendar, HelpCircle, CheckCircle, ArrowRight, Bot, MessageSquare,
   CreditCard, Building2, FileText, CheckCircle2, ChevronDown, ChevronUp,
   Download, PhoneCall, ShieldCheck, Landmark, BadgePercent
 } from 'lucide-react';
@@ -64,8 +64,8 @@ export default function Admissions({ ask, go }) {
             className="btn-3d-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md cursor-pointer"
             onClick={() => ask('What is the complete step-by-step admission and scholarship process for 2026-27?')}
           >
-            <Sparkles size={15} />
-            Ask AI Admission Assistant
+            <Bot size={15} />
+            Ask Helpdesk Assistant
           </button>
         </PageHead>
 
@@ -289,8 +289,8 @@ export default function Admissions({ ask, go }) {
                                 onClick={() => ask(`Can you give me more details about: ${q}?`)}
                                 className="inline-flex items-center gap-1 font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                               >
-                                <Sparkles size={12} />
-                                <span>Ask AI More Details</span>
+                                <MessageSquare size={12} />
+                                <span>Ask Assistant</span>
                               </button>
                             </div>
                           </div>

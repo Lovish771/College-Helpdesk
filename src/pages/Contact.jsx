@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Mail, Phone, Clock, MapPin, Building2, MessageCircle, ArrowRight,
-  ShieldCheck, HelpCircle, Users, AlertCircle, Sparkles, Search,
+  ShieldCheck, HelpCircle, Users, AlertCircle, Bot, Search,
   Headset, HeartPulse, Laptop, Home as HomeIcon, Award, ExternalLink
 } from 'lucide-react';
 import { PageHead } from '../utils/useAsync';
@@ -160,8 +160,8 @@ export default function Contact({ go, ask }) {
               background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
             }}
           >
-            <Sparkles size={14} />
-            Ask AI Assistant
+            <Bot size={14} />
+            Ask Helpdesk Assistant
           </button>
         </PageHead>
 

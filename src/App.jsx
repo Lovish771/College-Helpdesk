@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
+import React, { useCallback, useEffect, useState, useRef, Suspense, lazy } from 'react';
+import { flushSync } from 'react-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import FloatingAiAssistant from './components/FloatingAiAssistant';
 import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
@@ -46,6 +48,7 @@ function AppContent() {
 
   // Dark / Light Theme management with schema-validated persistence
   const [theme, setTheme] = useState(() => getStoredItem('lpu_theme'));
+  const isThemeChangingRef = useRef(false);
 
   // Keep DOM root, body, and storage strictly synchronized with active theme
   useEffect(() => {
@@ -64,21 +67,38 @@ function AppContent() {
   }, [theme]);
 
   const toggleTheme = useCallback((event) => {
+    if (isThemeChangingRef.current) return;
     const isDark = theme === 'dark';
     const nextTheme = isDark ? 'light' : 'dark';
 
     // Bidirectional circular view transition if supported
     if (typeof document !== 'undefined' && document.startViewTransition) {
       try {
-        const x = event?.clientX ?? (window.innerWidth - 80);
-        const y = event?.clientY ?? 30;
+        isThemeChangingRef.current = true;
+        const rect = event?.currentTarget?.getBoundingClientRect?.() || event?.target?.getBoundingClientRect?.();
+        const x = (event && typeof event.clientX === 'number' && event.clientX > 0)
+          ? event.clientX
+          : (rect ? Math.round(rect.left + rect.width / 2) : (window.innerWidth - 80));
+        const y = (event && typeof event.clientY === 'number' && event.clientY > 0)
+          ? event.clientY
+          : (rect ? Math.round(rect.top + rect.height / 2) : 30);
         const endRadius = Math.hypot(
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)
         );
 
+        // Set CSS custom properties for GPU-accelerated circle reveal / shrink
+        document.documentElement.style.setProperty('--click-x', `${x}px`);
+        document.documentElement.style.setProperty('--click-y', `${y}px`);
+        document.documentElement.style.setProperty('--click-r', `${endRadius}px`);
+
+        // Disable CSS transitions during DOM mutation so clean, instant snapshot is taken
+        document.documentElement.classList.add('disable-transitions');
+
         const transition = document.startViewTransition(() => {
-          setTheme(nextTheme);
+          flushSync(() => {
+            setTheme(nextTheme);
+          });
           if (nextTheme === 'dark') {
             document.documentElement.classList.add('dark');
             document.body.classList.add('dark');
@@ -86,26 +106,44 @@ function AppContent() {
             document.documentElement.classList.remove('dark');
             document.body.classList.remove('dark');
           }
+          document.documentElement.setAttribute('data-theme', nextTheme);
         });
 
         transition.ready.then(() => {
-          const clipPath = [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`
-          ];
-          document.documentElement.animate(
-            {
-              clipPath,
-            },
-            {
-              duration: 400,
-              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-              pseudoElement: '::view-transition-new(root)',
-            }
-          );
+          try {
+            const isDarkNext = nextTheme === 'dark';
+            document.documentElement.animate(
+              {
+                clipPath: isDarkNext
+                  ? [
+                      `circle(${endRadius}px at ${x}px ${y}px)`,
+                      `circle(0px at ${x}px ${y}px)`,
+                    ]
+                  : [
+                      `circle(0px at ${x}px ${y}px)`,
+                      `circle(${endRadius}px at ${x}px ${y}px)`,
+                    ],
+              },
+              {
+                duration: 450,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                pseudoElement: isDarkNext
+                  ? '::view-transition-old(root)'
+                  : '::view-transition-new(root)',
+              }
+            );
+          } catch (_) {}
+        }).catch(() => {});
+
+        transition.finished.finally(() => {
+          document.documentElement.classList.remove('disable-transitions');
+          isThemeChangingRef.current = false;
         });
         return;
-      } catch {}
+      } catch {
+        document.documentElement.classList.remove('disable-transitions');
+        isThemeChangingRef.current = false;
+      }
     }
 
     // Smooth fallback with global transition class
@@ -298,6 +336,9 @@ function AppContent() {
           />
         </Suspense>
       )}
+
+      {/* Draggable Floating AI Assistant Button */}
+      <FloatingAiAssistant go={go} page={page} ask={ask} chat={chat} />
     </div>
   );
 }

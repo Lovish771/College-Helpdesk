@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, GraduationCap, Wallet, BedDouble, HelpCircle,
-  ArrowRight, Sparkles, BookOpen, Clock, Building2, ChevronRight
+  ArrowRight, Bot, BookOpen, Clock, Building2, ChevronRight
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 
@@ -265,10 +265,10 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
                         handleAskAI(`Give me complete details about ${item.title}`);
                       }}
                       className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 shadow-xs hover:bg-orange-50 dark:hover:bg-slate-700 cursor-pointer"
-                      title="Ask AI about this"
+                      title="Ask Assistant about this"
                     >
-                      <Sparkles size={11} className="inline mr-1" />
-                      Ask AI
+                      <Bot size={11} className="inline mr-1" />
+                      Ask Helpdesk
                     </button>
                     <ChevronRight size={16} className="text-slate-400 group-hover:text-orange-600" />
                   </div>
@@ -283,14 +283,14 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
           )}
         </div>
 
-        {/* AI Instant Question Footer Banner */}
+        {/* Instant Question Footer Banner */}
         <div className="p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-t border-orange-100 dark:border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 min-w-0">
             <span className="p-1.5 rounded-lg bg-orange-600 text-white shrink-0">
-              <Sparkles size={14} />
+              <Bot size={14} />
             </span>
             <span className="truncate font-semibold">
-              {query ? `Ask AI: "${query}"` : 'Have a custom inquiry? Ask the 24/7 AI Assistant'}
+              {query ? `Ask Assistant: "${query}"` : 'Have a custom inquiry? Ask our 24/7 Helpdesk Assistant'}
             </span>
           </div>
 
@@ -301,7 +301,7 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
               background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
             }}
           >
-            <span>Ask AI Assistant</span>
+            <span>Ask Assistant</span>
             <ArrowRight size={13} />
           </button>
         </div>
