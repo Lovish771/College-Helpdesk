@@ -72,7 +72,13 @@ const ACADEMIC_SCHOOLS = [
 // Detailed Program View
 function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
   const [activeTab, setActiveTab] = useState('Overview');
-  const tabs = ['Overview', 'Eligibility & Admissions', 'Fee & Scholarship Slabs', 'Curriculum', 'Placements'];
+const tabs = ['Overview & Pathways', 'Curriculum & Semester 1', 'Placements & Recruiters', 'Eligibility & Criteria', 'Fee & Scholarships'];
+
+  const mainDegree = getMainDegree(p);
+  const mainDeg = mainDegree;
+  const theme = getDegreeTheme(mainDeg);
+  const enrichment = getProgramEnrichment(p.id) || {};
+  const compData = PROGRAM_COMPARISON_DATA[p.id] || {};
 
   const f = fees[p.id] || {
     tuition: '₹1,60,000 / semester (Base)',

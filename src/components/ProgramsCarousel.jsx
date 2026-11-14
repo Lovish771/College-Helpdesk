@@ -186,7 +186,7 @@ export default function ProgramsCarousel({
     }
     const timer = setInterval(() => {
       handleNext(false);
-    }, 3800);
+    }, 2800);
     return () => clearInterval(timer);
   }, [
     prefersReducedMotion,
@@ -228,8 +228,8 @@ export default function ProgramsCarousel({
     setIsTransitioning(true);
     setDragOffset(0);
 
-    // Swipe threshold: 40px or high-velocity flick
-    if (Math.abs(endDeltaX) > 40 || velocity > 0.4) {
+    // Swipe threshold: 28px or responsive flick
+    if (Math.abs(endDeltaX) > 28 || velocity > 0.3) {
       if (endDeltaX < 0) {
         setCurrentIndex((prev) => prev + 1);
       } else {
@@ -360,8 +360,8 @@ export default function ProgramsCarousel({
             transform: `translate3d(${translateX}px, 0, 0)`,
             transition: isTransitioning
               ? prefersReducedMotion
-                ? 'transform 150ms ease'
-                : 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1)'
+                ? 'transform 120ms ease'
+                : 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1)'
               : 'none',
           }}
           className="flex items-center will-change-transform py-6"
@@ -402,7 +402,7 @@ export default function ProgramsCarousel({
                   zIndex,
                   transition: prefersReducedMotion
                     ? 'none'
-                    : 'transform 550ms cubic-bezier(0.22, 1, 0.36, 1), opacity 550ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    : 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms cubic-bezier(0.16, 1, 0.3, 1)',
                   willChange: 'transform, opacity',
                 }}
                 className={`shrink-0 transition-transform cursor-pointer relative ${
