@@ -143,7 +143,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
         <div
           className={`px-4 py-3.5 rounded-2xl shadow-xs transition-all ${
             isBot
-              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm'
+              ? 'bg-white dark:bg-[#161922] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800/90 rounded-tl-sm'
               : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-tr-sm font-medium shadow-orange-500/10'
           }`}
         >

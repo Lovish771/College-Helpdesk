@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, Search, GraduationCap, Users, ShieldCheck, Clock,
   Bot, Wallet, BedDouble, Scale, PhoneCall, BookOpen,
@@ -49,6 +49,69 @@ const CAMPUS_HIGHLIGHTS = [
     tag: 'Health & Safety',
   },
 ];
+
+const TAGLINE_WORDS = "Empowering over 30,000 ambitious students across 44 globally accredited programmes with premier faculty, industry certifications, and 100% verified placement support.".split(" ");
+
+function TaglineRevealSection() {
+  const containerRef = useRef(null);
+  const [activeWordsCount, setActiveWordsCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      setActiveWordsCount(TAGLINE_WORDS.length);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          let count = 0;
+          const interval = setInterval(() => {
+            count += 1;
+            setActiveWordsCount(count);
+            if (count >= TAGLINE_WORDS.length) {
+              clearInterval(interval);
+            }
+          }, 35);
+          return () => clearInterval(interval);
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section className="py-20 sm:py-24 px-4 sm:px-6 bg-white dark:bg-[#070B14] border-b border-slate-200/80 dark:border-slate-800 transition-colors">
+      <div ref={containerRef} className="max-w-[680px] mx-auto text-center space-y-4">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+          <Award size={13} />
+          <span>Institutional Promise</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-snug font-sans">
+          {TAGLINE_WORDS.map((word, idx) => (
+            <span
+              key={idx}
+              className={`inline-block mr-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                idx < activeWordsCount
+                  ? 'text-slate-900 dark:text-white opacity-100 translate-y-0'
+                  : 'text-slate-400 dark:text-slate-600 opacity-25 translate-y-1'
+              }`}
+            >
+              {word}
+            </span>
+          ))}
+        </h2>
+      </div>
+    </section>
+  );
+}
 
 export default function Home({ go, ask, onOpenCompare }) {
   const [quickQuery, setQuickQuery] = useState('');
@@ -104,8 +167,8 @@ export default function Home({ go, ask, onOpenCompare }) {
               </div>
 
               {/* University Title */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-                Lovely Professional University Student Helpdesk
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] max-w-[680px] bg-gradient-to-r from-slate-950 via-slate-800 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
+                Lovely Professional University<br className="hidden sm:inline" /> Student Helpdesk
               </h1>
 
               <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
@@ -284,6 +347,11 @@ export default function Home({ go, ask, onOpenCompare }) {
           </div>
         </div>
       </section>
+
+      {/* ──────────────────────────────────────────────────────────
+          SECTION 1.5: MANDATORY B11 TAGLINE REVEAL (AI DESIGN SYSTEM)
+      ────────────────────────────────────────────────────────── */}
+      <TaglineRevealSection />
 
       {/* ──────────────────────────────────────────────────────────
           SECTION 2: FREQUENTLY REQUESTED INFORMATION (ELIGIBILITY CHECKER ONLY)

@@ -386,7 +386,7 @@ export default function FloatingAiAssistant({ go, page, ask, chat }) {
             height: modalHeight,
             zIndex: 50,
           }}
-          className="flex flex-col rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-up"
+          className="flex flex-col rounded-3xl bg-white/95 dark:bg-[#121620]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.25)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-up"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">

@@ -111,25 +111,17 @@ function AppContent() {
 
         transition.ready.then(() => {
           try {
-            const isDarkNext = nextTheme === 'dark';
             document.documentElement.animate(
               {
-                clipPath: isDarkNext
-                  ? [
-                      `circle(${endRadius}px at ${x}px ${y}px)`,
-                      `circle(0px at ${x}px ${y}px)`,
-                    ]
-                  : [
-                      `circle(0px at ${x}px ${y}px)`,
-                      `circle(${endRadius}px at ${x}px ${y}px)`,
-                    ],
+                clipPath: [
+                  `circle(0px at ${x}px ${y}px)`,
+                  `circle(${endRadius}px at ${x}px ${y}px)`,
+                ],
               },
               {
-                duration: 450,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                pseudoElement: isDarkNext
-                  ? '::view-transition-old(root)'
-                  : '::view-transition-new(root)',
+                duration: 480,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                pseudoElement: '::view-transition-new(root)',
               }
             );
           } catch (_) {}
