@@ -11,15 +11,17 @@
   }
 
   html.dark {
-    background-color: #020617;
+    background-color: #0B0E14;
   }
 
   body {
-    @apply font-sans antialiased text-slate-800 dark:text-slate-100 bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300;
+    @apply font-sans antialiased text-slate-800 dark:text-slate-100 bg-[#F8FAFC] dark:bg-[#0B0E14] transition-colors duration-300;
+    text-wrap: pretty;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold text-slate-900 dark:text-white;
+    @apply font-sans font-bold text-slate-900 dark:text-white tracking-tight;
+    text-wrap: balance;
   }
 
   :focus-visible {
@@ -275,8 +277,8 @@ input, textarea, [contenteditable="true"], .cursor-text {
 }
 
 ::view-transition-group(root) {
-  animation-duration: 450ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 ::view-transition-image-pair(root) {
@@ -291,25 +293,15 @@ input, textarea, [contenteditable="true"], .cursor-text {
   overflow: clip;
 }
 
-/* Light to Dark (White to Black):
-   Old snapshot is light (on top), collapses into the button revealing dark underneath */
-.dark::view-transition-old(root) {
-  animation: 450ms cubic-bezier(0.16, 1, 0.3, 1) circle-shrink forwards;
-  z-index: 9999;
-}
-.dark::view-transition-new(root) {
-  animation: none;
-  z-index: 1;
-}
-
-/* Dark to Light (Black to White):
-   New snapshot is light (on top), expands out from the button covering dark */
+/* Old snapshot remains visible underneath */
 ::view-transition-old(root) {
   animation: none;
   z-index: 1;
 }
+
+/* New snapshot (both light->dark and dark->light) expands outwards from the clicked button */
 ::view-transition-new(root) {
-  animation: 450ms cubic-bezier(0.16, 1, 0.3, 1) circle-reveal forwards;
+  animation: 480ms cubic-bezier(0.22, 1, 0.36, 1) circle-reveal forwards;
   z-index: 9999;
 }
 
