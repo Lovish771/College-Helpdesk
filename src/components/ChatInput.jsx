@@ -22,7 +22,7 @@ function ChatInputComponent({ onSend, disabled }) {
   return (
     <div className="p-4 sm:p-5 bg-[#F8FAFC] dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 transition-colors">
       <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
-        <div className="relative flex items-center gap-2 rounded-full bg-white dark:bg-slate-900 px-4 py-2 border border-slate-200 dark:border-slate-800 shadow-sm transition-all focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20">
+        <div className="relative flex items-center gap-2 rounded-lg bg-white dark:bg-slate-900 px-4 py-2 border border-slate-200 dark:border-slate-800 transition-colors focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20">
           <input
             ref={inputRef}
             type="text"
@@ -64,12 +64,7 @@ function ChatInputComponent({ onSend, disabled }) {
           <button
             type="submit"
             disabled={disabled || !text.trim()}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-90 hover:scale-110 cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500"
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-              boxShadow:
-                '0 4px 10px -1px rgba(234, 88, 12, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.15)',
-            }}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500"
             aria-label="Send message"
           >
             <Send size={15} className="-ml-0.5 mt-0.5 stroke-[2.5]" />

@@ -23,7 +23,7 @@ const STORAGE_KEY = 'lpu_ai_orb_position_v3';
  * - Smooth hover and click expands into glassmorphic AI chat panel
  * - State preview pill selector for instant inspection of all 5 modes
  */
-export default function FloatingAiAssistant({ go, page, ask, chat }) {
+export default function FloatingAiAssistant({ go, page }) {
   // Hide if already on dedicated full chat page
   if (page === 'chat') return null;
 

@@ -1,12 +1,18 @@
 import React, { useState, memo } from 'react';
-import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, Sparkles } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
+import { request } from '../api/client';
 
 const fmt = (d) => {
   if (!d) return 'Just now';
-  const date = typeof d === 'string' ? new Date(d) : d;
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  try {
+    const date = typeof d === 'string' || typeof d === 'number' ? new Date(d) : d;
+    if (isNaN(date?.getTime?.())) return 'Just now';
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return 'Just now';
+  }
 };
 
 /**
@@ -14,35 +20,23 @@ const fmt = (d) => {
  */
 function sanitizeInput(raw) {
   if (!raw || typeof raw !== 'string') return '';
-  return DOMPurify.sanitize(raw, {
-    ALLOWED_TAGS: ['b', 'i', 'strong', 'em', 'span', 'code', 'a', 'p', 'br', 'ul', 'ol', 'li'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
-  });
+  try {
+    return DOMPurify.sanitize(raw, {
+      ALLOWED_TAGS: ['b', 'i', 'strong', 'em', 'span', 'code', 'a', 'p', 'br', 'ul', 'ol', 'li'],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    });
+  } catch {
+    return String(raw);
+  }
 }
 
 /**
- * Format markdown bold **text**, bullet points, and strip code wrappers into clean, sanitized JSX
+ * Format markdown bold **text**, bullet points, and links into clean, sanitized JSX
  */
 function FormattedText({ text }) {
   if (!text) return null;
-
-  // Filter out any unwanted generated code fences (```...```) or raw json
-  let cleanText = text
-    .replace(/```[a-z]*\n[\s\S]*?```/gi, '')
-    .replace(/^```[a-z]*/gim, '')
-    .replace(/```$/gim, '')
-    .trim();
-
-  // If text is serialized JSON string
-  if (cleanText.startsWith('{') && cleanText.endsWith('}')) {
-    try {
-      const parsed = JSON.parse(cleanText);
-      cleanText = parsed.reply || parsed.text || parsed.message || cleanText;
-    } catch {}
-  }
-
-  // Sanitize
-  const sanitized = sanitizeInput(cleanText);
+  const rawText = typeof text === "string" ? text : String(text || "");
+  const sanitized = sanitizeInput(rawText);
 
   // Split by newlines
   const lines = sanitized.split('\n');
@@ -62,7 +56,7 @@ function FormattedText({ text }) {
         const parts = cleanLine.split(/(\*\*.*?\*\*)/g);
 
         const renderedLine = parts.map((part, pIdx) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
             return (
               <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
                 {part.slice(2, -2)}
@@ -74,7 +68,7 @@ function FormattedText({ text }) {
 
         if (isBullet) {
           return (
-            <div key={idx} className="flex items-start gap-2 text-[13.5px]">
+            <div key={idx} className="flex items-start gap-2 text-[13px] sm:text-[13.5px]">
               <span className="text-orange-500 font-bold shrink-0 mt-0.5">•</span>
               <span className="flex-1 text-slate-800 dark:text-slate-200">{renderedLine}</span>
             </div>
@@ -82,7 +76,7 @@ function FormattedText({ text }) {
         }
 
         return (
-          <p key={idx} className="text-[13.5px] text-slate-800 dark:text-slate-200">
+          <p key={idx} className="text-[13px] sm:text-[13.5px] text-slate-800 dark:text-slate-200">
             {renderedLine}
           </p>
         );
@@ -98,7 +92,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
   if (m.role === 'system') {
     return (
       <div className="my-2 text-center text-xs text-slate-400">
-        <span className="inline-block rounded-full bg-slate-100 px-3 py-1">
+        <span className="inline-block rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1">
           {m.text}
         </span>
       </div>
@@ -108,24 +102,28 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
   const isBot = m.role === 'bot';
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(m.text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(m.text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handleFeedback = (type) => {
     setFeedback(type);
-    // Optionally submit feedback to backend
     try {
-      fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session_id: 'chat_turn',
-          is_helpful: type === 'like',
-          comment: type === 'like' ? 'Helpful answer' : 'Needs improvement',
-        }),
-      }).catch(() => {});
+      request(
+        '/api/feedback',
+        () => ({ status: 'success', recorded: true }),
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            session_id: 'chat_turn',
+            is_helpful: type === 'like',
+            comment: type === 'like' ? 'Helpful answer' : 'Needs improvement',
+          }),
+        }
+      ).catch(() => {});
     } catch {}
   };
 
@@ -139,37 +137,38 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
       )}
 
       {/* Bubble Container */}
-      <div className={`flex flex-col max-w-[88%] sm:max-w-[78%] ${isBot ? 'items-start' : 'items-end'}`}>
+      <div className={`flex flex-col ${isBot ? 'w-full max-w-full sm:max-w-[94%] items-start' : 'max-w-[85%] sm:max-w-[75%] items-end'}`}>
         <div
           className={`px-4 py-3.5 rounded-2xl shadow-xs transition-all ${
             isBot
-              ? 'bg-white dark:bg-[#161922] text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800/90 rounded-tl-sm'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-tr-sm font-medium shadow-orange-500/10'
+              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm w-full'
+              : 'bg-orange-600 text-white rounded-tr-sm font-medium'
           }`}
         >
           {/* Formatted body */}
           {isBot ? (
             <FormattedText text={m.text} />
           ) : (
-            <p className="text-[13.5px] whitespace-pre-wrap leading-relaxed font-sans">{sanitizeInput(m.text)}</p>
+            <p className="text-[13px] sm:text-[13.5px] whitespace-pre-wrap leading-relaxed font-sans">{sanitizeInput(m.text)}</p>
           )}
 
           {/* Action button if needed */}
           {m.action === 'contact' && (
             <button
-              onClick={onContact}
-              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 px-3.5 py-1.5 text-xs font-bold text-orange-700 dark:text-orange-300 hover:bg-orange-100 transition-colors shadow-2xs cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
+              type="button"
+              onClick={() => onContact && onContact()}
+              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 px-3.5 py-1.5 text-xs font-bold text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/60 transition-colors shadow-2xs cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
             >
-              <span>Connect with LPU Admission Helpdesk</span>
+              <span>Admissions contact details</span>
               <ArrowRight size={13} />
             </button>
           )}
 
           {/* Message Footer Utilities for Bot (Copy + Helpful Thumbs) */}
           {isBot && (
-            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
-              <span className="text-[11px] font-semibold text-orange-600 dark:text-orange-400">
-                Official LPU Verified
+            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 gap-2">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                From this site's LPU reference data
               </span>
 
               <div className="flex items-center gap-2">
@@ -232,4 +231,3 @@ const ChatMessage = memo(ChatMessageComponent, (prevProps, nextProps) => {
 });
 
 export default ChatMessage;
-

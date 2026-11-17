@@ -1,13 +1,11 @@
-import React, { useCallback, useEffect, useState, useRef, Suspense, lazy } from 'react';
-import { flushSync } from 'react-dom';
+import React, { useCallback, useEffect, useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingAiAssistant from './components/FloatingAiAssistant';
-import CustomCursor from './components/CustomCursor';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageSkeleton from './components/Skeleton';
 import useChat from './hooks/useChat';
-import { AuthProvider } from './hooks/useAuth';
+import useAuth, { AuthProvider } from './hooks/useAuth';
 import { getStoredItem, setStoredItem } from './utils/storage';
 
 // Core entry views loaded synchronously for instant first-paint
@@ -16,25 +14,74 @@ import Chatbot from './pages/Chatbot';
 import Programs from './pages/Programs';
 import Eligibility from './pages/Eligibility';
 import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
 
-// Heavy secondary routes dynamically chunked
-const Curriculum = lazy(() => import('./pages/Curriculum'));
-const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'));
-const Admissions = lazy(() => import('./pages/Admissions'));
-const Fees = lazy(() => import('./pages/Fees'));
-const Hostel = lazy(() => import('./pages/Hostel'));
-const Analytics = lazy(() => import('./pages/Analytics'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+// Helper to handle dynamic chunk load failures after new deployments
+function lazyWithRetry(componentImport) {
+  return lazy(() =>
+    componentImport().catch((error) => {
+      const isChunkError =
+        error?.message?.includes('Failed to fetch dynamically imported module') ||
+        error?.message?.includes('Importing a module script failed') ||
+        error?.name === 'ChunkLoadError';
 
-// Heavy overlay modals dynamically loaded on demand
-const SearchModal = lazy(() => import('./components/SearchModal'));
-const DegreeComparisonModal = lazy(() => import('./components/DegreeComparisonModal'));
-const LegalModal = lazy(() => import('./components/LegalModal'));
-const AuthModal = lazy(() => import('./components/AuthModal'));
+      if (isChunkError && typeof window !== 'undefined') {
+        const retryKey = `chunk_retry_${window.location.hash || 'app'}`;
+        const hasRetried = window.sessionStorage.getItem(retryKey);
+        if (!hasRetried) {
+          window.sessionStorage.setItem(retryKey, 'true');
+          window.location.reload();
+          return new Promise(() => {}); // Wait for browser reload
+        }
+      }
+      throw error;
+    })
+  );
+}
+
+// Heavy secondary routes dynamically chunked with auto-retry
+const Curriculum = lazyWithRetry(() => import('./pages/Curriculum'));
+const KnowledgeBase = lazyWithRetry(() => import('./pages/KnowledgeBase'));
+const Admissions = lazyWithRetry(() => import('./pages/Admissions'));
+const Fees = lazyWithRetry(() => import('./pages/Fees'));
+const Hostel = lazyWithRetry(() => import('./pages/Hostel'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
+
+// Heavy overlay modals dynamically loaded on demand with auto-retry
+const SearchModal = lazyWithRetry(() => import('./components/SearchModal'));
+const DegreeComparisonModal = lazyWithRetry(() => import('./components/DegreeComparisonModal'));
+const LegalModal = lazyWithRetry(() => import('./components/LegalModal'));
+const AuthModal = lazyWithRetry(() => import('./components/AuthModal'));
 
 const read = () => window.location.hash.replace('#/', '') || 'home';
 
+// Per-route document title and description. The Home page keeps the plain
+// site name; every other route says what it is so tabs, history and shares
+// are distinguishable.
+const SITE = 'Student Helpdesk';
+const PAGE_META = {
+  home: ['Student Helpdesk — LPU student information', 'Fee structures, hostel tariffs, eligibility and admission details for Lovely Professional University, compiled from public sources by students.'],
+  chat: ['Ask a question — Student Helpdesk', 'Ask about fees, hostel, scholarships, eligibility or admissions and get an answer from the helpdesk knowledge base.'],
+  programs: ['Programmes — Student Helpdesk', 'Browse LPU programmes with duration, eligibility and fee ranges, and compare degrees side by side.'],
+  curriculum: ['Curriculum — Student Helpdesk', 'Semester-wise curriculum and credit structure for LPU programmes.'],
+  knowledge: ['Knowledge base — Student Helpdesk', 'Reference answers on admissions, fees, hostel, scholarships and campus services.'],
+  admissions: ['Admissions — Student Helpdesk', 'Admission steps, LPUNEST schedule, seat confirmation and document checklists.'],
+  fees: ['Fees — Student Helpdesk', 'Tuition, hostel, mess and examination fees with a planner to estimate your total.'],
+  hostel: ['Hostel — Student Helpdesk', 'Hostel room types, tariffs, mess plans and campus living details.'],
+  eligibility: ['Eligibility — Student Helpdesk', 'Eligibility criteria and qualifying requirements for LPU programmes.'],
+  contact: ['Contact — Student Helpdesk', 'Campus offices, helplines and email contacts for admissions and student services.'],
+  admin: ['Admin — Student Helpdesk', 'Administrator dashboard for managing programmes, knowledge entries and users.'],
+};
+
+function setMeta(page) {
+  const [title, description] = PAGE_META[page] || [`Page not found — ${SITE}`, 'The page you requested does not exist.'];
+  document.title = title;
+  const tag = document.querySelector('meta[name="description"]');
+  if (tag) tag.setAttribute('content', description);
+}
+
 function AppContent() {
+  const { isAdmin, loading: authLoading } = useAuth();
   const [page, setPage] = useState(read);
   const [pending, setPending] = useState(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -48,7 +95,6 @@ function AppContent() {
 
   // Dark / Light Theme management with schema-validated persistence
   const [theme, setTheme] = useState(() => getStoredItem('lpu_theme'));
-  const isThemeChangingRef = useRef(false);
 
   // Keep DOM root, body, and storage strictly synchronized with active theme
   useEffect(() => {
@@ -67,74 +113,41 @@ function AppContent() {
   }, [theme]);
 
   const toggleTheme = useCallback((event) => {
-    if (isThemeChangingRef.current) return;
-    const isDark = theme === 'dark';
-    const nextTheme = isDark ? 'light' : 'dark';
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
-    // Bidirectional circular view transition if supported
+    // Premium circular view transition if supported by browser
     if (typeof document !== 'undefined' && document.startViewTransition) {
       try {
-        isThemeChangingRef.current = true;
-        const rect = event?.currentTarget?.getBoundingClientRect?.() || event?.target?.getBoundingClientRect?.();
-        const x = (event && typeof event.clientX === 'number' && event.clientX > 0)
-          ? event.clientX
-          : (rect ? Math.round(rect.left + rect.width / 2) : (window.innerWidth - 80));
-        const y = (event && typeof event.clientY === 'number' && event.clientY > 0)
-          ? event.clientY
-          : (rect ? Math.round(rect.top + rect.height / 2) : 30);
+        const x = event?.clientX ?? (window.innerWidth - 80);
+        const y = event?.clientY ?? 30;
         const endRadius = Math.hypot(
           Math.max(x, window.innerWidth - x),
           Math.max(y, window.innerHeight - y)
         );
 
-        // Set CSS custom properties for GPU-accelerated circle reveal / shrink
-        document.documentElement.style.setProperty('--click-x', `${x}px`);
-        document.documentElement.style.setProperty('--click-y', `${y}px`);
-        document.documentElement.style.setProperty('--click-r', `${endRadius}px`);
-
-        // Disable CSS transitions during DOM mutation so clean, instant snapshot is taken
-        document.documentElement.classList.add('disable-transitions');
-
         const transition = document.startViewTransition(() => {
-          flushSync(() => {
-            setTheme(nextTheme);
-          });
-          if (nextTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            document.body.classList.remove('dark');
-          }
-          document.documentElement.setAttribute('data-theme', nextTheme);
+          setTheme(nextTheme);
         });
 
         transition.ready.then(() => {
-          try {
-            document.documentElement.animate(
-              {
-                clipPath: [
-                  `circle(0px at ${x}px ${y}px)`,
-                  `circle(${endRadius}px at ${x}px ${y}px)`,
-                ],
-              },
-              {
-                duration: 480,
-                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                pseudoElement: '::view-transition-new(root)',
-              }
-            );
-          } catch (_) {}
-        }).catch(() => {});
-
-        transition.finished.finally(() => {
-          document.documentElement.classList.remove('disable-transitions');
-          isThemeChangingRef.current = false;
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`
+          ];
+          document.documentElement.animate(
+            {
+              clipPath: clipPath,
+            },
+            {
+              duration: 500,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              pseudoElement: '::view-transition-new(root)',
+            }
+          );
         });
         return;
       } catch {
-        document.documentElement.classList.remove('disable-transitions');
-        isThemeChangingRef.current = false;
+        // Fallback below
       }
     }
 
@@ -144,30 +157,11 @@ function AppContent() {
       setTheme(nextTheme);
       setTimeout(() => {
         document.documentElement.classList.remove('theme-transitioning');
-      }, 400);
+      }, 500);
     } else {
       setTheme(nextTheme);
     }
   }, [theme]);
-
-  // Clean document title matching page name
-  useEffect(() => {
-    const PAGE_TITLES = {
-      home: 'Home',
-      chat: 'AI Assistant',
-      programs: 'Programmes',
-      curriculum: 'Curriculum',
-      knowledge: 'Knowledge Base',
-      admissions: 'Admissions',
-      fees: 'Fees & Slabs',
-      hostel: 'Hostel & Living',
-      eligibility: 'Eligibility',
-      contact: 'Contact',
-      analytics: 'Analytics',
-      admin: 'Admin Dashboard',
-    };
-    document.title = PAGE_TITLES[page] || 'Home';
-  }, [page]);
 
   const chat = useChat();
 
@@ -227,15 +221,20 @@ function AppContent() {
     hostel: Hostel,
     eligibility: Eligibility,
     contact: Contact,
-    analytics: Analytics,
     admin: AdminDashboard,
   };
 
-  const Page = pages[page] || Home;
+  // The admin console is not a public route. It resolves only for a session the
+  // server has confirmed as an administrator: while the stored token is still
+  // being verified we show nothing but a skeleton, and anyone else — guest or
+  // signed-in student — gets the same 404 as any unknown address, so the
+  // dashboard can neither be reached nor inferred from the URL.
+  const adminConfirmed = page === 'admin' && !authLoading && isAdmin;
+  const Page = page === 'admin' && !adminConfirmed ? NotFound : pages[page] || NotFound;
+  useEffect(() => { setMeta(page === 'admin' && !adminConfirmed ? 'notfound' : (page in pages ? page : 'notfound')); }, [page, adminConfirmed]);
 
   return (
-    <div className="flex min-h-screen flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
-      <CustomCursor />
+    <div className={`flex flex-col font-sans antialiased transition-colors duration-300 selection:bg-orange-100 dark:selection:bg-orange-950 selection:text-orange-900 dark:selection:text-orange-200 bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 ${page === 'chat' ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:p-3 focus:bg-orange-600 focus:text-white focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-xl focus-visible:ring-2 focus-visible:ring-orange-500"
@@ -257,12 +256,14 @@ function AppContent() {
       <main
         id="main"
         key={page}
-        className={`flex flex-1 flex-col animate-fade-in ${page === 'chat' ? 'overflow-hidden max-h-[100dvh]' : ''}`}
+        className={`flex flex-1 flex-col ${page === 'chat' ? 'min-h-0 overflow-hidden' : 'pt-16 sm:pt-20 animate-page-enter'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>
             {page === 'chat' ? (
-              <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} />
+              <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} onOpenAuth={handleOpenAuth} />
+            ) : page === 'admin' && authLoading ? (
+              <PageSkeleton />
             ) : (
               <Page {...props} />
             )}
@@ -302,7 +303,21 @@ function AppContent() {
         </Suspense>
       )}
 
-      {/* Legal & Unofficial Disclaimer Modal */}
+      {/* Authentication & Email OTP Modal */}
+      {authModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            onOpenLegal={handleOpenLegal}
+          />
+        </Suspense>
+      )}
+
+      {/* Draggable Floating AI Assistant Button */}
+      <FloatingAiAssistant go={go} page={page} />
+
+      {/* Legal & Unofficial Disclaimer / Terms Modal - Placed after AuthModal with z-[80] to layer on top */}
       {legalModalOpen && (
         <Suspense fallback={null}>
           <LegalModal
@@ -312,25 +327,6 @@ function AppContent() {
           />
         </Suspense>
       )}
-
-      {/* Authentication & Email OTP Modal */}
-      {authModalOpen && (
-        <Suspense fallback={null}>
-          <AuthModal
-            isOpen={authModalOpen}
-            onClose={() => setAuthModalOpen(false)}
-            onOpenLegal={handleOpenLegal}
-            onLoginSuccess={() => {
-              if (page === 'admin') {
-                window.location.reload();
-              }
-            }}
-          />
-        </Suspense>
-      )}
-
-      {/* Draggable Floating AI Assistant Button */}
-      <FloatingAiAssistant go={go} page={page} ask={ask} chat={chat} />
     </div>
   );
 }

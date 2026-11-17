@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Calendar, HelpCircle, CheckCircle, ArrowRight, Bot, MessageSquare,
+  Calendar, HelpCircle, CheckCircle, ArrowRight, Sparkles,
   CreditCard, Building2, FileText, CheckCircle2, ChevronDown, ChevronUp,
   Download, PhoneCall, ShieldCheck, Landmark, BadgePercent
 } from 'lucide-react';
@@ -46,6 +46,16 @@ export default function Admissions({ ask, go }) {
   const s = useAsync(getAdmissionsInfo);
   const [openFaqIndex, setOpenFaqIndex] = useState(0); // Default open first FAQ
 
+  useEffect(() => {
+    if (window.location.hash.includes('loan')) {
+      const t = setTimeout(() => {
+        const el = document.getElementById('education-loans');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   const toggleFaq = (idx) => {
     setOpenFaqIndex(openFaqIndex === idx ? null : idx);
   };
@@ -64,8 +74,8 @@ export default function Admissions({ ask, go }) {
             className="btn-3d-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md cursor-pointer"
             onClick={() => ask('What is the complete step-by-step admission and scholarship process for 2026-27?')}
           >
-            <Bot size={15} />
-            Ask Helpdesk Assistant
+            <Sparkles size={15} />
+            Ask AI Admission Assistant
           </button>
         </PageHead>
 
@@ -130,12 +140,12 @@ export default function Admissions({ ask, go }) {
               {/* ════════════════════════════════════════════════════════════
                   DEDICATED SECTION: EDUCATION LOAN PROCESS & FINANCIAL AID
               ════════════════════════════════════════════════════════════ */}
-              <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
+              <div id="education-loans" className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6 scroll-mt-24">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
                       <Landmark size={14} />
-                      <span>Official University Financial Aid &amp; Loans</span>
+                      <span>Financial aid &amp; loans at LPU</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display">
                       Education Loan Application Process
@@ -238,59 +248,60 @@ export default function Admissions({ ask, go }) {
                   <span className="text-xs text-slate-400">Click any question to view the full answer</span>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {d.faqs.map(([q, a], idx) => {
                     const isOpen = openFaqIndex === idx;
                     return (
                       <div
                         key={q}
+                        onMouseEnter={() => setOpenFaqIndex(idx)}
                         className={`rounded-2xl transition-all duration-200 border overflow-hidden ${
                           isOpen
-                            ? 'bg-white dark:bg-slate-900 border-orange-300 dark:border-orange-800 shadow-md ring-1 ring-orange-500/20'
-                            : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs'
+                            ? 'bg-white dark:bg-slate-900 border-orange-400 dark:border-orange-600 shadow-md ring-1 ring-orange-500/20'
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
                         }`}
                       >
                         <button
                           type="button"
                           onClick={() => toggleFaq(idx)}
-                          className="w-full flex items-center justify-between p-4 sm:p-5 text-left cursor-pointer group"
+                          className="w-full flex items-center justify-between p-3.5 sm:p-4 text-left cursor-pointer group"
                         >
-                          <div className="flex items-center gap-3.5 pr-4">
+                          <div className="flex items-center gap-3 pr-3">
                             <span
-                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors ${
+                              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
                                 isOpen
-                                  ? 'bg-orange-600 text-white'
-                                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
+                                  ? 'bg-orange-600 text-white shadow-xs'
+                                  : 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 group-hover:bg-orange-100'
                               }`}
                             >
-                              <HelpCircle size={15} />
+                              <HelpCircle size={14} />
                             </span>
-                            <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors leading-snug">
+                            <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors leading-snug">
                               {q}
                             </span>
                           </div>
 
                           <div className="shrink-0 text-slate-400 group-hover:text-orange-600 transition-colors">
-                            {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </div>
                         </button>
 
                         {isOpen && (
-                          <div className="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in">
-                            <div className="mt-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                          <div className="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-slate-800 animate-fade-in">
+                            <div className="mt-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans bg-slate-50/80 dark:bg-slate-800/40 p-3.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
                               {a}
                             </div>
 
-                            <div className="mt-3 flex items-center justify-between text-xs pt-2">
-                              <span className="text-[11px] text-slate-400">
+                            <div className="mt-2.5 flex items-center justify-between text-[11px] pt-1">
+                              <span className="text-slate-400">
                                 Verified by LPU Central Admissions Office (Block 30).
                               </span>
                               <button
                                 onClick={() => ask(`Can you give me more details about: ${q}?`)}
                                 className="inline-flex items-center gap-1 font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
                               >
-                                <MessageSquare size={12} />
-                                <span>Ask Assistant</span>
+                                <Sparkles size={12} />
+                                <span>Ask AI</span>
                               </button>
                             </div>
                           </div>
@@ -302,7 +313,7 @@ export default function Admissions({ ask, go }) {
               </div>
 
               {/* Eligibility Check Callout Footer */}
-              <div className="rounded-2xl p-6 sm:p-8 bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-200 dark:border-orange-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="rounded-lg p-6 sm:p-8 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-white font-display">
                     Ready to verify your marks and eligibility?

@@ -1,131 +1,83 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Campus3dCard from '../components/Campus3dCard';
 import {
-  ArrowRight, Search, GraduationCap, Users, ShieldCheck, Clock,
-  Bot, Wallet, BedDouble, Scale, PhoneCall, BookOpen,
-  Building2, CheckCircle2, XCircle, ChevronRight, Award, Compass, HelpCircle
+  ArrowRight, Search, GraduationCap, Wallet, CheckCircle2, BedDouble,
+  FileText, PhoneCall, Scale, Building2, MapPin, Sparkles,
+  Award, ShieldCheck, Flame, Compass, ChevronRight
 } from 'lucide-react';
-import { programs, qualifications } from '../data/mockData';
-import { checkEligibility } from '../api/programsApi';
 
 const CAMPUS_HIGHLIGHTS = [
   {
     id: 'chancellery',
-    title: 'Central Admissions Block & Chancellery (Block 30)',
+    title: 'Academic Block & Chancellery',
     location: 'Block 30 · Admissions Division',
-    desc: 'The nerve center for admissions, counselling, document verification, and foreign student admissions.',
+    desc: 'Central counselling, document verification, and international admissions paperwork hub.',
     image: '/images/lpu-academic-block.jpg',
-    tag: 'Administrative Block',
   },
   {
     id: 'library',
-    title: 'Shanti Devi Mittal Central Library',
+    title: 'Central Library',
     location: 'Central Campus · 9 Storeys',
-    desc: 'Houses over 1.5 million physical and digital books, automated circulation systems, and dedicated research cubicles.',
+    desc: 'Over 1.5 million physical and digital titles, automated circulation, and silent research cubicles.',
     image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1000&auto=format&fit=crop&q=80',
-    tag: 'Academic Infrastructure',
   },
   {
     id: 'unimall',
-    title: 'Uni-Mall & Student Life Hub',
+    title: 'Uni-Mall & Lifestyle Complex',
     location: 'Residential Sector',
-    desc: 'A dedicated 6-floor lifestyle mall with departmental stores, international food courts, lifestyle salons, and banks.',
+    desc: 'Six floors of departmental stores, food courts, brand outlets, and banking services.',
     image: 'https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=1000&auto=format&fit=crop&q=80',
-    tag: 'Student Living',
-  },
-  {
-    id: 'sports',
-    title: 'Olympic-Standard Indoor Sports Stadium',
-    location: 'Sports & Athletics Complex',
-    desc: 'Features world-class badminton courts, squash arenas, basketball pavilions, and a heated Olympic swimming pool.',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1000&auto=format&fit=crop&q=80',
-    tag: 'Athletics & Fitness',
-  },
-  {
-    id: 'hospital',
-    title: 'Uni-Hospital 24/7 Medical Care',
-    location: 'Medical Block · Opposite Block 34',
-    desc: 'Fully equipped multispecialty hospital with resident physicians, emergency ICU, diagnostic labs, and ambulances.',
-    image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=1000&auto=format&fit=crop&q=80',
-    tag: 'Health & Safety',
   },
 ];
 
-const TAGLINE_WORDS = "Empowering over 30,000 ambitious students across 44 globally accredited programmes with premier faculty, industry certifications, and 100% verified placement support.".split(" ");
+const TASKS = [
+  {
+    title: 'Fees & Scholarships',
+    desc: 'Per-semester tuition for each programme, plus LPUNEST scholarship slabs up to 50%.',
+    icon: Wallet,
+    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-500/30',
+    action: (go) => () => go('fees'),
+    cta: 'Explore Fee Structure',
+  },
+  {
+    title: 'Eligibility Checker',
+    desc: 'Enter your qualification and aggregate percentage to see your eligible degrees.',
+    icon: CheckCircle2,
+    color: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-500/30',
+    action: (go) => () => go('eligibility'),
+    cta: 'Check Instant Eligibility',
+  },
+  {
+    title: 'Hostel & Living Tariffs',
+    desc: '1- to 4-seater AC & air-cooled options, mess meal plans, and campus amenities.',
+    icon: BedDouble,
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-500/30',
+    action: (go) => () => go('hostel'),
+    cta: 'View Living Tariffs',
+  },
+  {
+    title: 'Checklists & Deadlines',
+    desc: 'Document verification checklists, reporting dates, and LPUNEST registration phases.',
+    icon: FileText,
+    color: 'text-cyan-600 dark:text-cyan-400',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/40 border-cyan-200 dark:border-cyan-500/30',
+    action: (go) => () => go('admissions'),
+    cta: 'Read Checklist',
+  },
+];
 
-function TaglineRevealSection() {
-  const containerRef = useRef(null);
-  const [activeWordsCount, setActiveWordsCount] = useState(0);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      setActiveWordsCount(TAGLINE_WORDS.length);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          let count = 0;
-          const interval = setInterval(() => {
-            count += 1;
-            setActiveWordsCount(count);
-            if (count >= TAGLINE_WORDS.length) {
-              clearInterval(interval);
-            }
-          }, 35);
-          return () => clearInterval(interval);
-        }
-      },
-      { threshold: 0.25 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <section className="py-20 sm:py-24 px-4 sm:px-6 bg-white dark:bg-[#070B14] border-b border-slate-200/80 dark:border-slate-800 transition-colors">
-      <div ref={containerRef} className="max-w-[680px] mx-auto text-center space-y-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-          <Award size={13} />
-          <span>Institutional Promise</span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-snug font-sans">
-          {TAGLINE_WORDS.map((word, idx) => (
-            <span
-              key={idx}
-              className={`inline-block mr-2 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                idx < activeWordsCount
-                  ? 'text-slate-900 dark:text-white opacity-100 translate-y-0'
-                  : 'text-slate-400 dark:text-slate-600 opacity-25 translate-y-1'
-              }`}
-            >
-              {word}
-            </span>
-          ))}
-        </h2>
-      </div>
-    </section>
-  );
-}
+const STATS = [
+  { label: 'Accredited Programmes', value: '44+', icon: GraduationCap },
+  { label: 'Campus Infrastructure', value: '600+ Acres', icon: Building2 },
+  { label: 'NAAC Accreditation', value: 'A++ Grade', icon: Award },
+  { label: 'Highest Package', value: '₹3 Crore', icon: Flame },
+];
 
 export default function Home({ go, ask, onOpenCompare }) {
   const [quickQuery, setQuickQuery] = useState('');
-
-  // Eligibility Checker State for Frequently Requested Information Section
-  const [elForm, setElForm] = useState({
-    programId: programs[0]?.id || 'btech-cse',
-    qualification: qualifications[0] || '10+2 with Physics, Mathematics & English',
-    percent: '',
-  });
-  const [elResult, setElResult] = useState(null);
-  const [elBusy, setElBusy] = useState(false);
-  const [elErr, setElErr] = useState('');
 
   const handleHeroSearch = (e) => {
     e.preventDefault();
@@ -133,437 +85,298 @@ export default function Home({ go, ask, onOpenCompare }) {
     ask(quickQuery);
   };
 
-  const handleCheckEligibility = async (e) => {
-    e.preventDefault();
-    const n = Number(elForm.percent);
-    if (!(n >= 0 && n <= 100) || elForm.percent === '') {
-      setElErr('Please enter a valid aggregate percentage between 0 and 100.');
-      return;
-    }
-    setElErr('');
-    setElBusy(true);
-    try {
-      const res = await checkEligibility(elForm);
-      setElResult(res);
-    } catch {
-      setElErr('Could not verify eligibility. Please try again or ask the assistant.');
-    }
-    setElBusy(false);
-  };
-
   return (
-    <div className="bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
-      {/* ──────────────────────────────────────────────────────────
-          SECTION 1: HERO SECTION
-      ────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 pb-16">
-          <div className="grid lg:grid-cols-12 gap-10 items-center">
-            {/* Left Content (7 Cols) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Institutional Authority Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400 text-xs font-bold uppercase tracking-wider">
-                <Award size={14} className="text-orange-600 dark:text-orange-400" />
-                <span>NAAC A++ Accredited · NIRF Top 30 · Student Helpdesk</span>
+    <div className="bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-12">
+
+      {/* ── Top Notice Bar (Compact, matches theme cleanly) ── */}
+      <div className="border-b border-slate-200/90 dark:border-slate-800/80 bg-white dark:bg-[#070B14]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-900/50">
+              <ShieldCheck size={12} className="text-orange-600 dark:text-orange-400" />
+              Verified Public Information
+            </span>
+            <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+            <span className="hidden md:inline">Authentic data on programmes, fee structures &amp; hostel plans</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => go('contact')}
+            className="inline-flex items-center gap-1 font-bold text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+          >
+            <span>Block 30 Admissions Desk</span>
+            <ChevronRight size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Elevated Modern Hero (matches white on white theme, and dark on dark theme) ── */}
+      <section className="relative bg-white dark:bg-[#070B14] text-slate-900 dark:text-white pt-6 sm:pt-8 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-200 dark:border-slate-800/80 transition-colors">
+        {/* Ambient background glow & architecture */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-20 mix-blend-luminosity scale-105 pointer-events-none"
+          style={{
+            backgroundImage: `url('/images/lpu-academic-block.jpg')`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-[#070B14] dark:via-[#070B14]/90 dark:to-[#070B14]/75 pointer-events-none" />
+
+        <div className="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          
+          {/* Left Column: Heading + Compact Search Bar */}
+          <div className="lg:col-span-7">
+            {/* Pill: Student Portal */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-3 shadow-2xs">
+              <Sparkles size={12} className="text-orange-500" />
+              <span>LPU Student Helpdesk Gateway</span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">
+              Instant answers on admissions, <span className="text-orange-500">fees &amp; hostel life</span>.
+            </h1>
+
+            <p className="mt-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-sans">
+              Search authentic university data covering 44 accredited degrees, LPUNEST scholarship slabs, verified accommodation tariffs, and admission requirements.
+            </p>
+
+            {/* Compact Rounded Search Bar */}
+            <form onSubmit={handleHeroSearch} className="mt-5 max-w-xl">
+              <div className="relative flex items-center bg-slate-50 dark:bg-[#0B101D]/90 border border-slate-200 dark:border-slate-700/80 rounded-full pl-4 pr-1.5 py-1 shadow-sm dark:shadow-xl focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
+                <Search size={16} className="text-slate-400 mr-2 shrink-0" />
+                <input
+                  id="home-question"
+                  type="text"
+                  value={quickQuery}
+                  onChange={(e) => setQuickQuery(e.target.value)}
+                  placeholder="e.g. What is the fee for B.Tech CSE?"
+                  aria-label="Ask a question about admissions or fees"
+                  className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none font-sans"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shrink-0 shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Ask Helpdesk</span>
+                  <ArrowRight size={13} />
+                </button>
               </div>
+            </form>
 
-              {/* University Title */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15] max-w-[680px] bg-gradient-to-r from-slate-950 via-slate-800 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">
-                Lovely Professional University<br className="hidden sm:inline" /> Student Helpdesk
-              </h1>
+            {/* Quick Suggestion Chips */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold text-slate-400">Popular:</span>
+              {[
+                'B.Tech CSE fees',
+                'LPUNEST scholarship slabs',
+                'Hostel AC room charges',
+                'MBA eligibility',
+              ].map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => ask(tag)}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-white transition-all cursor-pointer"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
 
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-                The centralized portal for prospective and enrolled students of Lovely Professional University. Access verified tuition fees, 50% merit scholarships, hostel booking guides, curriculum syllabi, and 24/7 AI-assisted inquiry resolution.
-              </p>
+          {/* Right Column: 3D Interactive Campus Landmark Showcase + Institutional Highlights */}
+          <div className="lg:col-span-5 space-y-3">
+            <Campus3dCard onExplore={() => go('contact')} />
 
-              {/* Instant Search Bar */}
-              <form onSubmit={handleHeroSearch} className="max-w-xl">
-                <div className="relative flex items-center rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm p-1.5 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500 transition-all">
-                  <Search size={18} className="text-slate-400 ml-3 shrink-0" />
-                  <input
-                    type="text"
-                    value={quickQuery}
-                    onChange={(e) => setQuickQuery(e.target.value)}
-                    placeholder="Ask anything: e.g. B.Tech CSE fee, 50% scholarship, hostel AC rooms..."
-                    className="w-full bg-transparent px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
-                  />
-                  <button
-                    type="submit"
-                    className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-xs cursor-pointer transition-all hover:brightness-105 active:scale-95"
-                    style={{
-                      background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                    }}
-                  >
-                    <Bot size={13} />
-                    <span>Ask Helpdesk</span>
-                  </button>
+            {/* 4 Mini Stat Badges */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {STATS.map(({ label, value, icon: Icon }) => (
+                <div
+                  key={label}
+                  className="p-3 rounded-xl bg-white dark:bg-[#0D1322]/70 border border-slate-200/90 dark:border-white/10 flex items-center gap-2.5 shadow-2xs"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                    <Icon size={15} />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-extrabold text-slate-900 dark:text-white leading-tight">{value}</span>
+                    <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{label}</span>
+                  </div>
                 </div>
-              </form>
-
-              {/* Quick Inquiry Filter Chips */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                <span className="text-slate-400 dark:text-slate-500 font-semibold">Popular queries:</span>
-                {[
-                  'B.Tech CSE Fee',
-                  '50% Scholarship',
-                  'Hostel Room Charges',
-                  'Compare Degrees',
-                  'DSR Block 29',
-                ].map((chip) => (
-                  <button
-                    key={chip}
-                    onClick={() => {
-                      if (chip === 'Compare Degrees') {
-                        onOpenCompare && onOpenCompare();
-                      } else {
-                        ask(`Tell me details about ${chip} at LPU`);
-                      }
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold transition-colors cursor-pointer"
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <button
-                  onClick={() => go('programs')}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md cursor-pointer transition-all hover:brightness-105 active:scale-95"
-                  style={{
-                    background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                  }}
-                >
-                  <GraduationCap size={16} />
-                  <span>Browse 44 Programmes</span>
-                </button>
-
-                <button
-                  onClick={() => go('fees')}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all"
-                >
-                  <Wallet size={15} className="text-orange-500" />
-                  <span>Tuition &amp; Slabs Calculator</span>
-                </button>
-
-                {onOpenCompare && (
-                  <button
-                    onClick={() => onOpenCompare()}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 py-3 text-xs sm:text-sm font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 transition-all cursor-pointer"
-                  >
-                    <Scale size={15} />
-                    <span>Compare Degrees</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Interactive 3D Zoom & Tilt Amphitheater Showcase */}
-            <div className="lg:col-span-5 relative space-y-4">
-              <Campus3dCard onExplore={() => go('contact')} />
+              ))}
             </div>
           </div>
 
-          {/* ── Verified Institutional Credentials Strip ── */}
-          <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { label: 'NAAC Accreditation', value: 'A++ Grade', sub: 'Highest CGPA 3.68/4 in North India' },
-              { label: 'Ministry of Education', value: 'NIRF Top 30', sub: 'Top multidisciplinary university rank' },
-              { label: 'Ultra-Modern Campus', value: '600+ Acres', sub: 'Smart hi-tech residential township' },
-              { label: 'Top Global Recruiters', value: '₹3 Cr Highest', sub: '2000+ top firms (Google, Microsoft)' },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 text-left"
-              >
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  {stat.label}
-                </p>
-                <p className="text-xl sm:text-2xl font-extrabold font-display text-slate-900 dark:text-white mt-1">
-                  {stat.value}
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                  {stat.sub}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ──────────────────────────────────────────────────────────
-          SECTION 1.5: MANDATORY B11 TAGLINE REVEAL (AI DESIGN SYSTEM)
-      ────────────────────────────────────────────────────────── */}
-      <TaglineRevealSection />
-
-      {/* ──────────────────────────────────────────────────────────
-          SECTION 2: FREQUENTLY REQUESTED INFORMATION (ELIGIBILITY CHECKER ONLY)
-      ────────────────────────────────────────────────────────── */}
-      <section className="py-16 bg-[#F8FAFC] dark:bg-slate-950 transition-colors">
+      {/* ── Common Enquiries: Modern 3D Elevated Cards (Compact spacing) ── */}
+      <section className="py-8 sm:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-2">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 text-xs font-bold uppercase tracking-wider mb-2">
-                <GraduationCap size={14} />
-                <span>Eligibility Verification</span>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
+                <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+                  Core Topics
+                </span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white font-display">
                 Frequently Requested Information
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                Check whether your academic stream and qualifying percentage meet the official admission criteria for your desired programme.
+              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                Direct access to the most consulted university datasets and calculators.
               </p>
             </div>
 
             <button
-              onClick={() => go('eligibility')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 transition-colors cursor-pointer self-start md:self-auto shrink-0"
+              type="button"
+              onClick={() => (onOpenCompare ? onOpenCompare() : go('programs'))}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-orange-500/60 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-xs font-bold transition-all shadow-2xs shrink-0 self-start sm:self-auto cursor-pointer"
             >
-              <span>Full Documents &amp; Eligibility Page</span>
-              <ArrowRight size={14} />
+              <Scale size={13} />
+              <span>Compare Degrees Matrix</span>
             </button>
           </div>
 
-          {/* Interactive Eligibility Checker Card */}
-          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 sm:p-10 shadow-sm">
-            <div className="grid lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-5 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 text-xs font-bold">
-                  <GraduationCap size={16} />
-                  <span>Interactive Eligibility Checker</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white leading-snug">
-                  Check Programme Eligibility Instantly
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Select any of LPU's 44 degree programmes, pick your qualifying academic background, and test your percentage against the official baseline cutoffs and LPUNEST requirements.
-                </p>
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => go('admissions')}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer"
-                  >
-                    <span>View Admission Dates &amp; LPUNEST Cutoffs</span>
-                    <ChevronRight size={13} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="lg:col-span-7 bg-slate-50/70 dark:bg-slate-800/40 p-6 sm:p-7 rounded-2xl border border-slate-200/70 dark:border-slate-700/60">
-                <form onSubmit={handleCheckEligibility} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-700 dark:text-slate-300">
-                        Desired Programme
-                      </label>
-                      <select
-                        value={elForm.programId}
-                        onChange={(e) => setElForm({ ...elForm, programId: e.target.value })}
-                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 outline-none focus:border-orange-500 cursor-pointer"
-                      >
-                        {programs.map((p) => (
-                          <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                            {p.name} ({p.short})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-700 dark:text-slate-300">
-                        Qualifying Stream
-                      </label>
-                      <select
-                        value={elForm.qualification}
-                        onChange={(e) => setElForm({ ...elForm, qualification: e.target.value })}
-                        className="w-full rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 outline-none focus:border-orange-500 cursor-pointer"
-                      >
-                        {qualifications.map((q) => (
-                          <option key={q} value={q} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
-                            {q}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {TASKS.map((task) => {
+              const Icon = task.icon;
+              return (
+                <div
+                  key={task.title}
+                  onClick={task.action(go)}
+                  className="group relative flex flex-col p-5 rounded-2xl cursor-pointer border transition-all duration-300 select-none
+                    bg-white dark:bg-[#0D131F] border-slate-200/90 dark:border-slate-800/90
+                    hover:-translate-y-1.5 hover:border-orange-500/60
+                    hover:shadow-md dark:hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.2)] shadow-2xs"
+                >
+                  {/* Emblem squircle */}
+                  <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mb-3 transition-transform duration-300 group-hover:scale-105 ${task.bg}`}>
+                    <Icon size={19} className={task.color} />
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-700 dark:text-slate-300">
-                      Aggregate Percentage (%)
-                    </label>
-                    <div className="flex gap-3">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={elForm.percent}
-                        onChange={(e) => setElForm({ ...elForm, percent: e.target.value })}
-                        placeholder="e.g. 75.5"
-                        className="flex-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 outline-none focus:border-orange-500"
-                      />
-                      <button
-                        type="submit"
-                        disabled={elBusy}
-                        className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-md transition-all hover:brightness-105 active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
-                        style={{
-                          background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                        }}
-                      >
-                        {elBusy ? 'Evaluating...' : 'Check Eligibility'}
-                      </button>
-                    </div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                    {task.title}
+                  </h3>
+
+                  <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed flex-1">
+                    {task.desc}
+                  </p>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-orange-600 dark:text-orange-400 group-hover:translate-x-1 transition-transform">
+                    <span>{task.cta}</span>
+                    <ArrowRight size={13} />
                   </div>
-
-                  {elErr && (
-                    <p className="text-xs font-semibold text-red-600 dark:text-red-400 mt-1">
-                      {elErr}
-                    </p>
-                  )}
-
-                  {elResult && (
-                    <div
-                      className={`p-4 rounded-xl text-xs sm:text-sm flex items-start gap-3 border ${
-                        elResult.eligible
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-                          : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-900 dark:text-red-200'
-                      }`}
-                    >
-                      {elResult.eligible ? (
-                        <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
-                      ) : (
-                        <XCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
-                      )}
-                      <div>
-                        <p className="font-semibold leading-relaxed">{elResult.message}</p>
-                        <button
-                          type="button"
-                          onClick={() => ask(`What are the exact eligibility and fee details for ${elForm.programId}?`)}
-                          className="mt-1 text-xs underline font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 cursor-pointer block"
-                        >
-                          Ask AI Assistant about scholarships for this programme &rarr;
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </form>
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ──────────────────────────────────────────────────────────
-          SECTION 3: REAL LPU CAMPUS LIFE & INFRASTRUCTURE
-      ────────────────────────────────────────────────────────── */}
-      <section className="py-16 bg-white dark:bg-slate-900 border-t border-b border-slate-200 dark:border-slate-800 transition-colors">
+      {/* ── Campus Landmarks / Life on Campus ── */}
+      <section className="py-8 sm:py-10 bg-slate-50/70 dark:bg-[#080D1A] border-y border-slate-200/80 dark:border-slate-800/80 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mb-10">
-            <span className="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-              Campus Tour &amp; Landmarks
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white mt-1">
-              Explore Lovely Professional University Campus
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-              Situated across 600+ sprawling acres in Phagwara, Punjab on the Jalandhar-Delhi G.T. Road, LPU integrates cutting-edge academic architecture, residential townships, and research hubs.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1.5 h-4 bg-orange-500 rounded-full" />
+                <span className="text-[11px] font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+                  Campus Facilities
+                </span>
+              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white font-display">
+                Key Landmark Hubs
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                Primary campus venues for admissions, academic research, and residential life.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => go('contact')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:border-orange-500 text-xs font-bold transition-all shadow-2xs shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <Building2 size={13} className="text-orange-500" />
+              <span>Campus Office Helplines</span>
+            </button>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {CAMPUS_HIGHLIGHTS.map((item) => (
-              <div
+              <article
                 key={item.id}
-                className="group rounded-3xl overflow-hidden bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                className="group rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0D131F] shadow-2xs hover:border-orange-500/50 hover:shadow-md transition-all duration-300"
               >
-                <div>
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                    <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-900/80 text-white backdrop-blur-md border border-white/20">
-                      {item.tag}
-                    </span>
-                  </div>
-
-                  <div className="p-5">
-                    <p className="text-[11px] font-semibold text-orange-600 dark:text-orange-400">
-                      {item.location}
-                    </p>
-                    <h3 className="font-display font-bold text-sm text-slate-900 dark:text-white mt-1 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-                      {item.desc}
-                    </p>
+                <div className="relative h-36 w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-orange-400 text-[10px] font-bold border border-white/10">
+                    <MapPin size={10} className="text-orange-400 shrink-0" />
+                    <span>{item.location}</span>
                   </div>
                 </div>
-
-                <div className="px-5 pb-5 pt-2">
-                  <button
-                    onClick={() => ask(`Tell me more about ${item.title} at LPU`)}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
-                  >
-                    <span>Inquire about this landmark</span>
-                    <ArrowRight size={13} />
-                  </button>
+                <div className="p-4">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                    {item.desc}
+                  </p>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ──────────────────────────────────────────────────────────
-          SECTION 4: DIRECT 24/7 AI ADMISSION ASSISTANT BANNER
-      ────────────────────────────────────────────────────────── */}
-      <section className="py-16 bg-[#F8FAFC] dark:bg-slate-950 transition-colors">
+      {/* ── Closing Call-To-Action Banner ── */}
+      <section className="py-8 sm:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="rounded-3xl bg-gradient-to-br from-orange-50/90 via-white to-amber-50/80 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 text-slate-900 dark:text-white p-8 sm:p-12 shadow-xl border border-orange-200/80 dark:border-slate-800 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8 transition-colors">
-            <div className="space-y-4 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/15 dark:bg-orange-600/30 border border-orange-500/30 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold">
-                <Bot size={14} />
-                <span>24/7 University Guidance</span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-display leading-tight text-slate-900 dark:text-white">
-                Have specific admission, fees, or living queries?
+          <div className="relative rounded-2xl p-6 sm:p-7 overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/20 dark:from-slate-900 dark:via-[#0B101D] dark:to-[#070B14] border border-orange-200/70 dark:border-slate-800 shadow-sm dark:shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="relative z-10 max-w-xl">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-500/40 text-orange-700 dark:text-orange-400 text-[10px] font-bold mb-2">
+                <Sparkles size={10} />
+                Need Dedicated Assistance?
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display">
+                Still looking for specific details?
               </h2>
-
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Skip waiting in phone queues. The Helpdesk Assistant provides instant, verified answers trained on all official Lovely Professional University academic regulations, LPUNEST criteria, and residential policies.
+              <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+                The admissions desk is available on toll-free <strong className="text-slate-900 dark:text-white">1800 102 4431</strong>. Or speak with the interactive AI student helpdesk in real time.
               </p>
             </div>
 
-            <div className="shrink-0 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <div className="relative z-10 flex shrink-0 flex-wrap gap-2.5">
               <button
+                type="button"
                 onClick={() => go('chat')}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-md cursor-pointer transition-all hover:brightness-105 active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                }}
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
               >
-                <Bot size={16} />
-                <span>Open Instant Chat</span>
+                <GraduationCap size={15} />
+                <span>Ask AI Assistant</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => go('contact')}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-full bg-white dark:bg-white/10 hover:bg-slate-50 dark:hover:bg-white/15 border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
               >
-                <span>Department Directory</span>
-                <ArrowRight size={15} />
+                <PhoneCall size={14} />
+                <span>Admissions Contacts</span>
               </button>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

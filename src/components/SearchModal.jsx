@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search, X, GraduationCap, Wallet, BedDouble, HelpCircle,
-  ArrowRight, Bot, BookOpen, Clock, Building2, ChevronRight
+  ArrowRight, Sparkles, BookOpen, Clock, Building2, ChevronRight
 } from 'lucide-react';
 import { programs, fees } from '../data/mockData';
 
@@ -15,7 +15,7 @@ const SEARCHABLE_ITEMS = [
     target: 'programs',
     targetData: p,
     icon: GraduationCap,
-    badgeColor: 'bg-orange-50 text-orange-600 border-orange-200',
+    badgeColor: 'bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-950/60 dark:text-orange-400 dark:border-orange-800',
     queryKeywords: `${p.name} ${p.short} ${p.degree} ${p.tags?.join(' ')} ${p.description}`,
   })),
 
@@ -27,7 +27,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹1,60,000 / sem (Base) · Up to 50% waiver with LPUNEST',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'cse btech fees scholarship 160000 1.6 lakh discount lpunest tuition',
   },
   {
@@ -37,7 +37,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹2,00,000 / sem (Base) · Up to 50% waiver with LPUNEST',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'aiml artificial intelligence data science cyber security cloud devops full stack fees 200000 2 lakh',
   },
   {
@@ -47,7 +47,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '₹2,00,000 / sem (Base) · CAT/MAT/LPUNEST scholarship slabs',
     target: 'fees',
     icon: Wallet,
-    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    badgeColor: 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800',
     queryKeywords: 'mba business management fees cat mat lpunest mittal',
   },
 
@@ -59,7 +59,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: '1-Seater to 4-Seater options: ₹83,000 to ₹1,53,000 / academic year',
     target: 'hostel',
     icon: BedDouble,
-    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800',
     queryKeywords: 'hostel room ac air cooled 1 seater 2 seater 3 seater 4 seater accommodation living',
   },
   {
@@ -69,7 +69,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Standard 4-Meal ₹50k/yr (Early: ₹45k) · Standard 3-Meal ₹46k · Laundry ₹5,400/yr',
     target: 'hostel',
     icon: BedDouble,
-    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800',
     queryKeywords: 'mess food meal dining vegetarian south indian non veg laundry clothes wash',
   },
 
@@ -81,7 +81,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Block 29, Room 102 · dsr@lpu.co.in · Ext: 2901/2902',
     target: 'contact',
     icon: Building2,
-    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200',
+    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/60 dark:text-purple-400 dark:border-purple-800',
     queryKeywords: 'dsr division student relations block 29 grievances identity card hostel permission leave complaints',
   },
   {
@@ -91,7 +91,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Toll-Free 1800 102 4431 / 1800 274 0615 · WhatsApp: +91-98762-98762',
     target: 'contact',
     icon: Building2,
-    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200',
+    badgeColor: 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/60 dark:text-purple-400 dark:border-purple-800',
     queryKeywords: 'admissions block 30 counselling contact phone toll free helpline whatsapp chancellery',
   },
 
@@ -103,7 +103,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'Biometric tracking; mandatory for appearing in End-Term Examinations',
     target: 'knowledge',
     icon: HelpCircle,
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800',
     queryKeywords: 'attendance 75 percent duty leave medical leave rules exams detention condonation',
   },
   {
@@ -113,7 +113,7 @@ const SEARCHABLE_ITEMS = [
     subtitle: 'UMS registration, timetable, grade points, fee receipts & notices',
     target: 'knowledge',
     icon: HelpCircle,
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800',
     queryKeywords: 'ums portal login lpu touch app marks grades results fee payment registration password',
   },
 ];
@@ -179,11 +179,11 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/60 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/70 backdrop-blur-xl animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-up transition-colors"
+        className="w-full max-w-2xl rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-white/10 overflow-hidden animate-scale-up transition-colors shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header Input */}
@@ -200,14 +200,20 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
           {query ? (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors mr-2 cursor-pointer"
+              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors mr-1 cursor-pointer"
+              title="Clear input"
             >
               <X size={16} />
             </button>
           ) : null}
-          <kbd className="hidden sm:inline-flex items-center gap-1 rounded-md bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-            ESC to close
-          </kbd>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Close"
+            aria-label="Close search"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Quick Filter Category Pills */}
@@ -265,10 +271,10 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
                         handleAskAI(`Give me complete details about ${item.title}`);
                       }}
                       className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 shadow-xs hover:bg-orange-50 dark:hover:bg-slate-700 cursor-pointer"
-                      title="Ask Assistant about this"
+                      title="Ask AI about this"
                     >
-                      <Bot size={11} className="inline mr-1" />
-                      Ask Helpdesk
+                      <Sparkles size={11} className="inline mr-1" />
+                      Ask AI
                     </button>
                     <ChevronRight size={16} className="text-slate-400 group-hover:text-orange-600" />
                   </div>
@@ -283,25 +289,22 @@ export default function SearchModal({ isOpen, onClose, go, ask }) {
           )}
         </div>
 
-        {/* Instant Question Footer Banner */}
-        <div className="p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-t border-orange-100 dark:border-slate-800 flex items-center justify-between gap-3">
+        {/* AI Instant Question Footer Banner */}
+        <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200 min-w-0">
             <span className="p-1.5 rounded-lg bg-orange-600 text-white shrink-0">
-              <Bot size={14} />
+              <Sparkles size={14} />
             </span>
             <span className="truncate font-semibold">
-              {query ? `Ask Assistant: "${query}"` : 'Have a custom inquiry? Ask our 24/7 Helpdesk Assistant'}
+              {query ? `Ask AI: "${query}"` : 'Have a custom inquiry? Ask the 24/7 AI Assistant'}
             </span>
           </div>
 
           <button
             onClick={() => handleAskAI(query ? `Tell me in detail about: ${query}` : '')}
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-sm transition-all hover:brightness-105 cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-            }}
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer"
           >
-            <span>Ask Assistant</span>
+            <span>Ask AI Assistant</span>
             <ArrowRight size={13} />
           </button>
         </div>
