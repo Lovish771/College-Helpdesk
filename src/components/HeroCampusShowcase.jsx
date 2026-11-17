@@ -16,7 +16,7 @@ const PHOTOS = [
   },
   {
     id: 'academic',
-    src: '/images/lpu-campus-academic.png',
+    src: '/images/lpu-academic-block.jpg',
     alt: 'Lovely Professional University Admissions Block and Chancellery Building Panorama',
     label: 'Admissions Block',
     tag: 'The Chancellery',

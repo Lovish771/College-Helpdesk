@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Campus3dCard from '../components/Campus3dCard';
 import {
   ArrowRight, Search, GraduationCap, Users, ShieldCheck, Clock,
   Bot, Wallet, BedDouble, Scale, PhoneCall, BookOpen,
@@ -13,7 +14,7 @@ const CAMPUS_HIGHLIGHTS = [
     title: 'Central Admissions Block & Chancellery (Block 30)',
     location: 'Block 30 · Admissions Division',
     desc: 'The nerve center for admissions, counselling, document verification, and foreign student admissions.',
-    image: '/images/lpu-campus-academic.png',
+    image: '/images/lpu-academic-block.jpg',
     tag: 'Administrative Block',
   },
   {
@@ -258,66 +259,9 @@ export default function Home({ go, ask, onOpenCompare }) {
               </div>
             </div>
 
-            {/* Right: Authentic Real LPU Campus Showcase (5 Cols) */}
+            {/* Right: Interactive 3D Zoom & Tilt Amphitheater Showcase */}
             <div className="lg:col-span-5 relative space-y-4">
-              {/* Primary Photo: Admissions Block 30 (Chancellery) */}
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 bg-slate-900 group">
-                <img
-                  src="/images/lpu-campus-academic.png"
-                  alt="Lovely Professional University Admissions Block 30 Chancellery"
-                  className="w-full h-64 sm:h-72 object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
-
-                <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-lg bg-orange-600/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
-                    Admissions Division
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-slate-900/80 text-slate-200 text-[10px] font-semibold backdrop-blur-md border border-white/20">
-                    Phagwara, Punjab
-                  </span>
-                </div>
-
-                <div className="absolute bottom-3.5 left-4 right-4">
-                  <h3 className="font-display font-bold text-white text-base leading-snug">
-                    Central Admissions Block 30 (Chancellery)
-                  </h3>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
-                    Official admissions counselling, LPUNEST desk &amp; document verification
-                  </p>
-                </div>
-              </div>
-
-              {/* Secondary Real Photo: Central Library */}
-              <div className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-800 bg-slate-900 group">
-                <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800/95">
-                  <img
-                    src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&auto=format&fit=crop&q=80"
-                    alt="Shanti Devi Mittal Central Library"
-                    className="w-24 h-16 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                    loading="lazy"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">
-                      Academic Infrastructure
-                    </span>
-                    <h4 className="font-display font-bold text-xs text-slate-900 dark:text-white truncate mt-0.5">
-                      Shanti Devi Mittal Central Library
-                    </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                      9-storey digital learning &amp; research hub
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => go('contact')}
-                    className="shrink-0 p-2 text-slate-400 hover:text-orange-600 cursor-pointer"
-                    title="View office contacts"
-                  >
-                    <ArrowRight size={15} />
-                  </button>
-                </div>
-              </div>
+              <Campus3dCard onExplore={() => go('contact')} />
             </div>
           </div>
 
