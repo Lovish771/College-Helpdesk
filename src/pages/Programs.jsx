@@ -1,8 +1,8 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
-  Compass, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
+  Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
   Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List,
   Activity, ChevronsUpDown, SlidersHorizontal
 } from 'lucide-react';
@@ -131,7 +131,8 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
   const [activeTab, setActiveTab] = useState('Overview');
   const tabs = ['Overview & Pathways', 'Curriculum & Semester 1', 'Placements & Recruiters', 'Eligibility & Criteria', 'Fee & Scholarships'];
 
-  const mainDeg = getMainDegree(p);
+  const mainDegree = getMainDegree(p);
+  const mainDeg = mainDegree;
   const theme = getDegreeTheme(mainDeg);
   const enrichment = getProgramEnrichment(p.id) || {};
   const compData = PROGRAM_COMPARISON_DATA[p.id] || {};
@@ -405,7 +406,7 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
                   onClick={() => ask(`Give me the full 8-semester curriculum, total credits, and elective choices for ${p.name}`)}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
                 >
-                  <BookOpen size={13} />
+                  <Sparkles size={13} />
                   <span>Ask AI for Full 8-Semester Syllabus</span>
                 </button>
               </div>
@@ -686,7 +687,7 @@ export default function Programs({ ask, onOpenCompare }) {
           <div className="max-w-2xl">
             {/* Pill: Explore Your Future */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-2.5 shadow-2xs">
-              <Compass size={12} className="text-orange-500" />
+              <Sparkles size={12} className="text-orange-500" />
               <span>Explore Your Future</span>
             </div>
 

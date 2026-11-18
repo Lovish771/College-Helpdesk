@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Check, GraduationCap, FileText, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Check, Sparkles, FileText, ArrowRight } from 'lucide-react';
 import { programs, qualifications } from '../data/mockData';
 import { checkEligibility, getDocuments } from '../api/programsApi';
 import { useAsync, Async, PageHead } from '../utils/useAsync';
@@ -52,7 +52,7 @@ export default function Eligibility({ ask }) {
             <div className="space-y-5">
               <div>
                 <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white font-display">
-                  <GraduationCap size={18} className="text-orange-600 dark:text-orange-400" />
+                  <Sparkles size={18} className="text-orange-600 dark:text-orange-400" />
                   Check Programme Eligibility
                 </h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -119,10 +119,7 @@ export default function Eligibility({ ask }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition-all hover:bg-orange-700 cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                }}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-orange-600 hover:bg-orange-700 py-3 text-sm font-medium text-white transition-colors cursor-pointer disabled:opacity-60"
               >
                 {busy ? 'Evaluating Eligibility…' : 'Check Eligibility Now'}
               </button>

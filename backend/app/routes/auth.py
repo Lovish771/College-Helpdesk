@@ -1,4 +1,5 @@
 import os
+import logging
 from functools import wraps
 from datetime import datetime
 from flask import Blueprint, request, jsonify, g
@@ -9,6 +10,7 @@ from app.services.email_service import EmailService
 from app.services.jwt_service import JWTService
 
 auth_bp = Blueprint('auth', __name__)
+logger = logging.getLogger(__name__)
 
 def get_current_user():
     """Extract and authenticate current user from Bearer token."""
@@ -91,7 +93,12 @@ def send_otp():
     ip_addr = request.remote_addr
     user_agent = request.headers.get('User-Agent', '')[:250]
     
-    success, msg, status_code = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
+    try:
+        success, msg, status_code = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
+    except Exception:
+        db.session.rollback()
+        logger.exception('OTP request failed for %s', email)
+        return jsonify({'success': False, 'error': 'We could not start email verification. Please try again shortly.'}), 503
     return jsonify({
         'success': success,
         'message': msg,
@@ -114,7 +121,12 @@ def verify_otp():
         }), 400
         
     ip_addr = request.remote_addr
-    success, msg, status_code = EmailService.verify_otp(email, otp, ip_address=ip_addr)
+    try:
+        success, msg, status_code = EmailService.verify_otp(email, otp, ip_address=ip_addr)
+    except Exception:
+        db.session.rollback()
+        logger.exception('OTP verification failed for %s', email)
+        return jsonify({'success': False, 'error': 'We could not verify that code right now. Please try again shortly.'}), 503
     
     if not success:
         return jsonify({
@@ -147,7 +159,12 @@ def verify_otp():
         user.last_login = datetime.utcnow()
         user.accepted_terms = accepted_terms
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logger.exception('Could not persist verified account for %s', email)
+        return jsonify({'success': False, 'error': 'Verification could not be completed right now. Please try again shortly.'}), 503
 
     # Generate JWT Token
     token = JWTService.encode({

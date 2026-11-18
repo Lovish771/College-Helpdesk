@@ -57,11 +57,9 @@ class EmailOTP(db.Model):
         matches = secrets.compare_digest(self.otp_hash, candidate_hash)
         if not matches:
             self.attempts += 1
-            db.session.commit()
             return False
             
         self.is_used = True
-        db.session.commit()
         return True
 
 class SecurityLog(db.Model):

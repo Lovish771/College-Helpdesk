@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  X, Plus, BarChart2, Scale, Check, ArrowRight,
+  X, Plus, Sparkles, Scale, Check, ArrowRight,
   GraduationCap, Wallet, Award, Clock, BookOpen, Briefcase, ChevronDown, CheckCircle2,
   Trash2, AlertCircle, Code, Cpu, Layers, Laptop, ExternalLink, HelpCircle
 } from 'lucide-react';
@@ -107,11 +107,11 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
       role="dialog"
       aria-modal="true"
       aria-label="Compare Degree Programmes"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/75 backdrop-blur-xl animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-6xl max-h-[94vh] flex flex-col rounded-3xl bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-up transition-colors"
+        className="relative w-full max-w-6xl max-h-[94vh] flex flex-col rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-white/10 overflow-hidden animate-scale-up transition-colors shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.8)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header */}
@@ -139,12 +139,9 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
             {selectedPrograms.length > 0 && (
               <button
                 onClick={handleDeepAIAnalysis}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition-all hover:brightness-105 active:scale-95 cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-                }}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer"
               >
-                <BarChart2 size={13} />
+                <Sparkles size={13} />
                 <span>Analyse All with AI</span>
               </button>
             )}
@@ -612,14 +609,14 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
         <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 shrink-0">
-              <Scale size={16} />
+              <Sparkles size={16} />
             </span>
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white">
                 Unsure which degree fits your future ambition best?
               </p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                Compare curriculum depth, eligibility, and career outcomes side by side.
+                Our AI Admission Engine can analyze syllabus difficulty, coding intensity, and placement histories side by side.
               </p>
             </div>
           </div>
@@ -627,10 +624,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
           {selectedPrograms.length > 0 && (
             <button
               onClick={handleDeepAIAnalysis}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition-all hover:brightness-110 active:scale-95 cursor-pointer shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
-              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer shrink-0"
             >
               <span>Analyse Them with AI ({selectedPrograms.length})</span>
               <ArrowRight size={13} />

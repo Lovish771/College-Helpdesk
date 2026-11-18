@@ -1,6 +1,7 @@
 import os
 import secrets
 import smtplib
+import ssl
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -59,17 +60,29 @@ class EmailService:
         db.session.add(sec_log)
         db.session.commit()
 
-        # Send via SMTP or log to server
-        cls._send_email(email, otp_code)
+        # Do not claim that a verification email was sent if production SMTP
+        # is unavailable. The OTP remains rate limited and can be retried.
+        if not cls._send_email(email, otp_code):
+            new_otp.is_used = True
+            db.session.commit()
+            return False, 'We could not send the verification email. Please try again shortly.', 503
 
         return True, 'Verification code has been sent to your email address.', 200
 
     @classmethod
     def _send_email(cls, email: str, otp_code: str):
         smtp_server = os.environ.get('SMTP_SERVER')
-        smtp_port = int(os.environ.get('SMTP_PORT', 587))
         smtp_user = os.environ.get('SMTP_USER')
         smtp_pass = os.environ.get('SMTP_PASSWORD')
+        is_production = any(os.environ.get(key, '').lower() in ('1', 'true', 'production') for key in ('VERCEL', 'FLASK_ENV', 'ENVIRONMENT'))
+
+        try:
+            smtp_port = int(os.environ.get('SMTP_PORT') or '587')
+            if not 1 <= smtp_port <= 65535:
+                raise ValueError('SMTP_PORT must be between 1 and 65535')
+        except (TypeError, ValueError) as exc:
+            logger.error('Invalid SMTP_PORT configuration: %s', exc)
+            return False
 
         if smtp_server and smtp_user and smtp_pass:
             try:
@@ -104,15 +117,23 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
                 msg.attach(MIMEText(text_content, 'plain'))
                 msg.attach(MIMEText(html_content, 'html'))
 
-                server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(smtp_user, [email], msg.as_string())
-                server.quit()
+                if smtp_port == 465:
+                    server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10, context=ssl.create_default_context())
+                else:
+                    server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+                    server.starttls(context=ssl.create_default_context())
+                with server:
+                    server.login(smtp_user, smtp_pass)
+                    server.sendmail(smtp_user, [email], msg.as_string())
                 logger.info(f"Successfully dispatched OTP email to {email}")
-                return
+                return True
             except Exception as e:
-                logger.error(f"Failed to send SMTP email: {e}. Falling back to server logs.")
+                logger.exception('Failed to send SMTP verification email: %s', e)
+                return False
+
+        if is_production:
+            logger.error('Email verification is unavailable: SMTP_SERVER, SMTP_USER, and SMTP_PASSWORD must be configured.')
+            return False
 
         # Development / Default Fallback: Clean console log
         print(f"\n=======================================================")
@@ -120,6 +141,7 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
         print(f"OTP CODE: >>> {otp_code} <<< (Valid for {cls.EXPIRATION_MINUTES} minutes)")
         print(f"=======================================================\n")
         logger.info(f"[DEV AUTH] Verification OTP for {email}: {otp_code}")
+        return True
 
     @classmethod
     def verify_otp(cls, email: str, candidate_otp: str, ip_address: str = None) -> tuple[bool, str, int]:
@@ -148,6 +170,7 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
 
         if not otp_record.verify(candidate_otp):
             attempts_left = cls.MAX_ATTEMPTS - otp_record.attempts
+            db.session.commit()
             return False, f'Incorrect verification code. {attempts_left} attempt(s) remaining.', 400
 
         # Log success
@@ -158,6 +181,5 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
             details='OTP successfully verified'
         )
         db.session.add(sec_log)
-        db.session.commit()
 
         return True, 'Verification successful.', 200
