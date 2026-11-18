@@ -162,7 +162,8 @@ vercel --prod
    - `ADMIN_EMAIL`: `admissions@lpu.co.in`.
    - `ADMIN_PASSWORD`: A secure administrator password.
    - `ADMIN_EMAILS`: `admissions@lpu.co.in`.
-   - `SMTP_SERVER` / `SMTP_USER` / `SMTP_PASSWORD`: (Optional) for live email delivery.
+   - For Vercel email verification, set `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL` in Project Settings → Environment Variables. Resend's HTTP API works from serverless runtimes where outbound SMTP is restricted.
+   - `SMTP_SERVER` / `SMTP_USER` / `SMTP_PASSWORD`: optional SMTP delivery for local or non-serverless deployments.
 4. Click **Deploy**. Vercel will build the frontend with `@vercel/static-build` and serve the API via `api/index.py` serverless WSGI runtime.
 
 ---

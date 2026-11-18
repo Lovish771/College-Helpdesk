@@ -98,19 +98,19 @@ function AppContent() {
   const [theme, setTheme] = useState(() => getStoredItem('lpu_theme'));
   const isThemeChangingRef = useRef(false);
 
-  const applyThemeToDom = (nextTheme) => {
+  const applyThemeToDom = useCallback((nextTheme) => {
     const isDark = nextTheme === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
     document.body.classList.toggle('dark', isDark);
     document.documentElement.setAttribute('data-theme', nextTheme);
     document.documentElement.style.colorScheme = nextTheme;
     setStoredItem('lpu_theme', nextTheme);
-  };
+  }, []);
 
   // Keep DOM root, body, and storage strictly synchronized with active theme
   useEffect(() => {
-      try { applyThemeToDom(theme); } catch {}
-  }, [theme]);
+    try { applyThemeToDom(theme); } catch {}
+  }, [theme, applyThemeToDom]);
 
   const toggleTheme = useCallback((event) => {
     if (isThemeChangingRef.current) return;
@@ -170,7 +170,7 @@ function AppContent() {
     } else {
       setTheme(nextTheme);
     }
-  }, [theme]);
+  }, [theme, applyThemeToDom]);
 
   const chat = useChat();
 

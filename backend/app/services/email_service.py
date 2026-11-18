@@ -1,8 +1,11 @@
 import os
+import json
 import secrets
 import smtplib
 import ssl
 import logging
+from urllib.request import Request, urlopen
+from flask import current_app, has_app_context
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
@@ -71,18 +74,75 @@ class EmailService:
 
     @classmethod
     def _send_email(cls, email: str, otp_code: str):
+        # Keep auth tests fully offline even when a developer has real SMTP
+        # credentials in a local .env file.
+        if has_app_context() and current_app.testing:
+            logger.info('Skipping SMTP delivery in test mode')
+            return True
+
         smtp_server = os.environ.get('SMTP_SERVER')
         smtp_user = os.environ.get('SMTP_USER')
         smtp_pass = os.environ.get('SMTP_PASSWORD')
+        resend_api_key = os.environ.get('RESEND_API_KEY')
         is_production = any(os.environ.get(key, '').lower() in ('1', 'true', 'production') for key in ('VERCEL', 'FLASK_ENV', 'ENVIRONMENT'))
 
-        try:
-            smtp_port = int(os.environ.get('SMTP_PORT') or '587')
-            if not 1 <= smtp_port <= 65535:
-                raise ValueError('SMTP_PORT must be between 1 and 65535')
-        except (TypeError, ValueError) as exc:
-            logger.error('Invalid SMTP_PORT configuration: %s', exc)
-            return False
+        smtp_port = 587
+        if not resend_api_key:
+            try:
+                smtp_port = int(os.environ.get('SMTP_PORT') or '587')
+                if not 1 <= smtp_port <= 65535:
+                    raise ValueError('SMTP_PORT must be between 1 and 65535')
+            except (TypeError, ValueError) as exc:
+                logger.error('Invalid SMTP_PORT configuration: %s', exc)
+                return False
+
+        text_content = f"""Lovely Professional University Student Helpdesk (Unofficial Project)
+Your 6-digit one-time verification code is: {otp_code}
+
+This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request this, you can safely ignore this email.
+"""
+        html_content = f"""
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:16px">
+          <h2 style="color:#ea580c">Lovely Professional University Student Helpdesk</h2>
+          <p style="color:#64748b;font-size:13px">Student-Developed Unofficial Guidance Project</p>
+          <hr style="border:0;border-top:1px solid #e2e8f0;margin:16px 0" />
+          <p style="color:#334155;font-size:14px">Your 6-digit one-time verification code is:</p>
+          <div style="background:#fff7ed;border:1px dashed #f97316;border-radius:12px;padding:16px;text-align:center;margin:20px 0">
+            <span style="font-family:monospace;font-size:32px;font-weight:bold;letter-spacing:6px;color:#c2410c">{otp_code}</span>
+          </div>
+          <p style="color:#64748b;font-size:12px;line-height:1.5">This code expires in <strong>{cls.EXPIRATION_MINUTES} minutes</strong> and can only be used once. Never share it.</p>
+          <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0" />
+          <p style="color:#94a3b8;font-size:11px">This is an unofficial peer helpdesk project and is not affiliated with or endorsed by Lovely Professional University.</p>
+        </div>
+        """
+
+        # HTTP email APIs work reliably from serverless runtimes that restrict
+        # outbound SMTP ports. Use Resend when configured, then SMTP as fallback.
+        if resend_api_key:
+            sender = os.environ.get('RESEND_FROM_EMAIL', 'LPU Helpdesk <onboarding@resend.dev>')
+            payload = json.dumps({
+                'from': sender,
+                'to': [email],
+                'subject': f'Lovely Professional University Helpdesk – Your Verification Code: {otp_code}',
+                'text': text_content,
+                'html': html_content,
+            }).encode('utf-8')
+            request = Request(
+                'https://api.resend.com/emails',
+                data=payload,
+                headers={'Authorization': f'Bearer {resend_api_key}', 'Content-Type': 'application/json'},
+                method='POST',
+            )
+            try:
+                with urlopen(request, timeout=10) as response:
+                    if 200 <= response.status < 300:
+                        logger.info('Successfully dispatched OTP email through Resend to %s', email)
+                        return True
+                    logger.error('Resend returned HTTP %s while sending OTP to %s', response.status, email)
+                    return False
+            except Exception:
+                logger.exception('Failed to send verification email through Resend to %s', email)
+                return False
 
         if smtp_server and smtp_user and smtp_pass:
             try:
@@ -91,29 +151,6 @@ class EmailService:
                 msg['From'] = f'LPU Helpdesk <{smtp_user}>'
                 msg['To'] = email
 
-                text_content = f"""Lovely Professional University Student Helpdesk (Unofficial Project)
-Your 6-digit one-time verification code is: {otp_code}
-
-This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request this, you can safely ignore this email.
-"""
-                html_content = f"""
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
-                    <h2 style="color: #ea580c; margin-bottom: 8px;">Lovely Professional University Student Helpdesk</h2>
-                    <p style="color: #64748b; font-size: 13px; margin-top: 0;">Student-Developed Unofficial Guidance Project</p>
-                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;" />
-                    <p style="color: #334155; font-size: 14px;">Your 6-digit one-time verification code is:</p>
-                    <div style="background: #fff7ed; border: 1px dashed #f97316; border-radius: 12px; padding: 16px; text-align: center; margin: 20px 0;">
-                        <span style="font-family: monospace; font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #c2410c;">{otp_code}</span>
-                    </div>
-                    <p style="color: #64748b; font-size: 12px; line-height: 1.5;">
-                        This verification code expires in <strong>{cls.EXPIRATION_MINUTES} minutes</strong> and can only be used once. Never share this code with anyone.
-                    </p>
-                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                    <p style="color: #94a3b8; font-size: 11px;">
-                        This is an unofficial peer helpdesk project and is not affiliated with or endorsed by Lovely Professional University.
-                    </p>
-                </div>
-                """
                 msg.attach(MIMEText(text_content, 'plain'))
                 msg.attach(MIMEText(html_content, 'html'))
 

@@ -108,11 +108,11 @@ export default function ProgramCard({
         if (onSelect) onSelect(p);
         else if (onView) onView(p);
       }}
-      className={`group relative flex flex-col rounded-3xl p-6 transition-all duration-300 ease-out cursor-pointer border select-none
+      className={`group relative flex flex-col rounded-[28px] p-5 sm:p-6 transition-all duration-300 ease-out cursor-pointer border select-none overflow-hidden
         bg-white dark:bg-[#0D131F]
         border-slate-200/90 dark:border-slate-800/90
-        shadow-sm dark:shadow-md
-        hover:-translate-y-2 hover:scale-[1.015]
+        shadow-[0_10px_30px_-20px_rgba(15,23,42,0.35)] dark:shadow-[0_16px_40px_-26px_rgba(0,0,0,0.85)]
+        hover:-translate-y-1.5 hover:scale-[1.01]
         ${theme.glowBorder}
         ${theme.glowShadow}
         ${
@@ -123,9 +123,21 @@ export default function ProgramCard({
       style={{
         transformStyle: 'preserve-3d',
       }}
+      role="article"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          if (onSelect) onSelect(p);
+          else onView?.(p);
+        }
+      }}
     >
-      {/* Top Header: Emblem Squircle + Badges */}
-      <div className="flex items-start justify-between gap-3 mb-4">
+      <div aria-hidden="true" className={`absolute -right-12 -top-14 h-36 w-36 rounded-full bg-gradient-to-br ${theme.gradient} opacity-[0.08] blur-2xl transition-all duration-500 group-hover:scale-125 group-hover:opacity-[0.14]`} />
+      <div aria-hidden="true" className={`absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r ${theme.gradient} opacity-70`} />
+
+      {/* Degree family emblem, programme highlights and duration */}
+      <div className="relative z-10 flex items-start justify-between gap-3 mb-5">
         {/* Emblem Squircle with glowing icon */}
         <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110 ${theme.badgeBg}`}>
           <EmblemIcon size={22} className={theme.textAccent} />
@@ -134,19 +146,19 @@ export default function ProgramCard({
         {/* Top Floating Badges */}
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 shadow-2xs">
-            <BadgeIcon size={11} className="text-orange-500 shrink-0" />
+            <BadgeIcon size={11} className={`${theme.textAccent} shrink-0`} />
             <span>{badgeText}</span>
           </span>
 
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 shadow-2xs">
-            <Clock size={11} className="text-slate-400 shrink-0" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm">
+            <Clock size={11} className={`${theme.textAccent} shrink-0`} />
             <span>{p.duration || '4 Years'}</span>
           </span>
         </div>
       </div>
 
       {/* ── PREMIER MAIN DEGREE BAR (SHINING SHIMMER EFFECT + VIBRANT GRADIENT) ── */}
-      <div className="flex items-center gap-2 mb-2.5">
+      <div className="relative z-10 flex items-center gap-2 mb-3">
         <div className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider overflow-hidden shadow-sm ${theme.glow} select-none transition-transform duration-300 group-hover:scale-105`}>
           {/* Vibrant Gradient Background */}
           <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
@@ -171,12 +183,12 @@ export default function ProgramCard({
       </div>
 
       {/* Title */}
-      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors line-clamp-2 leading-snug">
+      <h3 className="relative z-10 text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-100 transition-colors line-clamp-2 leading-snug min-h-[3.25rem]">
         {title}
       </h3>
 
       {/* Description */}
-      <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed mt-2.5 font-sans flex-1">
+      <p className="relative z-10 text-slate-600 dark:text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed mt-2.5 font-sans flex-1">
         {p.description}
       </p>
 
@@ -190,7 +202,7 @@ export default function ProgramCard({
 
       {/* Footer Row: Semester Fee + Action Buttons (Compare & View Details) */}
       <div className="mt-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-3">
-        <div className="flex flex-col">
+        <div className="flex flex-col rounded-2xl px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800">
           <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium flex items-center gap-1">
             <Wallet size={12} className="text-slate-400 dark:text-slate-500" />
             <span>Semester Fee</span>
@@ -209,15 +221,15 @@ export default function ProgramCard({
                 e.stopPropagation();
                 onCompare(p.id);
               }}
-              className={`px-3 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${
+              className={`premium-interaction px-3 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
                 isSelected
-                  ? 'bg-orange-600 text-white border-orange-600 shadow-md shadow-orange-600/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-orange-500/50 hover:bg-orange-500/10 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400'
+                  ? `${theme.btnClass} border-transparent`
+                  : `border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 ${theme.textAccent} hover:bg-slate-50 dark:hover:bg-slate-800`
               }`}
               title={isSelected ? 'Remove from Comparison' : 'Add to Compare'}
               aria-label={isSelected ? `Remove ${p.name} from comparison` : `Add ${p.name} to comparison`}
             >
-              <Scale size={13} className={isSelected ? 'text-white' : 'text-orange-500'} />
+              <Scale size={13} className={isSelected ? 'text-white' : theme.textAccent} />
               <span>{isSelected ? 'In Compare' : 'Compare'}</span>
             </button>
           )}
@@ -229,7 +241,7 @@ export default function ProgramCard({
               e.stopPropagation();
               if (onView) onView(p);
             }}
-            className={`px-3.5 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-xs ${isSelected ? "bg-gradient-to-r from-orange-500 to-amber-500 border-orange-500 text-white shadow-md shadow-orange-500/30" : "border-orange-500/70 hover:bg-orange-600 bg-orange-500/5 hover:text-white text-orange-600 dark:text-orange-400 hover:dark:text-white"}`}
+            className={`premium-interaction px-4 py-2.5 rounded-full border border-transparent text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${theme.btnClass}`}
           >
             <span>View Details</span>
             <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
