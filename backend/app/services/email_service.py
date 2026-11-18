@@ -1,10 +1,8 @@
 import os
-import json
 import secrets
 import smtplib
 import ssl
 import logging
-from urllib.request import Request, urlopen
 from flask import current_app, has_app_context
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -83,18 +81,15 @@ class EmailService:
         smtp_server = os.environ.get('SMTP_SERVER')
         smtp_user = os.environ.get('SMTP_USER')
         smtp_pass = os.environ.get('SMTP_PASSWORD')
-        resend_api_key = os.environ.get('RESEND_API_KEY')
         is_production = any(os.environ.get(key, '').lower() in ('1', 'true', 'production') for key in ('VERCEL', 'FLASK_ENV', 'ENVIRONMENT'))
 
-        smtp_port = 587
-        if not resend_api_key:
-            try:
-                smtp_port = int(os.environ.get('SMTP_PORT') or '587')
-                if not 1 <= smtp_port <= 65535:
-                    raise ValueError('SMTP_PORT must be between 1 and 65535')
-            except (TypeError, ValueError) as exc:
-                logger.error('Invalid SMTP_PORT configuration: %s', exc)
-                return False
+        try:
+            smtp_port = int(os.environ.get('SMTP_PORT') or '465')
+            if not 1 <= smtp_port <= 65535:
+                raise ValueError('SMTP_PORT must be between 1 and 65535')
+        except (TypeError, ValueError) as exc:
+            logger.error('Invalid SMTP_PORT configuration: %s; retrying with secure port 465', exc)
+            smtp_port = 465
 
         text_content = f"""Lovely Professional University Student Helpdesk (Unofficial Project)
 Your 6-digit one-time verification code is: {otp_code}
@@ -116,60 +111,34 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
         </div>
         """
 
-        # HTTP email APIs work reliably from serverless runtimes that restrict
-        # outbound SMTP ports. Use Resend when configured, then SMTP as fallback.
-        if resend_api_key:
-            sender = os.environ.get('RESEND_FROM_EMAIL', 'LPU Helpdesk <onboarding@resend.dev>')
-            payload = json.dumps({
-                'from': sender,
-                'to': [email],
-                'subject': f'Lovely Professional University Helpdesk – Your Verification Code: {otp_code}',
-                'text': text_content,
-                'html': html_content,
-            }).encode('utf-8')
-            request = Request(
-                'https://api.resend.com/emails',
-                data=payload,
-                headers={'Authorization': f'Bearer {resend_api_key}', 'Content-Type': 'application/json'},
-                method='POST',
-            )
-            try:
-                with urlopen(request, timeout=10) as response:
-                    if 200 <= response.status < 300:
-                        logger.info('Successfully dispatched OTP email through Resend to %s', email)
-                        return True
-                    logger.error('Resend returned HTTP %s while sending OTP to %s', response.status, email)
-                    return False
-            except Exception:
-                logger.exception('Failed to send verification email through Resend to %s', email)
-                return False
-
         if smtp_server and smtp_user and smtp_pass:
-            try:
-                msg = MIMEMultipart('alternative')
-                msg['Subject'] = f'Lovely Professional University Helpdesk – Your Verification Code: {otp_code}'
-                msg['From'] = f'LPU Helpdesk <{smtp_user}>'
-                msg['To'] = email
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = f'Lovely Professional University Helpdesk – Your Verification Code: {otp_code}'
+            msg['From'] = f'LPU Helpdesk <{smtp_user}>'
+            msg['To'] = email
+            msg.attach(MIMEText(text_content, 'plain'))
+            msg.attach(MIMEText(html_content, 'html'))
 
-                msg.attach(MIMEText(text_content, 'plain'))
-                msg.attach(MIMEText(html_content, 'html'))
-
-                if smtp_port == 465:
-                    server = smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10, context=ssl.create_default_context())
-                else:
-                    server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
-                    server.starttls(context=ssl.create_default_context())
-                with server:
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(smtp_user, [email], msg.as_string())
-                logger.info(f"Successfully dispatched OTP email to {email}")
-                return True
-            except Exception as e:
-                logger.exception('Failed to send SMTP verification email: %s', e)
-                return False
+            # Try the configured port first, then implicit TLS. This helps
+            # deployments whose network blocks SMTP submission on port 587.
+            smtp_ports = list(dict.fromkeys([smtp_port, 465] if smtp_port != 465 else [465]))
+            for port in smtp_ports:
+                try:
+                    if port == 465:
+                        server = smtplib.SMTP_SSL(smtp_server, port, timeout=8, context=ssl.create_default_context())
+                    else:
+                        server = smtplib.SMTP(smtp_server, port, timeout=8)
+                        server.starttls(context=ssl.create_default_context())
+                    with server:
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(smtp_user, [email], msg.as_string())
+                    logger.info('Successfully dispatched OTP email through SMTP port %s to %s', port, email)
+                    return True
+                except Exception:
+                    logger.exception('SMTP delivery failed on port %s for %s', port, email)
 
         if is_production:
-            logger.error('Email verification is unavailable: SMTP_SERVER, SMTP_USER, and SMTP_PASSWORD must be configured.')
+            logger.error('Email verification failed: configure a working SMTP provider.')
             return False
 
         # Development / Default Fallback: Clean console log
