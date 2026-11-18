@@ -1,5 +1,6 @@
 import sys
 import os
+import importlib
 
 # Ensure backend directory is in python search path
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -9,7 +10,12 @@ if root_dir not in sys.path:
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-from app import create_app, db
+# Use an explicit package import so Vercel's Python file tracer includes the
+# app code under backend/. Then alias it to the legacy absolute `app.*` imports
+# used throughout the existing Flask application.
+backend_app = importlib.import_module('backend.app')
+sys.modules['app'] = backend_app
+from backend.app import create_app, db
 
 # Initialize Flask application for Vercel Serverless WSGI
 app = create_app()
