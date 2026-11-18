@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Pause, Play, Compass } from 'lucide-react';
 import ProgramCard from './ProgramCard';
+import { getDegreeTheme, getMainDegree } from '../utils/degreeUtils';
 
 /**
  * ProgramsCarousel: Clean, Premium 3D-Uplifted Horizontal Carousel
@@ -336,6 +337,7 @@ export default function ProgramsCarousel({
             const distance = Math.abs(idx - currentIndex);
             const isVisible = distance <= 3;
             const isCentered = distance === 0;
+            const cardTheme = getDegreeTheme(getMainDegree(item.program));
 
             // Premium 3D uplifted scaling & opacity
             let cardScale = 0.88;
@@ -368,9 +370,7 @@ export default function ProgramsCarousel({
                   willChange: 'transform, opacity',
                 }}
                 className={`shrink-0 cursor-pointer relative ${
-                  isCentered
-                    ? 'filter drop-shadow-[0_20px_40px_rgba(249,115,22,0.22)]'
-                    : 'hover:opacity-90'
+                  isCentered ? '' : 'hover:opacity-90'
                 }`}
                 aria-hidden={!isVisible}
               >
@@ -378,7 +378,7 @@ export default function ProgramsCarousel({
                   <div className="relative">
                     {/* Glowing highlight ring around center active card */}
                     {isCentered && (
-                      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-orange-500/80 via-amber-500/80 to-orange-500/80 opacity-70 blur-xs pointer-events-none -z-10" />
+                      <div className={`absolute -inset-1 rounded-3xl bg-gradient-to-r ${cardTheme.gradient} opacity-45 blur-sm pointer-events-none -z-10`} />
                     )}
 
                     <ProgramCard

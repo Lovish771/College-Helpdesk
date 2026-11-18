@@ -107,7 +107,27 @@ const ANNUAL_EXAM_FEE = 5000; // Taken once annually in the 2nd semester of each
 export default function Fees({ ask, onOpenCompare, go }) {
   const [activeTab, setActiveTab] = useState('degree-planner'); // Default to full tenure fee planner
   const initialPrefs = useMemo(() => getStoredItem('lpu_fee_preferences'), []);
-  const [selectedCourseId, setSelectedCourseId] = useState(initialPrefs.selectedCourseId || 'btech-cse');
+  const [selectedCourseId, setSelectedCourseId] = useState(() => (
+    programs.some((program) => program.id === initialPrefs.selectedCourseId)
+      ? initialPrefs.selectedCourseId
+      : (programs[0]?.id || 'btech-cse')
+  ));
+
+  const activeCourse = useMemo(() => {
+    return programs.find((p) => p.id === selectedCourseId) || programs[0] || {
+      id: 'btech-cse',
+      name: 'B.Tech in Computer Science and Engineering',
+      short: 'B.Tech CSE',
+      degree: 'Undergraduate',
+      duration: '4 Years',
+      description: 'Comprehensive curriculum in computing and software systems.',
+    };
+  }, [selectedCourseId]);
+
+  const tenureYears = useMemo(() => {
+    const match = (activeCourse.duration || '').match(/\d+/);
+    return match ? parseInt(match[0], 10) : 4;
+  }, [activeCourse]);
   const [calcSlab, setCalcSlab] = useState(initialPrefs.calcSlab || 'cat1'); // 'none' | 'cat1' | 'cat2' | 'cat3' | 'custom'
   const [customPercent, setCustomPercent] = useState(initialPrefs.customPercent ?? 50);
   const [applyDefense, setApplyDefense] = useState(initialPrefs.applyDefense ?? false); // Rakshak Samman (20% on remaining fee)
@@ -276,7 +296,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
           badge="Official LPU Structure 2026-27"
         >
           <button
-            onClick={() => ask(`Can you help me calculate the total 4-year expenditure and hostel fees for ${activeCourse.short}?`)}
+            onClick={() => ask(`Can you help me calculate the total ${tenureYears}-year expenditure and hostel fees for ${activeCourse.short}?`)}
             className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer"
           >
             <Calculator size={14} />
@@ -311,7 +331,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
         </div>
 
         {/* ── Main Category Switcher (Pill Style) ── */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-2xl">
+        <div role="tablist" aria-label="Fees sections" className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-2xl">
           {[
             { id: 'degree-planner', label: 'Tenure Fee Calculator', icon: Calculator, badge: 'New' },
             { id: 'program-fees', label: 'Programme Tuition & Slabs', icon: Wallet },
@@ -322,8 +342,11 @@ export default function Fees({ ask, onOpenCompare, go }) {
             return (
               <button
                 key={id}
+                type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => setActiveTab(id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
+                className={`premium-interaction flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
                   active
                     ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -786,7 +809,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       Fee Breakdown ({activeCourse.short})
                     </span>
                     <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                      {waiverPercent}% Scholarship Applied
+                      {meritPercent}% Scholarship Applied
                     </span>
                   </div>
 
@@ -798,10 +821,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       </span>
                     </div>
 
-                    {waiverPercent > 0 && (
+                    {meritPercent > 0 && (
                       <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Scholarship Concession ({waiverPercent}%):</span>
-                        <span className="font-bold">-₹{concessionAmt.toLocaleString()} / sem</span>
+                        <span>Scholarship Concession ({meritPercent}%):</span>
+                        <span className="font-bold">-₹{meritConcessionAmt.toLocaleString()} / sem</span>
                       </div>
                     )}
 

@@ -87,6 +87,18 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setMoreOpen(false);
+        setUserDropdownOpen(false);
+        setOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
   const to = (p, isSpecial) => {
     if (isSpecial && onOpenCompare) {
       onOpenCompare();
@@ -190,7 +202,7 @@ export default function Navbar({
 
               {/* Dropdown Panel */}
               {moreOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl backdrop-blur-2xl border shadow-2xl p-2 animate-fade-in z-50 bg-white/95 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
+                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border shadow-2xl p-2 animate-fade-in z-50 bg-white text-slate-900 border-slate-200 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100">
                   <div className="space-y-1">
                     {moreNavItems.map(([id, label, Icon, desc, isSpecial]) => {
                       const active = page === id;
@@ -202,7 +214,7 @@ export default function Navbar({
                           className={`w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition-colors cursor-pointer ${
                             active
                               ? 'bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400'
-                              : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/90 text-slate-700 dark:text-slate-300'
                           }`}
                         >
                           <span
@@ -392,7 +404,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="lg:hidden mt-2 p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-900/98 border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-slate-100">
+          <div className="lg:hidden mt-2 p-4 rounded-3xl shadow-2xl animate-fade-in border bg-white dark:bg-slate-950 border-slate-200/90 dark:border-slate-700 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu

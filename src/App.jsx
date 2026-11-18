@@ -62,6 +62,7 @@ function AppContent() {
         document.body.classList.remove('dark');
       }
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.style.colorScheme = theme;
       setStoredItem('lpu_theme', theme);
     } catch {}
   }, [theme]);
@@ -107,30 +108,14 @@ function AppContent() {
             document.body.classList.remove('dark');
           }
           document.documentElement.setAttribute('data-theme', nextTheme);
+          document.documentElement.style.colorScheme = nextTheme;
         });
 
-        transition.ready.then(() => {
-          try {
-            document.documentElement.animate(
-              {
-                clipPath: [
-                  `circle(0px at ${x}px ${y}px)`,
-                  `circle(${endRadius}px at ${x}px ${y}px)`,
-                ],
-              },
-              {
-                duration: 480,
-                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                pseudoElement: '::view-transition-new(root)',
-              }
-            );
-          } catch (_) {}
-        }).catch(() => {});
-
-        transition.finished.finally(() => {
+        const finishTransition = () => {
           document.documentElement.classList.remove('disable-transitions');
           isThemeChangingRef.current = false;
-        });
+        };
+        transition.finished.then(finishTransition, finishTransition);
         return;
       } catch {
         document.documentElement.classList.remove('disable-transitions');
@@ -144,7 +129,7 @@ function AppContent() {
       setTheme(nextTheme);
       setTimeout(() => {
         document.documentElement.classList.remove('theme-transitioning');
-      }, 400);
+      }, 900);
     } else {
       setTheme(nextTheme);
     }

@@ -9,7 +9,6 @@ import {
 import { programs, fees } from '../data/mockData';
 import ProgramCard from '../components/ProgramCard';
 import ProgramsCarousel from '../components/ProgramsCarousel';
-import { PROGRAM_IMAGES } from '../data/programImages';
 import { getProgramEnrichment } from '../data/programDetails';
 import { PROGRAM_COMPARISON_DATA } from '../data/programComparisonData';
 import { getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
@@ -54,7 +53,7 @@ const ACADEMIC_SCHOOLS = [
     short: 'Pharmacy & Healthcare',
     badge: 'PCI Approved • Hospital Tie-ups',
     description: 'Clinical research, drug design, pharmacology, kinesiology, and sports injury physical therapy.',
-    programPrefixes: ['bpharm', 'bpt'],
+    programPrefixes: ['bpharm', 'bpt', 'mpharm'],
   },
   {
     id: 'school-sciences',
@@ -62,7 +61,7 @@ const ACADEMIC_SCHOOLS = [
     short: 'Agriculture & Sciences',
     badge: 'ICAR Accredited (India’s 1st Private Agri School)',
     description: 'Research over 1,000+ acres of agricultural farms, precision drone farming, organic production, and forensic laboratories.',
-    programPrefixes: ['bsc-agri', 'bsc-forensic'],
+    programPrefixes: ['bsc-agri', 'bsc-forensic', 'msc-data', 'bsc-biotech', 'bsc-micro'],
   },
   {
     id: 'school-law',
@@ -70,7 +69,31 @@ const ACADEMIC_SCHOOLS = [
     short: 'School of Law',
     badge: 'Bar Council of India (BCI) Approved',
     description: 'Constitutional law, corporate compliance, cyber jurisprudence, intellectual property rights, and state-of-the-art moot courts.',
-    programPrefixes: ['ba-llb', 'bba-llb'],
+    programPrefixes: ['ba-llb', 'bba-llb', 'llb', 'llm'],
+  },
+  {
+    id: 'school-design',
+    name: 'School of Design & Architecture',
+    short: 'Design & Architecture',
+    badge: 'Studio-led creative and built-environment programmes',
+    description: 'Design, architecture, animation, and visual communication programmes.',
+    programPrefixes: ['bdes', 'barch', 'bsc-animation'],
+  },
+  {
+    id: 'school-media',
+    name: 'School of Media & Communication',
+    short: 'Media & Communication',
+    badge: 'Journalism, storytelling, and digital media',
+    description: 'Journalism and mass communication programmes across modern media formats.',
+    programPrefixes: ['ba-jmc'],
+  },
+  {
+    id: 'school-education-hospitality',
+    name: 'Education & Hospitality',
+    short: 'Education & Hospitality',
+    badge: 'Professional teaching and hospitality programmes',
+    description: 'Programmes in teacher education and hotel management.',
+    programPrefixes: ['bed', 'bhmct'],
   },
 ];
 
@@ -80,21 +103,27 @@ const getProgramType = (p) => {
   if (name.includes('B.TECH') || short.includes('B.TECH')) return 'B.Tech';
   if (name.includes('BCA') || short.includes('BCA')) return 'BCA';
   if (name.includes('B.SC') || short.includes('B.SC')) return 'B.Sc';
+  if (name.includes('LL.B') || name.includes('LL.M') || name.includes('LAW')) return p.degree === 'Postgraduate' ? 'LL.M' : 'Law';
   if (name.includes('BBA') || short.includes('BBA')) return 'BBA';
   if (name.includes('B.COM') || short.includes('B.COM')) return 'B.Com';
-  if (name.includes('PHARM') || name.includes('PHYSIOTHERAPY')) return p.degree === 'Postgraduate' ? 'M.Pharm' : 'B.Pharm';
-  if (name.includes('LL.B') || name.includes('LL.M') || name.includes('LAW')) return p.degree === 'Postgraduate' ? 'LL.M' : 'Law';
+  if (name.includes('PHARM') || name.includes('PHYSIOTHERAPY') || short.includes('BPT')) {
+    if (name.includes('PHYSIOTHERAPY') || short.includes('BPT')) return 'BPT';
+    return p.degree === 'Postgraduate' ? 'M.Pharm' : 'B.Pharm';
+  }
   if (name.includes('DESIGN') || name.includes('ARCH') || name.includes('ANIMATION')) return 'Design & Arch';
   if (name.includes('MBA') || short.includes('MBA')) return 'MBA';
   if (name.includes('MCA') || short.includes('MCA')) return 'MCA';
   if (name.includes('M.TECH') || short.includes('M.TECH')) return 'M.Tech';
   if (name.includes('M.SC') || short.includes('M.SC')) return 'M.Sc';
+  if (name.includes('JOURNALISM') || short.includes('JMC')) return 'Media & Communication';
+  if (name.includes('EDUCATION') || short === 'B.ED') return 'B.Ed';
+  if (name.includes('HOTEL MANAGEMENT') || short.includes('BHMCT')) return 'Hospitality';
   return 'Other';
 };
 
-const UG_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'B.Pharm', 'Law', 'Design & Arch'];
+const UG_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'B.Pharm', 'BPT', 'Law', 'Design & Arch', 'Media & Communication', 'B.Ed', 'Hospitality'];
 const PG_DEGREE_TYPES = ['All Degrees', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'M.Pharm', 'LL.M'];
-const ALL_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'Law', 'Design & Arch'];
+const ALL_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'B.Pharm', 'M.Pharm', 'BPT', 'Law', 'LL.M', 'Design & Arch', 'Media & Communication', 'B.Ed', 'Hospitality'];
 
 
 // Detailed Program View (Comprehensive, Lists All Degree Details)
@@ -164,13 +193,8 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 space-y-6">
         {/* Hero Banner for Program */}
         <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
-            style={{
-              backgroundImage: `url(${PROGRAM_IMAGES[p.id] || PROGRAM_IMAGES['btech-cse']})`,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-slate-950 dark:via-slate-900/90 dark:to-slate-950/95 pointer-events-none" />
+          <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${theme.gradient}`} aria-hidden="true" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pointer-events-none" />
 
           <div className="relative z-10 p-6 sm:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="max-w-3xl space-y-3">
@@ -656,13 +680,7 @@ export default function Programs({ ask, onOpenCompare }) {
       
       {/* ── Institutional Header Banner (matches white on white theme, dark on dark theme) ── */}
       <div className="relative bg-white dark:bg-[#070B14] text-slate-900 dark:text-white pt-6 sm:pt-8 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-200 dark:border-slate-800/80 transition-colors">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-10 dark:opacity-25 mix-blend-luminosity scale-105 pointer-events-none"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&auto=format&fit=crop&q=80')`,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-orange-50/40 dark:from-[#070B14] dark:via-[#070B14]/85 dark:to-[#070B14]/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-orange-50/70 dark:from-[#070B14] dark:via-[#070B14] dark:to-slate-900 pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="max-w-2xl">
@@ -736,7 +754,7 @@ export default function Programs({ ask, onOpenCompare }) {
       <div className="sticky top-16 z-20 backdrop-blur-md bg-white/95 dark:bg-[#080D1A]/95 border-b border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors py-3">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 sm:p-4 shadow-xs space-y-3">
-            {/* Row 1: Search Input + Showing count + Compare button */}
+            {/* Search and count stay together; filters follow in a labelled grid. */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="relative flex-1 flex items-center">
                 <Search size={15} className="absolute left-3.5 text-slate-400 shrink-0" />
@@ -744,24 +762,25 @@ export default function Programs({ ask, onOpenCompare }) {
                   type="text"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search by degree title, subject, or short code (e.g. B.Tech, CSE, MBA)..."
-                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
+                  placeholder="Search programmes by name, subject, or code"
+                  aria-label="Search programmes"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
                 />
                 {q && (
-                  <button onClick={() => setQ('')} className="absolute right-3 p-1 text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setQ('')} aria-label="Clear search" className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors">
                     <X size={14} />
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Showing <strong className="text-orange-600 dark:text-orange-400 font-bold">{sortedFiltered.length}</strong> of {programs.length} Programmes
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <span className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  <strong className="text-slate-900 dark:text-white">{sortedFiltered.length}</strong> of {programs.length} programmes
                 </span>
                 {onOpenCompare && (
                   <button
                     type="button"
                     onClick={() => onOpenCompare(compareQueue.length > 0 ? compareQueue : ['btech-cse', 'btech-aiml'])}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 hover:bg-orange-100 transition-colors cursor-pointer shadow-2xs"
+                    className="premium-interaction inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 cursor-pointer shadow-2xs"
                   >
                     <Scale size={13} />
                     <span>Compare ({compareQueue.length > 0 ? compareQueue.length : 2})</span>
@@ -770,93 +789,61 @@ export default function Programs({ ask, onOpenCompare }) {
               </div>
             </div>
 
-            {/* Row 2: Level Filter Pills + Disciplines */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none text-xs">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">
-                  LEVEL:
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Study level
+                <select
+                  value={level}
+                  onChange={(e) => { setLevel(e.target.value); setSelectedDegreeType('All'); }}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="All">All levels</option>
+                  <option value="UG">Undergraduate</option>
+                  <option value="PG">Postgraduate</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                School / faculty
+                <select
+                  value={selectedSchoolId}
+                  onChange={(e) => setSelectedSchoolId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="all">All schools</option>
+                  {ACADEMIC_SCHOOLS.map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Degree type
+                <select
+                  value={selectedDegreeType}
+                  onChange={(e) => setSelectedDegreeType(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  {currentDegreeTypes.map((type) => (
+                    <option key={type} value={type === 'All Degrees' ? 'All' : type}>
+                      {type === 'All Degrees' ? 'All degree types' : type}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex items-end justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5 border border-slate-200 dark:border-slate-700">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300" aria-live="polite">
+                  {activeFilterCount ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} active` : 'No filters applied'}
                 </span>
-                {['All', 'UG', 'PG'].map((lvl) => (
-                  <button
-                    key={lvl}
-                    onClick={() => {
-                      setLevel(lvl);
-                      setSelectedDegreeType('All');
-                    }}
-                    className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
-                      level === lvl
-                        ? 'bg-orange-600 text-white shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    {lvl}
-                  </button>
-                ))}
-              </div>
-
-              <span className="text-slate-300 dark:text-slate-700 shrink-0">|</span>
-
-              <div className="flex items-center gap-1.5 shrink-0">
                 <button
-                  onClick={() => setSelectedSchoolId('all')}
-                  className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedSchoolId === 'all'
-                      ? 'bg-orange-600 text-white shadow-xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  All Disciplines
-                </button>
-                {ACADEMIC_SCHOOLS.map((school) => {
-                  const active = selectedSchoolId === school.id;
-                  return (
-                    <button
-                      key={school.id}
-                      onClick={() => setSelectedSchoolId(school.id)}
-                      className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all cursor-pointer ${
-                        active
-                          ? 'bg-orange-600 text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {school.short}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Row 3: Degree award types (B.Tech, BCA, B.Sc, BBA, MBA, etc.) */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs pt-2 border-t border-slate-100 dark:border-slate-800/80">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 shrink-0 mr-1">
-                DEGREE:
-              </span>
-              {currentDegreeTypes.map((type) => {
-                const active = selectedDegreeType === type || (type === 'All Degrees' && selectedDegreeType === 'All');
-                return (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedDegreeType(type === 'All Degrees' ? 'All' : type)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      active
-                        ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 font-bold'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {type}
-                  </button>
-                );
-              })}
-
-              {activeFilterCount > 0 && (
-                <button
+                  type="button"
                   onClick={handleResetFilters}
-                  className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer shrink-0"
+                  disabled={!activeFilterCount}
+                  className="premium-interaction inline-flex items-center gap-1 text-xs font-bold text-orange-700 dark:text-orange-300 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed"
                 >
-                  <X size={12} />
-                  <span>Reset Filters</span>
+                  <X size={13} />
+                  Reset
                 </button>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -935,7 +922,7 @@ export default function Programs({ ask, onOpenCompare }) {
               We couldn't find any courses matching "{q}". Try clearing your filters or search for another faculty.
             </p>
             <button
-              onClick={() => { setQ(''); setSelectedSchoolId('all'); setSelectedDegree('All Degrees'); }}
+              onClick={handleResetFilters}
               className="mt-4 px-4 py-2 rounded-xl bg-orange-600 text-white text-xs font-bold cursor-pointer"
             >
               Reset All Filters

@@ -8,13 +8,13 @@ export default function LpuLogo({
 
   return (
     <div className={`inline-flex items-center gap-2 select-none ${className}`}>
-      {/* Real Official LPU University Logo */}
+      {/* Real Official LPU University Mascot Logo */}
       <img
-        src="/images/lpu-logo.png"
-        alt="Lovely Professional University Logo"
+        src="/images/lpu-mascot-logo.png"
+        alt="Lovely Professional University Mascot Logo"
         width={size}
         height={size}
-        className="shrink-0 object-contain drop-shadow-2xs transition-transform duration-200 group-hover:scale-105 rounded-md"
+        className="shrink-0 object-cover drop-shadow-2xs transition-transform duration-200 group-hover:scale-105 rounded-full"
         style={{
           width: `${size}px`,
           height: `${size}px`,
