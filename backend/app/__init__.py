@@ -17,8 +17,13 @@ def create_app(config_name=None, **kwargs):
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     else:
-        if os.getenv('DATABASE_URL'):
-            app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+        database_url = os.getenv('DATABASE_URL', '').strip()
+        if database_url:
+            # Providers still commonly issue the legacy postgres:// scheme;
+            # SQLAlchemy 2 expects postgresql://.
+            if database_url.startswith('postgres://'):
+                database_url = 'postgresql://' + database_url[len('postgres://'):]
+            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         elif os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
             # Vercel serverless environment: only /tmp is writable
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/lpu_helpdesk.db'
@@ -28,6 +33,7 @@ def create_app(config_name=None, **kwargs):
             db_path = os.path.join(base_dir, 'lpu_helpdesk.db')
             app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
     
     # CORS configuration - restrict to permitted origins with credentials support
     allowed_origins = [
