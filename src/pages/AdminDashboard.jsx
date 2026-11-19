@@ -31,6 +31,14 @@ export default function AdminDashboard({ go, onOpenAuth }) {
   const [logs, setLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  // Conversations state
+  const [conversations, setConversations] = useState([]);
+  const [conversationsTotal, setConversationsTotal] = useState(0);
+  const [conversationsPage, setConversationsPage] = useState(1);
+  const [conversationsSearch, setConversationsSearch] = useState('');
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+
   // NLP Evaluation state
   const [nlpData, setNlpData] = useState(null);
   const [loadingNlp, setLoadingNlp] = useState(true);
@@ -113,6 +121,31 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     }
   }, [token]);
 
+  const fetchConversations = useCallback(async () => {
+    if (!token) return;
+    setLoadingConversations(true);
+    try {
+      const res = await fetch(resolveApiUrl(`/api/admin/conversations?page=${conversationsPage}&limit=15&q=${encodeURIComponent(conversationsSearch)}`), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setConversations(data.conversations || []);
+          setConversationsTotal(data.total || 0);
+          setSelectedConversation((prev) => {
+            if (prev && data.conversations.some((c) => c.sessionId === prev.sessionId)) return prev;
+            return data.conversations[0] || null;
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching conversations:', err);
+    } finally {
+      setLoadingConversations(false);
+    }
+  }, [token, conversationsPage, conversationsSearch]);
+
   const fetchNlpEvaluation = useCallback(async () => {
     if (!token) return;
     setLoadingNlp(true);
@@ -136,9 +169,10 @@ export default function AdminDashboard({ go, onOpenAuth }) {
       fetchMetrics();
       fetchUsers();
       fetchLogs();
+      fetchConversations();
       fetchNlpEvaluation();
     }
-  }, [isAdmin, fetchMetrics, fetchUsers, fetchLogs, fetchNlpEvaluation]);
+  }, [isAdmin, fetchMetrics, fetchUsers, fetchLogs, fetchConversations, fetchNlpEvaluation]);
 
   const handleTestNlpPipeline = async (queryText) => {
     const q = (queryText !== undefined ? queryText : interactiveQuery).trim();
@@ -330,6 +364,21 @@ export default function AdminDashboard({ go, onOpenAuth }) {
           >
             <Users className="w-4 h-4" />
             <span>Registered Accounts ({usersTotal})</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('conversations');
+              fetchConversations();
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'conversations'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Live User Chats ({conversationsTotal})</span>
           </button>
 
           <button
@@ -1091,7 +1140,170 @@ export default function AdminDashboard({ go, onOpenAuth }) {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            TAB 4: SECURITY AUDIT LOGS TABLE
+            TAB 4: LIVE USER CHATS & AI TRANSCRIPTS (NO SUPABASE NEEDED!)
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'conversations' && (
+          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">
+            {/* Header Toolbar */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">
+                    Live User Chat Transcripts ({conversationsTotal})
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                    Live SQLite / SQLAlchemy Feed
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Inspect actual user questions, AI responses, and detected intents logged across web sessions. No external database or Supabase required.
+                </p>
+              </div>
+
+              <div className="relative max-w-xs w-full">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Filter by student email or session ID..."
+                  value={conversationsSearch}
+                  onChange={(e) => {
+                    setConversationsSearch(e.target.value);
+                    setConversationsPage(1);
+                  }}
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+
+            {/* Split Screen Grid: Sessions List (Left) + Transcript (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
+              {/* Left Column: Session List */}
+              <div className="lg:col-span-5 border-r border-slate-100 dark:border-slate-800 p-3 space-y-2 max-h-[600px] overflow-y-auto">
+                {loadingConversations ? (
+                  <div className="p-8 text-center text-xs text-slate-400 italic">
+                    Loading live conversation sessions...
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-400 italic">
+                    No conversation sessions logged yet.
+                  </div>
+                ) : (
+                  conversations.map((c) => {
+                    const isSelected = selectedConversation?.sessionId === c.sessionId;
+                    return (
+                      <button
+                        key={c.sessionId}
+                        onClick={() => setSelectedConversation(c)}
+                        className={`w-full text-left p-3 rounded-2xl transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-orange-50/80 dark:bg-orange-950/30 border-orange-400 dark:border-orange-600 shadow-2xs ring-1 ring-orange-500/20'
+                            : 'bg-white dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="font-bold text-slate-900 dark:text-white truncate max-w-[200px]">
+                            {c.userEmail}
+                          </span>
+                          <span className="text-[10px] text-slate-400 shrink-0">
+                            {c.lastActivity ? new Date(c.lastActivity).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 font-medium mb-1.5">
+                          "{c.lastMessage}"
+                        </p>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-400">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-bold">
+                            {c.messageCount} messages
+                          </span>
+                          <span className="truncate max-w-[120px] font-mono">
+                            ID: {c.sessionId.slice(0, 8)}...
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Right Column: Active Conversation Transcript View */}
+              <div className="lg:col-span-7 p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col justify-between max-h-[600px] overflow-y-auto">
+                {selectedConversation ? (
+                  <div className="space-y-4">
+                    {/* Transcript Header */}
+                    <div className="pb-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-slate-400 text-[11px] block">Active User Transcript:</span>
+                        <strong className="text-slate-900 dark:text-white text-sm">
+                          {selectedConversation.userEmail}
+                        </strong>
+                      </div>
+                      <span className="text-[11px] text-slate-400">
+                        Started: {selectedConversation.startedAt ? new Date(selectedConversation.startedAt).toLocaleString() : 'N/A'}
+                      </span>
+                    </div>
+
+                    {/* Messages Scroll Area */}
+                    <div className="space-y-3 pr-1">
+                      {selectedConversation.messages && selectedConversation.messages.length > 0 ? (
+                        selectedConversation.messages.map((m, idx) => {
+                          const isUser = m.role === 'user';
+                          return (
+                            <div
+                              key={m.id || idx}
+                              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                            >
+                              <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-slate-400">
+                                <span>{isUser ? 'Student' : 'AI Helpdesk'}</span>
+                                {m.intent && (
+                                  <span className="px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-slate-800 font-mono text-[9px] text-slate-600 dark:text-slate-300">
+                                    intent: {m.intent}
+                                  </span>
+                                )}
+                                {m.confidence !== null && m.confidence !== undefined && (
+                                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px]">
+                                    ({Math.round(m.confidence * 100)}% conf)
+                                  </span>
+                                )}
+                              </div>
+
+                              <div
+                                className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
+                                  isUser
+                                    ? 'bg-orange-600 text-white rounded-tr-xs shadow-xs'
+                                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-slate-200/80 dark:border-slate-800 shadow-xs'
+                                }`}
+                              >
+                                {m.content}
+                              </div>
+
+                              <span className="text-[9px] text-slate-400 mt-0.5 px-1">
+                                {m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center py-12 text-slate-400 text-xs italic">
+                          No messages recorded in this session.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-xs text-slate-400 py-16">
+                    <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
+                    <span>Select a student session from the left list to inspect the full chat transcript.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TAB 5: SECURITY AUDIT LOGS TABLE
         ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'security_logs' && (
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 animate-fade-in">

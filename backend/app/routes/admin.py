@@ -241,3 +241,58 @@ def admin_logs():
         'page': page,
         'limit': limit
     }), 200
+
+@bp.route('/admin/conversations', methods=['GET'])
+@admin_required
+def admin_conversations():
+    """Retrieve live user conversation sessions, chat transcripts, and inquiries across all users."""
+    page = int(request.args.get('page', 1))
+    limit = min(int(request.args.get('limit', 25)), 100)
+    q = (request.args.get('q') or '').strip().lower()
+
+    query = ConversationSession.query
+    if q:
+        # Search by user email or session id
+        matching_users = User.query.filter(User.email.ilike(f'%{q}%')).all()
+        user_ids = [u.id for u in matching_users]
+        query = query.filter((ConversationSession.user_id.in_(user_ids)) | (ConversationSession.id.ilike(f'%{q}%')))
+
+    total = query.count()
+    sessions = query.order_by(ConversationSession.last_activity.desc()).offset((page - 1) * limit).limit(limit).all()
+
+    results = []
+    for s in sessions:
+        user = User.query.get(s.user_id) if s.user_id else None
+        msgs = ConversationMessage.query.filter_by(session_id=s.id).order_by(ConversationMessage.timestamp.asc()).all()
+
+        results.append({
+            'sessionId': s.id,
+            'userId': s.user_id,
+            'userEmail': user.email if user else 'Anonymous Guest Student',
+            'userName': user.name if user else 'Guest Student',
+            'startedAt': s.started_at.isoformat() if s.started_at else None,
+            'lastActivity': s.last_activity.isoformat() if s.last_activity else None,
+            'messageCount': len(msgs),
+            'lastMessage': msgs[-1].content[:120] if msgs else 'No messages exchanged',
+            'messages': [
+                {
+                    'id': m.id,
+                    'role': m.role,
+                    'content': m.content,
+                    'timestamp': m.timestamp.isoformat() if m.timestamp else None,
+                    'intent': m.detected_intent,
+                    'confidence': m.confidence,
+                    'answerStatus': m.answer_status
+                }
+                for m in msgs
+            ]
+        })
+
+    return jsonify({
+        'success': True,
+        'conversations': results,
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'totalPages': (total + limit - 1) // limit if limit > 0 else 1
+    }), 200

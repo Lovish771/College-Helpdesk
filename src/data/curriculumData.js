@@ -591,6 +591,245 @@ export const AUTHENTIC_CURRICULUM = {
       { code: 'BP899P', name: 'Project Work, Technical Dissertation & Viva-Voce', credits: 6, type: 'Project', term: 'Spring' },
     ],
   },
+
+  // ─────────────────────────────────────────────────────────
+  // 10. B.TECH CSE - DATA SCIENCE (8 Semesters)
+  // ─────────────────────────────────────────────────────────
+  'btech-ds': {
+    '1': [
+      { code: 'CSE101', name: 'Computer Programming & Algorithmic Thinking', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'CSE111', name: 'Computer Programming Lab', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'MTH165', name: 'Linear Algebra & Calculus for Data Science', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'PHY110', name: 'Engineering Physics (Semiconductor & Optics)', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'PHY119', name: 'Physics Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'ECE131', name: 'Digital Logic & Circuit Theory', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'MEC107', name: 'Engineering Graphics & Digital Prototyping', credits: 2, type: 'Lab', term: 'Autumn' },
+      { code: 'PEL121', name: 'Technical Communication & Professional Etiquette', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '2': [
+      { code: 'CSE205', name: 'Data Structures and Algorithms', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'CSE211', name: 'Data Structures Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'CSE202', name: 'Object Oriented Programming using C++', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'CSE209', name: 'OOP Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'MTH240', name: 'Probability, Random Variables & Applied Statistics', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'INT219', name: 'Python Programming for Data Science', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'INT220', name: 'Python Data Science Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'PEL131', name: 'Technical Presentation & Research Writing', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '3': [
+      { code: 'CSE306', name: 'Design and Analysis of Algorithms', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'CSE307', name: 'Algorithms Optimization Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'INT246', name: 'Foundations of Machine Learning', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'INT247', name: 'Machine Learning Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'CSE325', name: 'Database Management Systems & Vector Stores', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'CSE326', name: 'DBMS & SQL Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'CSE316', name: 'Operating Systems Principles & Concurrency', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'INT306', name: 'Data Warehousing & Dimensional Modeling', credits: 3, type: 'Elective', term: 'Autumn' },
+      { code: 'PEA305', name: 'Quantitative & Analytical Aptitude - I', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '4': [
+      { code: 'INT354', name: 'Big Data Engineering & Distributed Systems', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'INT355', name: 'Big Data Laboratory (Hadoop & PySpark)', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'INT404', name: 'Deep Learning & Neural Network Architectures', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'INT405', name: 'Deep Learning PyTorch Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'CSE310', name: 'Computer Communication Networks', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'CSE320', name: 'Software Engineering & Agile Methodologies', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'INT356', name: 'Statistical Modeling & Data Visualization with R', credits: 3, type: 'Elective', term: 'Spring' },
+      { code: 'PEA306', name: 'Quantitative & Analytical Aptitude - II', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '5': [
+      { code: 'INT411', name: 'Cloud Data Architecture & Lakehouses (AWS/Snowflake)', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'INT412', name: 'Cloud Data Lab', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'INT428', name: 'Natural Language Processing & Transformers', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'INT429', name: 'NLP & Large Language Model Lab', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'CSE423', name: 'Data Privacy, Governance & Cyber Security', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'INT432', name: 'Business Intelligence & Dashboarding (PowerBI)', credits: 3, type: 'Elective', term: 'Autumn' },
+      { code: 'PEV401', name: 'Corporate Verbal Ability & Placement Readiness', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '6': [
+      { code: 'INT501', name: 'Computer Vision & Convolutional Architectures', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'INT502', name: 'Computer Vision & OpenCV Lab', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'INT440', name: 'Time Series Analytics & Financial Forecasting', credits: 3, type: 'Elective', term: 'Spring' },
+      { code: 'INT512', name: 'Streaming Analytics with Apache Kafka & Spark', credits: 3, type: 'Elective', term: 'Spring' },
+      { code: 'CSE498', name: 'Data Science Capstone Project - Phase I', credits: 4, type: 'Project', term: 'Spring' },
+      { code: 'PEV402', name: 'Technical Interview Mastery & Mock Coding', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '7': [
+      { code: 'INT701', name: 'Generative AI, Agentic Workflows & RAG Pipelines', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'INT702', name: 'GenAI & LangChain Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'INT710', name: 'MLOps, CI/CD for Models & Production Deployment', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'CSE501', name: 'Research Methodology, Patents & Technical Writing', credits: 2, type: 'Core', term: 'Autumn' },
+      { code: 'CSE499', name: 'Data Science Capstone Project - Phase II', credits: 8, type: 'Project', term: 'Autumn' },
+    ],
+    '8': [
+      { code: 'INT801', name: 'Full-Semester Corporate Data Science Industry Internship', credits: 12, type: 'Project', term: 'Spring' },
+      { code: 'INT802', name: 'Comprehensive Technical Dissertation & External Viva', credits: 4, type: 'Project', term: 'Spring' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // 11. B.TECH CSE - CYBER SECURITY (8 Semesters)
+  // ─────────────────────────────────────────────────────────
+  'btech-cyber': {
+    '1': [
+      { code: 'CSE101', name: 'Computer Programming & Problem Solving', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'CSE111', name: 'Computer Programming Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'MTH165', name: 'Calculus & Discrete Mathematics for Cryptography', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'PHY110', name: 'Engineering Physics & Electromagnetics', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'PHY119', name: 'Physics Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'ECE131', name: 'Digital Logic & Circuit Theory', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'MEC107', name: 'Engineering Graphics & Digital Prototyping', credits: 2, type: 'Lab', term: 'Autumn' },
+      { code: 'PEL121', name: 'Technical Communication & Corporate Etiquette', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '2': [
+      { code: 'CSE205', name: 'Data Structures and Algorithms', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'CSE211', name: 'Data Structures Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'CSE202', name: 'Object Oriented Programming using C++', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'CSE209', name: 'OOP Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'CSE310', name: 'Computer Networks & TCP/IP Protocols', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'CSE311', name: 'Computer Networks & Packet Capture Lab (Wireshark)', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'MTH166', name: 'Differential Equations & Linear Algebra', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'PEL131', name: 'Technical Presentation Skills', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '3': [
+      { code: 'CSE306', name: 'Design and Analysis of Algorithms', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'CSE316', name: 'Operating Systems & Linux Kernel Architecture', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'CSE317', name: 'Operating Systems Laboratory', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'SEC201', name: 'Principles of Information Security & Cyber Defense', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'SEC202', name: 'Linux System Administration & Shell Scripting', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'CSE325', name: 'Database Management Systems & Secure SQL', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'PEA305', name: 'Analytical & Quantitative Aptitude - I', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '4': [
+      { code: 'SEC301', name: 'Applied Cryptography & Public Key Infrastructure', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'SEC311', name: 'Cryptography & Encryption Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'SEC302', name: 'Ethical Hacking & Network Penetration Testing', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'SEC312', name: 'Penetration Testing Laboratory (Kali Linux/Metasploit)', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'CSE320', name: 'Secure Software Engineering & Code Auditing', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'INT246', name: 'Python for Cyber Automation & Threat Intelligence', credits: 3, type: 'Elective', term: 'Spring' },
+      { code: 'PEA306', name: 'Analytical & Quantitative Aptitude - II', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '5': [
+      { code: 'SEC401', name: 'Malware Analysis, Disassembly & Reverse Engineering', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'SEC411', name: 'Reverse Engineering Lab (Ghidra/IDA Pro)', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'SEC402', name: 'Digital Forensics & Incident Response (DFIR)', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'SEC412', name: 'Digital Forensics Lab (Autopsy & FTK Imager)', credits: 1, type: 'Lab', term: 'Autumn' },
+      { code: 'CSE411', name: 'Cloud Security Architecture (AWS/Azure IAM & KMS)', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'SEC403', name: 'Cyber Law, IT Act 2000 & International Compliance (ISO 27001)', credits: 3, type: 'Elective', term: 'Autumn' },
+      { code: 'PEV401', name: 'Corporate Verbal & Soft Skills', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '6': [
+      { code: 'SEC405', name: 'Web Application Security, Burp Suite & OWASP Top 10', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'SEC415', name: 'Web Security Testing Laboratory', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'SEC406', name: 'Security Operations Center (SOC), SIEM & Splunk Analytics', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'SEC416', name: 'SOC Monitoring & SIEM Lab', credits: 1, type: 'Lab', term: 'Spring' },
+      { code: 'SEC498', name: 'Cyber Security Capstone Project - Phase I', credits: 4, type: 'Project', term: 'Spring' },
+      { code: 'PEV402', name: 'Technical Mock Interviews & Placement Readiness', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '7': [
+      { code: 'SEC501', name: 'IoT Security, SCADA & Industrial Control Systems', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'SEC502', name: 'Blockchain Security & Smart Contract Vulnerability Auditing', credits: 3, type: 'Elective', term: 'Autumn' },
+      { code: 'CSE501', name: 'Research Methodology, Patent Law & Cyber Ethics', credits: 2, type: 'Core', term: 'Autumn' },
+      { code: 'SEC499', name: 'Cyber Security Capstone Project - Phase II', credits: 8, type: 'Project', term: 'Autumn' },
+    ],
+    '8': [
+      { code: 'SEC801', name: 'Full-Semester Corporate Cyber Security Industry Internship', credits: 12, type: 'Project', term: 'Spring' },
+      { code: 'SEC802', name: 'Comprehensive Technical Dissertation & Security Defense', credits: 4, type: 'Project', term: 'Spring' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // 12. BACHELOR OF EDUCATION (B.ED - 4 Semesters NCTE)
+  // ─────────────────────────────────────────────────────────
+  'bed': {
+    '1': [
+      { code: 'EDN101', name: 'Childhood and Growing Up (Developmental Psychology)', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'EDN102', name: 'Contemporary India and Education (Philosophical Foundations)', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'EDN103', name: 'Language Across the Curriculum', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'EDN104', name: 'Understanding Disciplines and School Subjects', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'EDN111', name: 'Reading and Reflecting on Educational Texts (EPC-1)', credits: 2, type: 'Lab', term: 'Autumn' },
+      { code: 'EDN112', name: 'Drama and Art in Education (EPC-2)', credits: 2, type: 'Lab', term: 'Autumn' },
+      { code: 'EDN113', name: 'School Immersion & Field Observation - I', credits: 2, type: 'Project', term: 'Autumn' },
+    ],
+    '2': [
+      { code: 'EDN201', name: 'Learning and Teaching (Theories & Pedagogy)', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN202', name: 'Knowledge and Curriculum - Part I', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN203', name: 'Pedagogy of School Subject - I (Maths / Science / Social / English)', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN204', name: 'Pedagogy of School Subject - II (Specialization Subject)', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN205', name: 'Assessment for Learning (Formative & Summative Evaluation)', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN211', name: 'Critical Understanding of ICT in Education (EPC-3)', credits: 2, type: 'Lab', term: 'Spring' },
+      { code: 'EDN212', name: 'Micro-Teaching & Simulated Classroom Practice', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '3': [
+      { code: 'EDN301', name: 'School Internship & Classroom Teaching Practice (16 Weeks On-Site)', credits: 16, type: 'Project', term: 'Autumn' },
+      { code: 'EDN302', name: 'Reflective Journal & Action Research Project in School', credits: 4, type: 'Project', term: 'Autumn' },
+      { code: 'EDN303', name: 'Development of Teaching-Learning Material (TLM) & Audio-Visual Media', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '4': [
+      { code: 'EDN401', name: 'Gender, School and Society', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN402', name: 'Creating an Inclusive School (Special Education Needs)', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'EDN403', name: 'Health, Physical and Yoga Education', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'EDN404', name: 'Guidance, Counseling & Mental Wellbeing in Schools', credits: 3, type: 'Elective', term: 'Spring' },
+      { code: 'EDN411', name: 'Understanding the Self & Psychological Testing (EPC-4)', credits: 2, type: 'Skill', term: 'Spring' },
+      { code: 'EDN499', name: 'Comprehensive Teaching Portfolio Assessment & Final Board Viva', credits: 4, type: 'Project', term: 'Spring' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // 13. BACHELOR OF DESIGN (B.DES - 8 Semesters)
+  // ─────────────────────────────────────────────────────────
+  'b-des': {
+    '1': [
+      { code: 'DES101', name: 'Elements and Principles of 2D/3D Design', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'DES102', name: 'Freehand Drawing & Visual Observation', credits: 3, type: 'Lab', term: 'Autumn' },
+      { code: 'DES103', name: 'Color Theory, Pigments & Perception', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'DES104', name: 'Geometry & Isometric Perspective', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'DES111', name: 'Materials & Model Making Workshop - I (Paper/Board/Foam)', credits: 3, type: 'Lab', term: 'Autumn' },
+      { code: 'PEL121', name: 'Design Communication & Visual Narratives', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '2': [
+      { code: 'DES201', name: 'Design Thinking & Creative Problem Solving Frameworks', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'DES202', name: 'Digital Vector & Raster Art (Illustrator & Photoshop)', credits: 4, type: 'Lab', term: 'Spring' },
+      { code: 'DES203', name: 'Typography, Lettering & Visual Hierarchy', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'DES204', name: 'History of Art, Design Movements & Bauhaus', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'DES211', name: 'Materials Workshop - II (Wood, Clay & Acrylic)', credits: 3, type: 'Lab', term: 'Spring' },
+    ],
+    '3': [
+      { code: 'DES301', name: 'User-Centered Design (UCD) & Empathy Research', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'DES302', name: 'Interaction Design & Wireframing in Figma', credits: 4, type: 'Lab', term: 'Autumn' },
+      { code: 'DES303', name: 'Digital 3D CAD Modeling (Rhino & Blender)', credits: 4, type: 'Lab', term: 'Autumn' },
+      { code: 'DES304', name: 'Information Architecture & Micro-copy', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'DES311', name: 'Usability Testing & User Observation Lab', credits: 2, type: 'Lab', term: 'Autumn' },
+    ],
+    '4': [
+      { code: 'DES401', name: 'UI/UX Design for Mobile Applications & Design Systems', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'DES402', name: 'Design Systems, Tokens & Component Libraries', credits: 4, type: 'Core', term: 'Spring' },
+      { code: 'DES403', name: 'Ergonomics & Human Factors Engineering', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'DES404', name: 'Motion Design & Micro-interactions in After Effects', credits: 3, type: 'Lab', term: 'Spring' },
+      { code: 'DES498', name: 'Minor Design Studio Project', credits: 3, type: 'Project', term: 'Spring' },
+    ],
+    '5': [
+      { code: 'DES501', name: 'Service Design & Omnichannel Customer Journeys', credits: 4, type: 'Core', term: 'Autumn' },
+      { code: 'DES502', name: 'Advanced Design Research & Qualitative Analysis', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'DES503', name: 'AR/VR & Immersive Experience Prototyping', credits: 4, type: 'Elective', term: 'Autumn' },
+      { code: 'DES504', name: 'Design for Accessibility & Inclusive Design (WCAG 2.2)', credits: 3, type: 'Core', term: 'Autumn' },
+      { code: 'PEV401', name: 'Portfolio Pitching & Client Critique', credits: 2, type: 'Skill', term: 'Autumn' },
+    ],
+    '6': [
+      { code: 'DES601', name: 'Design Management, IP Rights & Client Contracts', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'DES602', name: 'Sustainable & Circular Product Design', credits: 3, type: 'Core', term: 'Spring' },
+      { code: 'DES698', name: 'Graduation Capstone Project - Phase I (Problem Space & Concept)', credits: 6, type: 'Project', term: 'Spring' },
+      { code: 'PEV402', name: 'Executive Design Interview & Portfolio Review', credits: 2, type: 'Skill', term: 'Spring' },
+    ],
+    '7': [
+      { code: 'DES701', name: 'Full-Semester Industry Design Studio Internship', credits: 14, type: 'Project', term: 'Autumn' },
+      { code: 'DES702', name: 'Professional Internship Portfolio Defense', credits: 4, type: 'Project', term: 'Autumn' },
+    ],
+    '8': [
+      { code: 'DES801', name: 'Graduation Capstone Project - Phase II (Final High-Fidelity Prototype)', credits: 12, type: 'Project', term: 'Spring' },
+      { code: 'DES802', name: 'Degree Exhibition Jury & External Industry Viva', credits: 4, type: 'Project', term: 'Spring' },
+    ],
+  },
 };
 
 /**
@@ -664,13 +903,137 @@ export function getProgramCurriculum(programId, semesterNumber, allPrograms = []
       ];
     }
 
-    // Mid-level semesters (3, 4, 5, 6)
+    if (programId.includes('me') || p.name?.toLowerCase().includes('mechanical')) {
+      if (semNum === 3) {
+        return [
+          { code: 'MEC301', name: 'Engineering Thermodynamics', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC311', name: 'Applied Thermodynamics Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'MEC302', name: 'Fluid Mechanics & Hydraulic Machinery', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC303', name: 'Kinematics of Machines', credits: 3, type: 'Core', term: termName },
+          { code: 'MEC304', name: 'Manufacturing Technology & Workshop Processes', credits: 3, type: 'Core', term: termName },
+          { code: 'PEA305', name: 'Analytical Aptitude & Reasoning - I', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 4) {
+        return [
+          { code: 'MEC401', name: 'Heat & Mass Transfer', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC411', name: 'Heat Transfer Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'MEC402', name: 'Dynamics of Machinery & Vibrations', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC403', name: 'Design of Machine Elements', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC404', name: 'Computer Aided Design (CAD/SolidWorks)', credits: 3, type: 'Lab', term: termName },
+          { code: 'PEA306', name: 'Analytical Aptitude & Reasoning - II', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 5) {
+        return [
+          { code: 'MEC501', name: 'Internal Combustion Engines & Gas Turbines', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC502', name: 'Automobile Engineering & Powertrain Systems', credits: 3, type: 'Core', term: termName },
+          { code: 'MEC503', name: 'Refrigeration & Air Conditioning (HVAC)', credits: 3, type: 'Core', term: termName },
+          { code: 'MEC504', name: 'Operations Research & Production Management', credits: 3, type: 'Elective', term: termName },
+          { code: 'PEV401', name: 'Corporate Communication & Soft Skills', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 6) {
+        return [
+          { code: 'MEC601', name: 'Mechatronics & Industrial Robotics', credits: 4, type: 'Core', term: termName },
+          { code: 'MEC611', name: 'Robotics & Automation Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'MEC602', name: 'Power Plant Engineering & Renewable Energy', credits: 3, type: 'Core', term: termName },
+          { code: 'MEC498', name: 'Mechanical Capstone Project - Phase I', credits: 4, type: 'Project', term: termName },
+          { code: 'PEV402', name: 'Placement Technical Interview Preparation', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+    }
+
+    if (programId.includes('civil') || p.name?.toLowerCase().includes('civil')) {
+      if (semNum === 3) {
+        return [
+          { code: 'CIV301', name: 'Strength of Materials & Solid Mechanics', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV311', name: 'Materials Testing Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'CIV302', name: 'Fluid Mechanics & Open Channel Hydraulics', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV303', name: 'Surveying & Geomatics Engineering', credits: 3, type: 'Core', term: termName },
+          { code: 'CIV313', name: 'Surveying Field Camp Practicum', credits: 2, type: 'Lab', term: termName },
+          { code: 'PEA305', name: 'Analytical Aptitude - I', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 4) {
+        return [
+          { code: 'CIV401', name: 'Structural Analysis & Trusses', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV402', name: 'Concrete Technology & Mix Design', credits: 3, type: 'Core', term: termName },
+          { code: 'CIV412', name: 'Concrete Quality Testing Lab', credits: 1, type: 'Lab', term: termName },
+          { code: 'CIV403', name: 'Geotechnical Engineering & Soil Mechanics', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV404', name: 'Building Planning & Civil Drafting (AutoCAD)', credits: 3, type: 'Lab', term: termName },
+          { code: 'PEA306', name: 'Analytical Aptitude - II', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 5) {
+        return [
+          { code: 'CIV501', name: 'Design of Reinforced Concrete Structures (RCC)', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV502', name: 'Transportation Engineering & Highway Design', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV503', name: 'Water Resources Engineering & Hydrology', credits: 3, type: 'Core', term: termName },
+          { code: 'CIV504', name: 'Environmental Engineering & Wastewater Treatment', credits: 3, type: 'Elective', term: termName },
+          { code: 'PEV401', name: 'Corporate Verbal & Technical Communication', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 6) {
+        return [
+          { code: 'CIV601', name: 'Design of Steel Structures & Connections', credits: 4, type: 'Core', term: termName },
+          { code: 'CIV602', name: 'Foundation Engineering & Earth Retaining Walls', credits: 3, type: 'Core', term: termName },
+          { code: 'CIV603', name: 'Construction Management, Estimating & Costing', credits: 3, type: 'Core', term: termName },
+          { code: 'CIV498', name: 'Civil Engineering Capstone Project - Phase I', credits: 4, type: 'Project', term: termName },
+          { code: 'PEV402', name: 'Corporate Placement Technical Readiness', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+    }
+
+    if (programId.includes('ece') || p.name?.toLowerCase().includes('electronics')) {
+      if (semNum === 3) {
+        return [
+          { code: 'ECE301', name: 'Signals and Systems', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE302', name: 'Electronic Devices & Analog Circuits', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE312', name: 'Analog Circuits Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE303', name: 'Electromagnetic Field Theory & Wave Propagation', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE304', name: 'Data Structures & Object Oriented Programming', credits: 3, type: 'Core', term: termName },
+          { code: 'PEA305', name: 'Analytical Aptitude & Problem Solving', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 4) {
+        return [
+          { code: 'ECE401', name: 'Analog and Digital Communication Systems', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE411', name: 'Communication Systems Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE402', name: 'Microprocessors and Microcontrollers (8051 / ARM)', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE412', name: 'Microcontrollers Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE403', name: 'Control Systems Engineering', credits: 4, type: 'Core', term: termName },
+          { code: 'PEA306', name: 'Quantitative Aptitude & Logical Reasoning', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 5) {
+        return [
+          { code: 'ECE501', name: 'Digital Signal Processing (DSP)', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE511', name: 'DSP & MATLAB Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE502', name: 'VLSI Design & Verilog HDL Programming', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE512', name: 'VLSI Simulation Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE503', name: 'Linear Integrated Circuits & Op-Amps', credits: 3, type: 'Core', term: termName },
+          { code: 'PEV401', name: 'Corporate Verbal & Interview Etiquette', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+      if (semNum === 6) {
+        return [
+          { code: 'ECE601', name: 'Microwave Engineering, Antennas & Radar', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE611', name: 'Microwave & Antenna Laboratory', credits: 1, type: 'Lab', term: termName },
+          { code: 'ECE602', name: 'Embedded Systems & Internet of Things (IoT)', credits: 4, type: 'Core', term: termName },
+          { code: 'ECE498', name: 'ECE Capstone Project - Phase I', credits: 4, type: 'Project', term: termName },
+          { code: 'PEV402', name: 'Core Electronics Placement Preparation', credits: 2, type: 'Skill', term: termName },
+        ];
+      }
+    }
+
+    // Default authentic engineering courses for mid-level semesters
     return [
-      { code: `${branchPrefix}${semNum}01`, name: `Core ${branchName} Systems Theory - Sem ${semNum}`, credits: 4, type: 'Core', term: termName },
-      { code: `${branchPrefix}${semNum}11`, name: `${branchName} Practical Systems Lab`, credits: 1, type: 'Lab', term: termName },
-      { code: `${branchPrefix}${semNum}02`, name: `Applied Numerical Methods & Simulation`, credits: 4, type: 'Core', term: termName },
-      { code: `${branchPrefix}${semNum}03`, name: `Industrial Automation & Embedded Controls`, credits: 3, type: 'Core', term: termName },
-      { code: `${branchPrefix}${semNum}04`, name: 'Professional Domain Elective', credits: 3, type: 'Elective', term: termName },
+      { code: `${branchPrefix}${semNum}01`, name: `Advanced ${branchName} Principles - Module ${semNum}`, credits: 4, type: 'Core', term: termName },
+      { code: `${branchPrefix}${semNum}11`, name: `${branchName} Practical Laboratory`, credits: 1, type: 'Lab', term: termName },
+      { code: `${branchPrefix}${semNum}02`, name: `Applied Numerical Analysis & Simulation`, credits: 4, type: 'Core', term: termName },
+      { code: `${branchPrefix}${semNum}03`, name: `Instrumentation & Control Engineering`, credits: 3, type: 'Core', term: termName },
+      { code: `${branchPrefix}${semNum}04`, name: 'Discipline Professional Elective', credits: 3, type: 'Elective', term: termName },
       { code: `PEA30${semNum % 2 + 5}`, name: 'Analytical Aptitude & Reasoning', credits: 2, type: 'Skill', term: termName },
     ];
   }

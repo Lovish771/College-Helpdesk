@@ -20,7 +20,7 @@ const ICONS = {
 export default function KnowledgeBase({ ask }) {
   const [q, setQ] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [expandedId, setExpandedId] = useState(1); // Default first FAQ open
+  const [expandedId, setExpandedId] = useState(null); // Click-only: default all closed for clean UI
 
   const filteredArticles = mockArticles.filter((a) => {
     const matchQ =
@@ -152,94 +152,85 @@ export default function KnowledgeBase({ ask }) {
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {filteredArticles.map((art) => {
                 const isOpen = expandedId === art.id;
                 return (
                   <div
                     key={art.id}
-                    className={`rounded-2xl transition-all duration-200 border overflow-hidden ${
+                    className={`rounded-xl sm:rounded-2xl transition-all duration-200 border overflow-hidden ${
                       isOpen
-                        ? 'bg-white dark:bg-slate-900 border-orange-400 dark:border-orange-600 shadow-md ring-1 ring-orange-500/20'
-                        : 'bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
+                        ? 'bg-white dark:bg-slate-900 border-orange-500/70 dark:border-orange-500/60 shadow-sm ring-1 ring-orange-500/20'
+                        : 'bg-white dark:bg-slate-900 border-slate-200/75 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs'
                     }`}
                   >
-                    {/* Accordion Question Header */}
+                    {/* Accordion Question Header - Click Only */}
                     <button
                       type="button"
                       onClick={() => toggleAccordion(art.id)}
-                      className="w-full flex items-center justify-between p-4 sm:p-5 text-left cursor-pointer group"
+                      className="w-full flex items-center justify-between p-3 sm:px-4 sm:py-3 text-left cursor-pointer group select-none"
                       aria-expanded={isOpen}
                     >
-                      <div className="flex items-center gap-3.5 pr-4">
+                      <div className="flex items-center gap-3 pr-2">
                         <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-colors ${
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
                             isOpen
                               ? 'bg-orange-600 text-white shadow-xs'
                               : 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 group-hover:bg-orange-100'
                           }`}
                         >
-                          <HelpCircle size={15} />
+                          <HelpCircle size={14} />
                         </span>
-                        <div>
-                          <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors leading-snug">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5">
+                          <span className="text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors leading-snug">
                             {art.title}
                           </span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                              {art.tag}
-                            </span>
-                            <span className="text-[11px] text-slate-400 font-medium">
-                              {art.reads} students found this helpful
-                            </span>
-                          </div>
+                          <span className="self-start text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                            {art.tag}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="shrink-0 text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                        {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      <div className="shrink-0 text-slate-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors pl-2">
+                        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </button>
 
-                    {/* Accordion In-Place Answer Content */}
+                    {/* Accordion In-Place Answer Content - Clean, Compact & Click-Only */}
                     {isOpen && (
-                      <div className="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in">
-                        {/* Direct Structured Answer */}
-                        <div className="mt-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed space-y-2 whitespace-pre-line font-medium bg-slate-50/70 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                      <div className="px-4 pb-3.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-2.5">
+                        {/* Direct Crisp Answer */}
+                        <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                           {art.answer}
-                        </div>
+                        </p>
 
-                        {/* Key Highlights Bullet Points */}
+                        {/* Inline Key Highlights */}
                         {art.highlights && art.highlights.length > 0 && (
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                              Key Highlights:
-                            </span>
+                          <div className="flex flex-wrap items-center gap-1.5 pt-1">
                             {art.highlights.map((h, i) => (
                               <span
                                 key={i}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/50"
                               >
-                                <CheckCircle2 size={12} className="text-emerald-500" />
+                                <CheckCircle2 size={10} className="text-emerald-500" />
                                 <span>{h}</span>
                               </span>
                             ))}
                           </div>
                         )}
 
-                        {/* Optional Inline AI Follow-up */}
-                        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-                          <span className="text-slate-400 text-[11px]">
-                            Verified by Lovely Professional University Academic Administration.
+                        {/* Minimal Footer */}
+                        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
+                          <span className="text-slate-400 text-[10px]">
+                            Verified by LPU Academic Administration
                           </span>
-
                           <button
                             type="button"
                             onClick={() => ask && ask(`Regarding: "${art.title}" — can you give me more specific guidelines and deadlines?`)}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 transition-colors cursor-pointer"
                           >
-                            <HelpCircle size={13} />
-                            <span>Ask AI for Personalized Details</span>
+                            <HelpCircle size={11} />
+                            <span>Ask AI for details</span>
                           </button>
                         </div>
                       </div>

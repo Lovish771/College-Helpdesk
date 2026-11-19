@@ -49,13 +49,13 @@ export default function ProgramCard({
       }}
       className={`group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl p-5 sm:p-5.5 transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden
         bg-white dark:bg-[#0c1322]
-        border transition-all
+        border transition-all duration-300
         ${
           isSelected
-            ? 'border-orange-500 ring-2 ring-orange-500/80 shadow-lg shadow-orange-500/10'
+            ? 'border-orange-500 ring-2 ring-orange-500/80 shadow-[0_18px_36px_-6px_rgba(234,88,12,0.22)] -translate-y-1.5'
             : isFeatured
-            ? 'border-slate-300/90 dark:border-slate-700/90 ring-1 ring-slate-300/60 dark:ring-slate-700/60 shadow-xl shadow-slate-900/8 dark:shadow-black/40'
-            : 'border-slate-200/85 dark:border-slate-800/85 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:-translate-y-1'
+            ? 'border-orange-500/60 dark:border-orange-500/60 ring-1 ring-orange-500/30 shadow-[0_18px_36px_-6px_rgba(234,88,12,0.16)] dark:shadow-[0_18px_36px_-6px_rgba(234,88,12,0.24)] -translate-y-1'
+            : 'border-slate-200/50 dark:border-slate-800/50 shadow-xs hover:border-orange-500/70 dark:hover:border-orange-400/60 hover:shadow-[0_20px_38px_-8px_rgba(234,88,12,0.18)] dark:hover:shadow-[0_20px_38px_-8px_rgba(234,88,12,0.28)] hover:-translate-y-2'
         }
       `}
       style={{
