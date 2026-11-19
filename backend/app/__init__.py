@@ -58,9 +58,27 @@ def create_app(config_name=None, **kwargs):
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     else:
         database_url = os.getenv('DATABASE_URL', '').strip()
+        driver_valid = False
         if database_url:
             if database_url.startswith('postgres://'):
                 database_url = 'postgresql://' + database_url[len('postgres://'):]
+            
+            if database_url.startswith('postgresql'):
+                try:
+                    import psycopg2
+                    driver_valid = True
+                except ImportError:
+                    try:
+                        import pg8000
+                        database_url = 'postgresql+pg8000://' + database_url.split('://', 1)[1]
+                        driver_valid = True
+                    except ImportError:
+                        logger.warning("PostgreSQL DATABASE_URL provided but neither psycopg2 nor pg8000 driver is available. Falling back to SQLite.")
+                        driver_valid = False
+            else:
+                driver_valid = True
+
+        if driver_valid:
             app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         elif os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
             app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
@@ -128,8 +146,17 @@ def create_app(config_name=None, **kwargs):
             'timestamp': datetime.now(timezone.utc).isoformat()
         }, 500
 
-    # Initialize extensions
-    db.init_app(app)
+    # Initialize extensions with safe fallback
+    try:
+        db.init_app(app)
+    except Exception as exc:
+        logger.warning("Primary database init failed (%s). Falling back to SQLite: %s", exc, sqlite_fallback_uri)
+        app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
+        try:
+            app.extensions.pop('sqlalchemy', None)
+        except Exception:
+            pass
+        db.init_app(app)
     
     # Register blueprints
     from app.routes import chat, programs, curriculum, knowledge, feedback, admin, analytics, auth
