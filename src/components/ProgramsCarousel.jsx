@@ -388,16 +388,17 @@ export default function ProgramsCarousel({
                     : 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 320ms cubic-bezier(0.16, 1, 0.3, 1)',
                   willChange: 'transform, opacity',
                 }}
-                className={`shrink-0 transition-transform cursor-pointer relative ${
-                  isCentered ? 'filter drop-shadow-[0_15px_35px_rgba(249,115,22,0.28)]' : ''
-                }`}
+                className="shrink-0 transition-transform cursor-pointer relative"
                 aria-hidden={!isVisible}
               >
                 {isVisible && (
                   <div className="relative">
-                    {/* Glowing Orange Outline for Center Active Card */}
+                    {/* Atmospheric diffuse ambient glow for center card */}
                     {isCentered && (
-                      <div className={`absolute -inset-1 rounded-[28px] bg-gradient-to-r ${getDegreeTheme(getMainDegree(item.program)).gradient} opacity-80 blur-xs pointer-events-none -z-10`} />
+                      <div
+                        aria-hidden="true"
+                        className={`absolute -inset-2.5 rounded-3xl bg-gradient-to-r ${getDegreeTheme(getMainDegree(item.program)).gradient} opacity-20 blur-xl pointer-events-none -z-10 transition-opacity duration-300`}
+                      />
                     )}
 
                     <ProgramCard
@@ -406,6 +407,7 @@ export default function ProgramsCarousel({
                       onAsk={onAsk}
                       onCompare={onCompare}
                       isSelected={compareQueue.includes(item.program.id)}
+                      isFeatured={isCentered}
                     />
                   </div>
                 )}

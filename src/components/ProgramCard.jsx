@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ArrowRight, Wallet, GraduationCap, Scale } from 'lucide-react';
+import { Clock, ArrowRight, GraduationCap, Scale } from 'lucide-react';
 import { fees } from '../data/mockData';
 import { cleanProgramTitle, getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
 
@@ -13,7 +13,7 @@ const formatDuration = (d) => {
 };
 
 /**
- * Extract clean tuition fee string e.g. "₹2,00,000 / sem"
+ * Extract clean tuition fee string e.g. "₹1,60,000 / sem"
  */
 const getFormattedFee = (p) => {
   const f = fees[p.id];
@@ -21,7 +21,7 @@ const getFormattedFee = (p) => {
     const match = f.tuition.match(/₹[\d,]+/);
     if (match) return `${match[0]} / sem`;
   }
-  return '₹2,00,000 / sem';
+  return '₹1,60,000 / sem';
 };
 
 export default function ProgramCard({
@@ -30,12 +30,16 @@ export default function ProgramCard({
   onAsk,
   onCompare,
   isSelected = false,
+  isFeatured = false,
   onSelect
 }) {
   const formattedFee = getFormattedFee(p);
   const mainDegree = getMainDegree(p);
   const theme = getDegreeTheme(mainDegree);
   const title = cleanProgramTitle(p.name, mainDegree);
+  const feeParts = formattedFee.split(' / ');
+  const feeAmount = feeParts[0] || formattedFee;
+  const feePeriod = feeParts[1] ? ` / ${feeParts[1]}` : ' / sem';
 
   return (
     <div
@@ -43,18 +47,17 @@ export default function ProgramCard({
         if (onSelect) onSelect(p);
         else if (onView) onView(p);
       }}
-      className={`group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out cursor-pointer border select-none overflow-hidden
-        bg-white dark:bg-[#0D131F]
-        border-slate-200/90 dark:border-slate-800/90
-        shadow-[0_4px_20px_-10px_rgba(15,23,42,0.15)] dark:shadow-[0_8px_30px_-16px_rgba(0,0,0,0.65)]
-        hover:-translate-y-1.5 hover:shadow-xl
-        ${theme.glowBorder}
-        ${theme.glowShadow}
+      className={`group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl p-5 sm:p-5.5 transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden
+        bg-white dark:bg-[#0c1322]
+        border transition-all
         ${
           isSelected
-            ? `ring-2 ${theme.ringColor} border-transparent shadow-md scale-[1.01]`
-            : ''
-        }`}
+            ? 'border-orange-500 ring-2 ring-orange-500/80 shadow-lg shadow-orange-500/10'
+            : isFeatured
+            ? 'border-slate-300/90 dark:border-slate-700/90 ring-1 ring-slate-300/60 dark:ring-slate-700/60 shadow-xl shadow-slate-900/8 dark:shadow-black/40'
+            : 'border-slate-200/85 dark:border-slate-800/85 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xl hover:-translate-y-1'
+        }
+      `}
       style={{
         transformStyle: 'preserve-3d',
       }}
@@ -68,14 +71,23 @@ export default function ProgramCard({
         }
       }}
     >
-      {/* Subtle Ambient Color Glow Top Edge */}
-      <div aria-hidden="true" className={`absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${theme.gradient} opacity-[0.08] blur-xl transition-all duration-500 group-hover:opacity-[0.14]`} />
+      {/* Top subtle light reflection */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-300/60 dark:via-white/10 to-transparent pointer-events-none"
+      />
+
+      {/* Subtle Ambient Color Glow in corner */}
+      <div
+        aria-hidden="true"
+        className={`absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gradient-to-br ${theme.gradient} opacity-[0.06] blur-2xl transition-all duration-500 group-hover:opacity-[0.12] pointer-events-none`}
+      />
 
       <div>
-        {/* ── Row 1: Left = Shining Degree Badge; Right = High Demand (if top enrolled) + Duration ── */}
-        <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+        {/* ── Row 1: Left = Shining Degree Badge; Right = High Demand + Duration ── */}
+        <div className="relative z-10 flex items-center justify-between gap-2">
           {/* Shining degree badge (e.g. B.Tech / MBA / BCA) with shimmer sweep */}
-          <div className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider overflow-hidden shadow-xs select-none shrink-0 ${theme.glow}`}>
+          <div className="relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider overflow-hidden shadow-2xs select-none shrink-0">
             {/* Degree vibrant gradient background */}
             <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
             {/* Shimmer light beam */}
@@ -86,14 +98,15 @@ export default function ProgramCard({
             </span>
           </div>
 
-          {/* Right: High Demand badge (top enrollment only) + Course Duration ("4 yr programme") */}
+          {/* Right: High Demand badge (top enrollment only) + Course Duration */}
           <div className="flex items-center gap-1.5 shrink-0">
             {HIGH_DEMAND_IDS.has(p.id) && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 dark:bg-orange-950/40 border border-orange-500/30 text-orange-600 dark:text-orange-400 whitespace-nowrap">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/30 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
                 High Demand
               </span>
             )}
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 whitespace-nowrap">
               <Clock size={11} className={`${theme.textAccent} shrink-0`} />
               <span>{formatDuration(p.duration)}</span>
             </div>
@@ -101,45 +114,51 @@ export default function ProgramCard({
         </div>
 
         {/* ── Row 2: Name of the Degree ── */}
-        <h3 className="relative z-10 text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-100 transition-colors line-clamp-2 leading-snug">
+        <h3 className="relative z-10 text-base sm:text-[17px] font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-2 leading-snug mt-3">
           {title}
         </h3>
 
         {/* Short clean description */}
-        <p className="relative z-10 text-slate-600 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed mt-2 font-sans">
+        <p className="relative z-10 text-slate-500 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed mt-1.5 font-sans">
           {p.description}
         </p>
 
-        {/* Key Highlights / Eligibility Badge - prevents card from feeling too small or empty */}
+        {/* Key Highlights / Eligibility Badge */}
         {p.eligibility && (
-          <div className="relative z-10 mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+          <div className="relative z-10 mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 dark:bg-emerald-950/30 border border-emerald-500/20 dark:border-emerald-800/40 text-[11px] font-medium text-emerald-800 dark:text-emerald-300 max-w-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
             <span className="truncate">Min. {p.minPercent || 60}% in 10+2 • LPUNEST / JEE</span>
           </div>
         )}
 
-        {/* ── Row 3: Semester Fee & Scholarship ── */}
-        <div className="relative z-10 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-baseline justify-between">
+        {/* ── Row 3: Semester Fee & Scholarship Inset Well ── */}
+        <div className="relative z-10 mt-3.5 p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/70 flex items-center justify-between">
           <div>
-            <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Tuition Fee
             </span>
-            <span className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-base tracking-tight">
-              {formattedFee}
-            </span>
+            <div className="flex items-baseline gap-0.5 mt-0.5">
+              <span className="text-slate-900 dark:text-white font-black text-base tracking-tight">
+                {feeAmount}
+              </span>
+              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                {feePeriod}
+              </span>
+            </div>
           </div>
           <div className="text-right">
-            <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold tracking-tight bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
               Up to 50% Waiver
             </span>
-            <span className="text-[10px] text-slate-400 font-medium">LPUNEST Merit</span>
+            <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-medium text-right mt-0.5">
+              LPUNEST Merit
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ── Row 4: Action Buttons (Compare & View Details) with 3D click micro-interaction ── */}
-      <div className="relative z-10 mt-3 pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-2">
-        {/* Compare feature: more subtle / lesser than View Details & themed */}
+      {/* ── Row 4: Action Buttons (Equal Height, Perfectly Balanced) ── */}
+      <div className="relative z-10 mt-3.5 pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-2.5">
         {onCompare ? (
           <button
             type="button"
@@ -147,16 +166,16 @@ export default function ProgramCard({
               e.stopPropagation();
               onCompare(p.id);
             }}
-            className={`premium-interaction px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
+            className={`h-9 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all duration-200 cursor-pointer active:scale-95 ${
               isSelected
-                ? `${theme.badgeBg} border-current shadow-xs font-bold`
-                : 'border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs font-bold'
+                : 'border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-white shadow-2xs'
             }`}
             title={isSelected ? 'Remove from Comparison' : 'Compare Programme'}
             aria-label={isSelected ? `Remove ${p.name} from comparison` : `Compare ${p.name}`}
           >
-            <Scale size={12} className={isSelected ? theme.textAccent : 'text-slate-400'} />
-            <span className="text-[11px]">{isSelected ? '✓ Compared' : 'Compare'}</span>
+            <Scale size={13} className={isSelected ? 'text-orange-400' : 'text-slate-400'} />
+            <span className="text-[11px] font-medium">{isSelected ? 'Compared' : 'Compare'}</span>
           </button>
         ) : <div />}
 
@@ -167,10 +186,10 @@ export default function ProgramCard({
             e.stopPropagation();
             if (onView) onView(p);
           }}
-          className={`premium-interaction px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 active:translate-y-0.5 ${theme.btnClass}`}
+          className={`h-9 px-4 rounded-xl border border-transparent text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer shadow-xs active:scale-95 hover:shadow-md hover:scale-[1.02] ${theme.btnClass}`}
         >
           <span>View Details</span>
-          <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
         </button>
       </div>
     </div>
