@@ -3,7 +3,7 @@ import {
   ShieldAlert, ShieldCheck, Users, MessageSquare, AlertTriangle,
   Activity, RefreshCw, Search, Trash2, Calendar, Database,
   CheckCircle2, ArrowUpDown, ChevronLeft, ChevronRight, Lock, KeyRound,
-  Sparkles, BookOpen, Layers, Zap, TrendingUp, Sliders, Play, Code2,
+  BookOpen, Layers, Zap, TrendingUp, Sliders, Play, Code2,
   ArrowUpRight, BarChart3, Check, X, Filter, BrainCircuit, Bot,
   Award, Gauge, CheckCheck, Clock, FileText, CornerDownRight
 } from 'lucide-react';

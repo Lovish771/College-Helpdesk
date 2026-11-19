@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, Sparkles } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
 import { request } from '../api/client';

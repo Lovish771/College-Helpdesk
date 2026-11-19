@@ -1,3 +1,4 @@
+import re
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -43,7 +44,10 @@ def create_app(config_name=None, **kwargs):
         "http://127.0.0.1:3000",
         "http://localhost:5000",
         "http://127.0.0.1:5000",
+        re.compile(r"^https://.*\.vercel\.app$"),
     ]
+    if os.getenv('FRONTEND_URL'):
+        allowed_origins.append(os.getenv('FRONTEND_URL'))
     CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
     
     # Strict security headers middleware (OWASP Top 10 hardening)
@@ -60,7 +64,7 @@ def create_app(config_name=None, **kwargs):
             "style-src 'self' 'unsafe-inline' fonts.googleapis.com; "
             "font-src 'self' fonts.gstatic.com data:; "
             "img-src 'self' data: https: blob:; "
-            "connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 http://localhost:5173 http://127.0.0.1:5173;"
+            "connect-src 'self' https: http://localhost:5000 http://127.0.0.1:5000 http://localhost:5173 http://127.0.0.1:5173;"
         )
         response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
         return response

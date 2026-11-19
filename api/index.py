@@ -20,17 +20,9 @@ from backend.app import create_app, db
 # Initialize Flask application for Vercel Serverless WSGI
 app = create_app()
 
-# On Vercel serverless cold start, ensure database tables exist and seed if fresh
+# On Vercel serverless cold start, ensure database tables exist cleanly
 with app.app_context():
     try:
-        from app.models import Program
-        if Program.query.count() == 0:
-            from scripts.seed_database import seed_programs, seed_curriculum, seed_intent_patterns, seed_knowledge_entries, create_admin_user, seed_users
-            seed_programs()
-            seed_curriculum()
-            seed_intent_patterns()
-            seed_knowledge_entries()
-            create_admin_user()
-            seed_users()
+        db.create_all()
     except Exception as e:
-        print(f"[Vercel Serverless] Seed check notice: {e}")
+        print(f"[Vercel Serverless] Table create notice: {e}")

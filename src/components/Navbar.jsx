@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, ChevronDown, Moon, Sun,
-  Home, GraduationCap, BookOpen, HelpCircle, Sparkles,
+  Home, GraduationCap, BookOpen, HelpCircle, MessageSquare,
   UserCheck, Wallet, BedDouble, Scale, PhoneCall,
   User as UserIcon, LogOut, ShieldCheck, KeyRound
 } from 'lucide-react';
@@ -143,9 +143,6 @@ export default function Navbar({
             <div className="flex flex-col justify-center leading-none text-left">
               <span className="font-display font-extrabold text-xs sm:text-base tracking-tight text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                 Student Helpdesk
-              </span>
-              <span className="hidden sm:block text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-tight mt-0.5">
-                LPU Support Portal
               </span>
             </div>
           </button>
@@ -354,7 +351,7 @@ export default function Navbar({
                       onClick={() => to('chat')}
                       className="w-full flex items-center gap-2 p-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                     >
-                      <Sparkles size={14} className="text-orange-500" />
+                      <MessageSquare size={14} className="text-orange-500" />
                       <span>My Saved Chats</span>
                     </button>
 
@@ -457,7 +454,7 @@ export default function Navbar({
 
             <ul className="space-y-1">
               {[
-                ['chat', 'AI Assistant (24/7 Chat)', Sparkles],
+                ['chat', 'Helpdesk Assistant (24/7)', MessageSquare],
                 ...PRIMARY_NAV,
                 ...moreNavItems.map(([id, label, icon, , isSpecial]) => [id, label, icon, isSpecial]),
               ].map(([id, label, Icon, isSpecial]) => {

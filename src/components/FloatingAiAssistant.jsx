@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Send, X, Minus, Sparkles, MessageSquare, Bot, ArrowRight,
-  Maximize2, RotateCcw, Volume2, ShieldCheck, HelpCircle, Code, FileText, CheckCircle2,
-  ExternalLink, Layers
+  Send, X, Minus, MessageSquare, Bot, ArrowRight,
+  Maximize2, RotateCcw, Volume2, ShieldCheck, HelpCircle, FileText, CheckCircle2,
+  ExternalLink, Layers, Wallet, Award, BedDouble, GraduationCap, UserCheck
 } from 'lucide-react';
 import ThreeAiOrb from './ThreeAiOrb';
 import { sendMessage } from '../api/chatbotApi';
@@ -57,7 +57,7 @@ export default function FloatingAiAssistant({ go, page }) {
     {
       id: 1,
       sender: 'bot',
-      text: "Hello, I'm your AI Assistant 👋\nAsk anything, get help, explore ideas, or work on your projects.",
+      text: "Hello! I'm your LPU Student Helpdesk Assistant 👋\nAsk me anything about programmes, semester fees, scholarships, or hostel life.",
       time: 'Online',
     },
   ]);
@@ -313,11 +313,11 @@ export default function FloatingAiAssistant({ go, page }) {
 
   const handleQuickChip = (chipLabel) => {
     const promptMap = {
-      Code: 'What are the core coding languages and AI curriculum taught in B.Tech CSE?',
-      Explain: 'Explain the LPUNEST 50% scholarship eligibility slabs and criteria.',
-      Generate: 'Generate a summary of 1-Seater, 2-Seater, and 3-Seater AC hostel fee structures.',
-      Summarize: 'Summarize the key admission deadlines and document verification checklist.',
-      More: 'What facilities, placement records, and campus amenities are available at LPU?',
+      Fees: 'What are the semester tuition fee structures and examination charges at LPU?',
+      Scholarships: 'How do the LPUNEST Category 1, 2, and 3 scholarship fee concessions work?',
+      Hostels: 'What are the 1-seater, 2-seater, 3-seater, and 4-seater AC hostel tariffs and mess charges?',
+      'B.Tech CSE': 'What specializations, eligibility, and curriculum tracks are offered in B.Tech CSE?',
+      Admissions: 'What are the key steps, documents required, and deadlines for LPU admission?',
     };
     handleSendMessage(promptMap[chipLabel] || chipLabel);
   };
@@ -379,12 +379,12 @@ export default function FloatingAiAssistant({ go, page }) {
                 />
               </div>
 
-              {/* Pill: AI Assistant • Online */}
+              {/* Pill: Student Helpdesk • Online */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-md shadow-inner">
                 <span className="text-orange-400 font-bold text-xs flex items-center gap-1.5">
-                  <Sparkles size={12} className="text-orange-400 fill-orange-400" />
+                  <Bot size={13} className="text-orange-400" />
                   <span className="font-display tracking-tight text-white font-bold text-xs">
-                    AI Assistant
+                    LPU Helpdesk
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium pl-2 border-l border-white/15">
@@ -415,14 +415,14 @@ export default function FloatingAiAssistant({ go, page }) {
             </div>
           </div>
 
-          {/* ── Greeting Banner matching Mockup ── */}
+          {/* ── Greeting Banner ── */}
           <div className="px-5 sm:px-6 pt-4 pb-2 relative z-10">
             <h2 className="text-lg sm:text-xl font-extrabold text-white font-display tracking-tight flex items-center gap-2">
-              <span>Hello, I'm your AI Assistant</span>
+              <span>LPU Student Helpdesk</span>
               <span className="text-xl">👋</span>
             </h2>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              Ask anything, get help, explore ideas, or work on your projects.
+              Ask about tuition fees, LPUNEST scholarships, programmes, or hostel life.
             </p>
           </div>
 
@@ -469,7 +469,7 @@ export default function FloatingAiAssistant({ go, page }) {
             {isSending && (
               <div className="flex gap-2 items-center text-slate-400 text-xs py-1">
                 <div className="w-5 h-5 rounded-md bg-orange-500/20 text-orange-400 flex items-center justify-center">
-                  <Sparkles size={11} className="animate-spin" />
+                  <Bot size={11} className="animate-pulse" />
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] text-slate-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" />
@@ -482,7 +482,7 @@ export default function FloatingAiAssistant({ go, page }) {
             <div ref={chatBottomRef} />
           </div>
 
-          {/* ── Input Box (Pixel-matched to reference mockup) ── */}
+          {/* ── Input Box ── */}
           <div className="p-4 sm:p-5 pt-2 relative z-10 space-y-3">
             <form
               onSubmit={(e) => {
@@ -498,7 +498,7 @@ export default function FloatingAiAssistant({ go, page }) {
                 onChange={(e) => setInputText(e.target.value)}
                 onFocus={() => setOrbState('listening')}
                 onBlur={() => !isSending && setOrbState('hover')}
-                placeholder="Ask me anything..."
+                placeholder="Ask about fees, courses, hostels, scholarships..."
                 className="w-full bg-transparent py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none"
               />
 
@@ -513,29 +513,23 @@ export default function FloatingAiAssistant({ go, page }) {
               </button>
             </form>
 
-            {/* ── Action Chips matching Mockup Exactly ── */}
+            {/* ── Action Chips matching College Admissions Helpdesk ── */}
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none text-[11px] pb-1">
               {[
-                { label: 'Code', icon: 'code' },
-                { label: 'Explain', icon: 'book' },
-                { label: 'Generate', icon: 'sparkle' },
-                { label: 'Summarize', icon: 'list' },
-                { label: 'More', icon: 'more' },
-              ].map((chip) => (
+                { label: 'Fees', icon: Wallet },
+                { label: 'Scholarships', icon: Award },
+                { label: 'Hostels', icon: BedDouble },
+                { label: 'B.Tech CSE', icon: GraduationCap },
+                { label: 'Admissions', icon: UserCheck },
+              ].map(({ label, icon: ChipIcon }) => (
                 <button
-                  key={chip.label}
+                  key={label}
                   type="button"
-                  onClick={() => handleQuickChip(chip.label)}
+                  onClick={() => handleQuickChip(label)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-orange-500/40 text-slate-300 hover:text-white transition-all whitespace-nowrap cursor-pointer active:scale-95"
                 >
-                  {chip.icon === 'code' && (
-                    <span className="text-slate-400 font-mono text-[10px]">&lt;/&gt;</span>
-                  )}
-                  {chip.icon === 'book' && <FileText size={11} className="text-slate-400" />}
-                  {chip.icon === 'sparkle' && <Sparkles size={11} className="text-orange-400" />}
-                  {chip.icon === 'list' && <FileText size={11} className="text-slate-400" />}
-                  {chip.icon === 'more' && <span className="text-slate-400 font-bold">•••</span>}
-                  <span>{chip.label}</span>
+                  <ChipIcon size={11} className="text-orange-400" />
+                  <span>{label}</span>
                 </button>
               ))}
             </div>
@@ -591,7 +585,7 @@ export default function FloatingAiAssistant({ go, page }) {
             className="pointer-events-none absolute left-1/2 -bottom-3 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0
               px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-orange-500/40 text-white text-[10px] font-bold tracking-tight whitespace-nowrap shadow-xl backdrop-blur-md flex items-center gap-1.5"
           >
-            <Sparkles size={10} className="text-orange-400 fill-orange-400" />
+            <Bot size={11} className="text-orange-400" />
             <span className="capitalize">{orbState} Mode • Click to Chat</span>
           </div>
         </div>

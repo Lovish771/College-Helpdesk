@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Mail, Phone, Clock, MapPin, Building2, MessageCircle, ArrowRight,
-  ShieldCheck, HelpCircle, Users, AlertCircle, Sparkles, Search,
+  ShieldCheck, HelpCircle, Users, AlertCircle, Search,
   Headset, HeartPulse, Laptop, Home as HomeIcon, Award, ExternalLink
 } from 'lucide-react';
 import { PageHead } from '../utils/useAsync';
@@ -26,7 +26,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: 'Admissions & Scholarships',
       borderClass: 'border-orange-200 dark:border-orange-900/50 hover:border-orange-400',
-      badgeClass: 'bg-orange-600 text-white',
+      badgeClass: 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-500/25',
       icon: Building2,
     },
     {
@@ -44,7 +44,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: 'Student Affairs & Mentorship',
       borderClass: 'border-emerald-200 dark:border-emerald-900/50 hover:border-emerald-400',
-      badgeClass: 'bg-emerald-600 text-white',
+      badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25',
       icon: Users,
     },
     {
@@ -62,7 +62,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: 'Hostel & Dining',
       borderClass: 'border-amber-200 dark:border-amber-900/50 hover:border-amber-400',
-      badgeClass: 'bg-amber-600 text-white',
+      badgeClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25',
       icon: HomeIcon,
     },
     {
@@ -80,7 +80,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: 'Controller of Examinations',
       borderClass: 'border-blue-200 dark:border-blue-900/50 hover:border-blue-400',
-      badgeClass: 'bg-blue-600 text-white',
+      badgeClass: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/25',
       icon: Award,
     },
     {
@@ -98,7 +98,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: 'UMS & IT Infrastructure',
       borderClass: 'border-purple-200 dark:border-purple-900/50 hover:border-purple-400',
-      badgeClass: 'bg-purple-600 text-white',
+      badgeClass: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/25',
       icon: Laptop,
     },
     {
@@ -116,7 +116,7 @@ export default function Contact({ go, ask }) {
       ],
       tag: '24/7 Medical Care',
       borderClass: 'border-rose-200 dark:border-rose-900/50 hover:border-rose-400',
-      badgeClass: 'bg-rose-600 text-white',
+      badgeClass: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/25',
       icon: HeartPulse,
     },
   ];
@@ -157,7 +157,7 @@ export default function Contact({ go, ask }) {
             className="btn-primary"
             onClick={() => ask('How do I contact Admissions Block 30 or DSR for urgent assistance?')}
           >
-            <Sparkles size={14} />
+            <HelpCircle size={14} />
             Ask AI Assistant
           </button>
         </PageHead>
@@ -210,13 +210,13 @@ export default function Contact({ go, ask }) {
                 className={`rounded-3xl p-6 border shadow-xs hover:shadow-lg transition-all duration-200 bg-white dark:bg-slate-900 ${office.borderClass} flex flex-col justify-between hover:-translate-y-1`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${office.badgeClass}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${office.badgeClass}`}>
                       {office.tag}
                     </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
                       <Building2 size={13} className="text-orange-500 shrink-0" />
-                      <span className="truncate max-w-[140px]">{office.block}</span>
+                      <span>{office.block}</span>
                     </span>
                   </div>
 
@@ -293,32 +293,6 @@ export default function Contact({ go, ask }) {
               </div>
             );
           })}
-        </div>
-
-        {/* Campus Map & Visiting Details */}
-        <div className="mt-12 rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/30 border border-orange-500/40 text-orange-400 text-xs font-bold">
-              <MapPin size={13} />
-              <span>Campus Location &amp; Physical Visiting Guide</span>
-            </div>
-            <h3 className="text-2xl font-extrabold font-display">
-              Visiting Lovely Professional University Campus
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              LPU is situated on the Jalandhar-Delhi G.T. Road (NH-1), Phagwara, Punjab (144411). Easily accessible via Phagwara Railway Station (5 km) or Jalandhar City Station (22 km). On arrival, report to the Central Welcome Center at Main Gate 1 for immediate guided electric buggy shuttles to Admissions Block 30.
-            </p>
-          </div>
-
-          <div className="shrink-0 space-y-2 w-full sm:w-auto">
-            <button
-              onClick={() => ask('What is the nearest railway station or airport and how do I reach LPU campus?')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-xs font-bold bg-white text-slate-900 hover:bg-slate-100 transition-colors active:scale-95 cursor-pointer shadow-md"
-            >
-              <span>Get Transit &amp; Shuttle Guide</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
         </div>
       </div>
     </div>

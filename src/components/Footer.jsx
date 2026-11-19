@@ -2,7 +2,7 @@ import React from 'react';
 import {
   MapPin, Award, TrendingUp, ChevronRight, ExternalLink,
   Building2, PhoneCall, MessageCircle, Mail, Users, Headset, HeartPulse,
-  Landmark, ShieldAlert, ShieldCheck, Sparkles, BookOpen
+  Landmark, ShieldAlert, ShieldCheck, BookOpen
 } from 'lucide-react';
 import LpuLogo from './LpuLogo';
 
@@ -20,30 +20,6 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none translate-y-1/2" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* MANDATORY PROMINENT DISCLAIMER BANNER */}
-        <div className="mb-10 p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                Student-Developed Project (Unofficial Helpdesk)
-              </h4>
-              <p className="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 mt-1 leading-relaxed">
-                This is a student-developed, unofficial helpdesk project. It is not affiliated with, endorsed by, or an official website or chatbot of Lovely Professional University. Information is compiled from publicly available sources and verified for Academic Session 2026-27.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => handleLegal('disclaimer')}
-            className="shrink-0 text-xs font-bold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 underline flex items-center gap-1 self-end md:self-center cursor-pointer"
-          >
-            <span>Read Full Disclaimer</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
         {/* Main 4-Column Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           {/* Column 1: Brand & Identity (4 Cols) */}

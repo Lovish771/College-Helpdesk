@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Check, Sparkles, FileText, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Check, FileText, ArrowRight } from 'lucide-react';
 import { programs, qualifications } from '../data/mockData';
 import { checkEligibility, getDocuments } from '../api/programsApi';
 import { useAsync, Async, PageHead } from '../utils/useAsync';
@@ -52,7 +52,7 @@ export default function Eligibility({ ask }) {
             <div className="space-y-5">
               <div>
                 <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white font-display">
-                  <Sparkles size={18} className="text-orange-600 dark:text-orange-400" />
+                  <CheckCircle2 size={18} className="text-orange-600 dark:text-orange-400" />
                   Check Programme Eligibility
                 </h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">

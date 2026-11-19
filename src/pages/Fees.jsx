@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
   Wallet, Award, BedDouble, ChevronRight, CheckCircle2,
-  Sparkles, ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
+  ArrowRight, Search, Filter, ShieldCheck, HelpCircle,
   Building2, Users, Info, Scale, Check, Plus, Calculator, Landmark,
   Calendar, Layers, Clock, Coffee, Shirt, X, GraduationCap
 } from 'lucide-react';
@@ -226,56 +226,42 @@ export default function Fees({ ask, onOpenCompare, go }) {
             onClick={() => ask(`Can you help me calculate the total ${tenureYears}-year expenditure and hostel fees for ${activeCourse.short}?`)}
             className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold cursor-pointer"
           >
-            <Sparkles size={14} />
+            <Calculator size={14} />
             <span>Calculate with AI</span>
           </button>
         </PageHead>
 
-                {/* ── Official Estimation Notice Banner (Session 2026-27) ── */}
-        <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-500/30 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-              <Info size={15} />
-            </div>
-            <p className="text-amber-900/90 dark:text-amber-200/90 leading-snug">
-              <strong className="font-extrabold">Estimated Budget (Session 2026-27):</strong> Figures represent estimated LPU academic, hostel & dining expenditures. Annual exam fee (₹5,000) is levied in 2nd semester.
-            </p>
+        {/* ── Main Category Switcher (Strictly One Single Horizontal Line) ── */}
+        <div className="w-full max-w-5xl overflow-x-auto scrollbar-none py-1">
+          <div className="inline-flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-200/70 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-2xs whitespace-nowrap">
+            {[
+              { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet, badge: `${programs.length} Courses` },
+              { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator, badge: 'Interactive' },
+              { id: 'residential-fees', label: 'Hostel, Mess & Laundry Rates', icon: BedDouble },
+              { id: 'scholarships', label: 'Scholarship Policies', icon: Award },
+            ].map(({ id, label, icon: Icon, badge }) => {
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`inline-flex items-center gap-2 py-2 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
+                    active
+                      ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon size={14} className="shrink-0" />
+                  <span className="whitespace-nowrap">{label}</span>
+                  {badge && (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-600 text-white uppercase shrink-0">
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 dark:bg-amber-900/40 border border-amber-500/20 text-amber-800 dark:text-amber-200 font-bold text-[11px]">
-            <Clock size={12} className="text-amber-600 dark:text-amber-400" />
-            <span>Session 2026-27 Verified</span>
-          </div>
-        </div>
-
-        {/* ── Main Category Switcher (Pill Style) ── */}
-        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-800/80 max-w-3xl">
-          {[
-            { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet, badge: `${programs.length} Courses` },
-            { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator, badge: 'Interactive' },
-            { id: 'residential-fees', label: 'Hostel, Mess & Laundry Rates', icon: BedDouble },
-            { id: 'scholarships', label: 'Scholarship Policies', icon: Award },
-          ].map(({ id, label, icon: Icon, badge }) => {
-            const active = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
-                  active
-                    ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Icon size={15} />
-                <span>{label}</span>
-                {badge && (
-                  <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-600 text-white uppercase">
-                    {badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
         </div>
 
         {/* ════════════════════════════════════════════════════════════
@@ -637,7 +623,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                     onClick={() => ask(`I planned my ${tenureYears}-year expenditure for ${activeCourse.name} at ₹${totalTenureCost.toLocaleString()}. What are the monthly EMI options and loan subsidy schemes available?`)}
                     className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold cursor-pointer"
                   >
-                    <Sparkles size={14} />
+                    <Calculator size={14} />
                     <span>Ask AI for EMI Breakdown</span>
                   </button>
                 </div>
@@ -890,7 +876,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       className={`p-5 rounded-2xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all duration-300 flex flex-col justify-between group ${
                         isSelected
                           ? `ring-2 ${degTheme.ringColor} border-transparent shadow-md`
-                          : `border-slate-200/90 dark:border-slate-800 ${degTheme.hoverBorder} ${degTheme.hoverGlow}`
+                          : `border-slate-200/90 dark:border-slate-800 ${degTheme.glowBorder} ${degTheme.glow}`
                       }`}
                     >
                       <div>

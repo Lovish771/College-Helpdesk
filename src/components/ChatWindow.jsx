@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Lock, Sparkles, LogIn } from 'lucide-react';
+import { Lock, LogIn } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  X, Plus, Sparkles, Scale, Check, ArrowRight,
+  X, Plus, Scale, Check, ArrowRight,
   GraduationCap, Wallet, Award, Clock, BookOpen, Briefcase, ChevronDown, CheckCircle2,
   Trash2, AlertCircle, Code, Cpu, Layers, Laptop, ExternalLink, HelpCircle
 } from 'lucide-react';
@@ -141,7 +141,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
                 onClick={handleDeepAIAnalysis}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-xs font-medium text-white transition-colors cursor-pointer"
               >
-                <Sparkles size={13} />
+                <Scale size={13} />
                 <span>Analyse All with AI</span>
               </button>
             )}
@@ -609,7 +609,7 @@ export default function DegreeComparisonModal({ isOpen, onClose, initialPrograms
         <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 shrink-0">
-              <Sparkles size={16} />
+              <Scale size={16} />
             </span>
             <div>
               <p className="text-xs font-bold text-slate-900 dark:text-white">

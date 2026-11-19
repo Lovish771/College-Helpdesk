@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Campus3dCard from '../components/Campus3dCard';
 import {
   ArrowRight, Search, GraduationCap, Wallet, CheckCircle2, BedDouble,
-  FileText, PhoneCall, Scale, Building2, MapPin, Sparkles,
+  FileText, PhoneCall, Scale, Building2, MapPin, HelpCircle,
   Award, ShieldCheck, Flame, Compass, ChevronRight
 } from 'lucide-react';
 
@@ -128,7 +128,7 @@ export default function Home({ go, ask, onOpenCompare }) {
           <div className="lg:col-span-7">
             {/* Pill: Student Portal */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-3 shadow-2xs">
-              <Sparkles size={12} className="text-orange-500" />
+              <GraduationCap size={13} className="text-orange-500" />
               <span>LPU Student Helpdesk Gateway</span>
             </div>
 
@@ -343,7 +343,7 @@ export default function Home({ go, ask, onOpenCompare }) {
           <div className="relative rounded-2xl p-6 sm:p-7 overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/20 dark:from-slate-900 dark:via-[#0B101D] dark:to-[#070B14] border border-orange-200/70 dark:border-slate-800 shadow-sm dark:shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="relative z-10 max-w-xl">
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-500/40 text-orange-700 dark:text-orange-400 text-[10px] font-bold mb-2">
-                <Sparkles size={10} />
+                <HelpCircle size={10} />
                 Need Dedicated Assistance?
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-display">

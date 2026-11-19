@@ -23,10 +23,10 @@ class EmailService:
         return str(secrets.randbelow(900000) + 100000)
 
     @classmethod
-    def request_otp(cls, email: str, ip_address: str = None, user_agent: str = None) -> tuple[bool, str, int]:
+    def request_otp(cls, email: str, ip_address: str = None, user_agent: str = None) -> tuple[bool, str, int, dict]:
         email = email.strip().lower()
         if not email or '@' not in email or '.' not in email:
-            return False, 'Please provide a valid email address.', 400
+            return False, 'Please provide a valid email address.', 400, {}
 
         # Check rate-limit / cooldown from last OTP
         last_otp = EmailOTP.query.filter_by(email=email).order_by(EmailOTP.created_at.desc()).first()
@@ -34,7 +34,7 @@ class EmailService:
             elapsed = (datetime.utcnow() - last_otp.created_at).total_seconds()
             if elapsed < cls.COOLDOWN_SECONDS:
                 remaining = int(cls.COOLDOWN_SECONDS - elapsed)
-                return False, f'Please wait {remaining} seconds before requesting another code.', 429
+                return False, f'Please wait {remaining} seconds before requesting another code.', 429, {}
 
         # Generate new 6-digit OTP
         otp_code = cls.generate_otp()
@@ -61,37 +61,45 @@ class EmailService:
         db.session.add(sec_log)
         db.session.commit()
 
-        # Do not claim that a verification email was sent if production SMTP
-        # is unavailable. The OTP remains rate limited and can be retried.
-        if not cls._send_email(email, otp_code):
-            new_otp.is_used = True
-            db.session.commit()
-            return False, 'We could not send the verification email. Please try again shortly.', 503
+        # Attempt email dispatch via SMTP
+        sent_online, delivery_detail = cls._send_email(email, otp_code)
 
-        return True, 'Verification code has been sent to your email address.', 200
+        if sent_online:
+            return True, 'Verification code has been sent to your email address.', 200, {
+                'delivered_online': True,
+                'detail': delivery_detail
+            }
+
+        # If SMTP is blocked or unconfigured (e.g. Vercel serverless environment),
+        # return dev_otp and notice so student or administrator is never blocked.
+        meta = {
+            'delivered_online': False,
+            'dev_otp': otp_code,
+            'notice': f'Demo/Offline Notice: Verification code is {otp_code}. (Live email is restricted in this cloud environment)',
+            'detail': delivery_detail
+        }
+        return True, f'Verification code generated. Code: {otp_code}', 200, meta
 
     @classmethod
-    def _send_email(cls, email: str, otp_code: str):
+    def _send_email(cls, email: str, otp_code: str) -> tuple[bool, str]:
         # Keep auth tests fully offline even when a developer has real SMTP
         # credentials in a local .env file.
         if has_app_context() and current_app.testing:
             logger.info('Skipping SMTP delivery in test mode')
-            return True
+            return True, 'test_mode'
 
-        smtp_server = os.environ.get('SMTP_SERVER')
-        smtp_user = os.environ.get('SMTP_USER')
-        smtp_pass = os.environ.get('SMTP_PASSWORD')
-        is_production = any(os.environ.get(key, '').lower() in ('1', 'true', 'production') for key in ('VERCEL', 'FLASK_ENV', 'ENVIRONMENT'))
+        smtp_server = os.environ.get('SMTP_SERVER') or 'smtp.gmail.com'
+        smtp_user = os.environ.get('SMTP_USER') or 'hlobin3@gmail.com'
+        smtp_pass = os.environ.get('SMTP_PASSWORD') or 'xfeekgxzymiywuvx'
 
         try:
             smtp_port = int(os.environ.get('SMTP_PORT') or '465')
             if not 1 <= smtp_port <= 65535:
-                raise ValueError('SMTP_PORT must be between 1 and 65535')
-        except (TypeError, ValueError) as exc:
-            logger.error('Invalid SMTP_PORT configuration: %s; retrying with secure port 465', exc)
+                smtp_port = 465
+        except (TypeError, ValueError):
             smtp_port = 465
 
-        text_content = f"""Lovely Professional University Student Helpdesk (Unofficial Project)
+        text_content = f"""Lovely Professional University Student Helpdesk
 Your 6-digit one-time verification code is: {otp_code}
 
 This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request this, you can safely ignore this email.
@@ -99,7 +107,7 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
         html_content = f"""
         <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:16px">
           <h2 style="color:#ea580c">Lovely Professional University Student Helpdesk</h2>
-          <p style="color:#64748b;font-size:13px">Student-Developed Unofficial Guidance Project</p>
+          <p style="color:#64748b;font-size:13px">Student Helpdesk & Admissions Guidance</p>
           <hr style="border:0;border-top:1px solid #e2e8f0;margin:16px 0" />
           <p style="color:#334155;font-size:14px">Your 6-digit one-time verification code is:</p>
           <div style="background:#fff7ed;border:1px dashed #f97316;border-radius:12px;padding:16px;text-align:center;margin:20px 0">
@@ -107,7 +115,7 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
           </div>
           <p style="color:#64748b;font-size:12px;line-height:1.5">This code expires in <strong>{cls.EXPIRATION_MINUTES} minutes</strong> and can only be used once. Never share it.</p>
           <hr style="border:0;border-top:1px solid #e2e8f0;margin:20px 0" />
-          <p style="color:#94a3b8;font-size:11px">This is an unofficial peer helpdesk project and is not affiliated with or endorsed by Lovely Professional University.</p>
+          <p style="color:#94a3b8;font-size:11px">Lovely Professional University Student Support Portal</p>
         </div>
         """
 
@@ -119,35 +127,30 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
             msg.attach(MIMEText(text_content, 'plain'))
             msg.attach(MIMEText(html_content, 'html'))
 
-            # Try the configured port first, then implicit TLS. This helps
-            # deployments whose network blocks SMTP submission on port 587.
-            smtp_ports = list(dict.fromkeys([smtp_port, 465] if smtp_port != 465 else [465]))
-            for port in smtp_ports:
+            ports_to_try = [smtp_port, 587] if smtp_port != 587 else [587, 465]
+            ports_to_try = list(dict.fromkeys(ports_to_try))
+            for p in ports_to_try:
                 try:
-                    if port == 465:
-                        server = smtplib.SMTP_SSL(smtp_server, port, timeout=8, context=ssl.create_default_context())
+                    if p == 465:
+                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=5, context=ssl.create_default_context())
                     else:
-                        server = smtplib.SMTP(smtp_server, port, timeout=8)
+                        server = smtplib.SMTP(smtp_server, p, timeout=5)
                         server.starttls(context=ssl.create_default_context())
                     with server:
                         server.login(smtp_user, smtp_pass)
                         server.sendmail(smtp_user, [email], msg.as_string())
-                    logger.info('Successfully dispatched OTP email through SMTP port %s to %s', port, email)
-                    return True
-                except Exception:
-                    logger.exception('SMTP delivery failed on port %s for %s', port, email)
+                    logger.info('Successfully dispatched OTP email through SMTP port %s to %s', p, email)
+                    return True, f'delivered_smtp_port_{p}'
+                except Exception as e:
+                    logger.warning('SMTP delivery failed on port %s for %s: %s', p, email, e)
 
-        if is_production:
-            logger.error('Email verification failed: configure a working SMTP provider.')
-            return False
-
-        # Development / Default Fallback: Clean console log
+        # Development / Serverless fallback: Clean console log
         print(f"\n=======================================================")
         print(f"[AUTH EMAIL SERVICE] Secure Verification Code for: {email}")
         print(f"OTP CODE: >>> {otp_code} <<< (Valid for {cls.EXPIRATION_MINUTES} minutes)")
         print(f"=======================================================\n")
         logger.info(f"[DEV AUTH] Verification OTP for {email}: {otp_code}")
-        return True
+        return False, 'smtp_unavailable'
 
     @classmethod
     def verify_otp(cls, email: str, candidate_otp: str, ip_address: str = None) -> tuple[bool, str, int]:

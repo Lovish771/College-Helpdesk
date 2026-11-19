@@ -1,79 +1,15 @@
 import React from 'react';
-import {
-  Clock, ArrowRight, Wallet, Flame, Star, Sparkles,
-  Code, Cpu, Wifi, TrendingUp, HeartPulse, Layers, GraduationCap, CheckCircle2, Scale
-} from 'lucide-react';
+import { Clock, ArrowRight, Wallet, GraduationCap, Scale } from 'lucide-react';
 import { fees } from '../data/mockData';
 import { cleanProgramTitle, getMainDegree, getDegreeTheme } from '../utils/degreeUtils';
 
-/**
- * Determine dynamic category badge & emblem based on specialization
- */
-const getProgramMeta = (p) => {
-  const id = (p.id || '').toLowerCase();
+// Top enrollment tracks at LPU based on official university admission figures
+const HIGH_DEMAND_IDS = new Set(['btech-cse', 'btech-aiml', 'mba', 'bca', 'bsc-agri']);
 
-  if (id.includes('aiml') || id.includes('ds') || id.includes('ai') || id.includes('data')) {
-    return {
-      badgeText: 'High Demand',
-      badgeIcon: Flame,
-      emblemIcon: Cpu,
-      emblemColor: 'text-purple-500 dark:text-purple-400',
-      emblemBg: 'bg-purple-500/10 dark:bg-purple-950/40 border-purple-500/30'
-    };
-  }
-  if (id.includes('iot') || id.includes('cloud') || id.includes('cyber') || id.includes('devops')) {
-    return {
-      badgeText: 'Innovative Program',
-      badgeIcon: Sparkles,
-      emblemIcon: Wifi,
-      emblemColor: 'text-cyan-600 dark:text-cyan-400',
-      emblemBg: 'bg-cyan-500/10 dark:bg-cyan-950/40 border-cyan-500/30'
-    };
-  }
-  if (id.includes('fullstack') || id.includes('spe') || id.includes('cse') || id.includes('bca') || id.includes('mca')) {
-    return {
-      badgeText: id.includes('fullstack') ? 'Most Popular' : 'High Demand',
-      badgeIcon: id.includes('fullstack') ? Star : Flame,
-      emblemIcon: Code,
-      emblemColor: 'text-indigo-600 dark:text-indigo-400',
-      emblemBg: 'bg-indigo-500/10 dark:bg-indigo-950/40 border-indigo-500/30'
-    };
-  }
-  if (id.includes('bba') || id.includes('mba') || id.includes('bcom')) {
-    return {
-      badgeText: 'Most Popular',
-      badgeIcon: Star,
-      emblemIcon: TrendingUp,
-      emblemColor: 'text-amber-600 dark:text-amber-400',
-      emblemBg: 'bg-amber-500/10 dark:bg-amber-950/40 border-amber-500/30'
-    };
-  }
-  if (id.includes('bpharm') || id.includes('bpt') || id.includes('health') || id.includes('pharm')) {
-    return {
-      badgeText: 'Innovative Program',
-      badgeIcon: Sparkles,
-      emblemIcon: HeartPulse,
-      emblemColor: 'text-rose-600 dark:text-rose-400',
-      emblemBg: 'bg-rose-500/10 dark:bg-rose-950/40 border-rose-500/30'
-    };
-  }
-  if (id.includes('ece') || id.includes('me') || id.includes('civil') || id.includes('aero') || id.includes('biotech')) {
-    return {
-      badgeText: 'High Demand',
-      badgeIcon: Flame,
-      emblemIcon: Layers,
-      emblemColor: 'text-emerald-600 dark:text-emerald-400',
-      emblemBg: 'bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/30'
-    };
-  }
-
-  return {
-    badgeText: 'Innovative Program',
-    badgeIcon: Sparkles,
-    emblemIcon: GraduationCap,
-    emblemColor: 'text-orange-600 dark:text-orange-400',
-    emblemBg: 'bg-orange-500/10 dark:bg-orange-950/40 border-orange-500/30'
-  };
+const formatDuration = (d) => {
+  if (!d) return '4 yr programme';
+  const num = d.match(/\d+/);
+  return num ? `${num[0]} yr programme` : '4 yr programme';
 };
 
 /**
@@ -96,7 +32,6 @@ export default function ProgramCard({
   isSelected = false,
   onSelect
 }) {
-  const { badgeText, badgeIcon: BadgeIcon, emblemIcon: EmblemIcon } = getProgramMeta(p);
   const formattedFee = getFormattedFee(p);
   const mainDegree = getMainDegree(p);
   const theme = getDegreeTheme(mainDegree);
@@ -108,16 +43,16 @@ export default function ProgramCard({
         if (onSelect) onSelect(p);
         else if (onView) onView(p);
       }}
-      className={`group relative flex flex-col rounded-[28px] p-5 sm:p-6 transition-all duration-300 ease-out cursor-pointer border select-none overflow-hidden
+      className={`group relative flex flex-col justify-between rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 ease-out cursor-pointer border select-none overflow-hidden
         bg-white dark:bg-[#0D131F]
         border-slate-200/90 dark:border-slate-800/90
-        shadow-[0_10px_30px_-20px_rgba(15,23,42,0.35)] dark:shadow-[0_16px_40px_-26px_rgba(0,0,0,0.85)]
-        hover:-translate-y-1.5 hover:scale-[1.01]
+        shadow-[0_4px_20px_-10px_rgba(15,23,42,0.15)] dark:shadow-[0_8px_30px_-16px_rgba(0,0,0,0.65)]
+        hover:-translate-y-1.5 hover:shadow-xl
         ${theme.glowBorder}
         ${theme.glowShadow}
         ${
           isSelected
-            ? `ring-2 ${theme.ringColor} border-transparent shadow-xl scale-[1.02]`
+            ? `ring-2 ${theme.ringColor} border-transparent shadow-md scale-[1.01]`
             : ''
         }`}
       style={{
@@ -133,120 +68,110 @@ export default function ProgramCard({
         }
       }}
     >
-      <div aria-hidden="true" className={`absolute -right-12 -top-14 h-36 w-36 rounded-full bg-gradient-to-br ${theme.gradient} opacity-[0.08] blur-2xl transition-all duration-500 group-hover:scale-125 group-hover:opacity-[0.14]`} />
-      <div aria-hidden="true" className={`absolute inset-x-6 top-0 h-0.5 bg-gradient-to-r ${theme.gradient} opacity-70`} />
+      {/* Subtle Ambient Color Glow Top Edge */}
+      <div aria-hidden="true" className={`absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${theme.gradient} opacity-[0.08] blur-xl transition-all duration-500 group-hover:opacity-[0.14]`} />
 
-      {/* Degree family emblem, programme highlights and duration */}
-      <div className="relative z-10 flex items-start justify-between gap-3 mb-5">
-        {/* Emblem Squircle with glowing icon */}
-        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110 ${theme.badgeBg}`}>
-          <EmblemIcon size={22} className={theme.textAccent} />
+      <div>
+        {/* ── Row 1: Left = Shining Degree Badge; Right = High Demand (if top enrolled) + Duration ── */}
+        <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+          {/* Shining degree badge (e.g. B.Tech / MBA / BCA) with shimmer sweep */}
+          <div className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider overflow-hidden shadow-xs select-none shrink-0 ${theme.glow}`}>
+            {/* Degree vibrant gradient background */}
+            <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
+            {/* Shimmer light beam */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
+            <GraduationCap size={13} className="relative z-10 text-white drop-shadow-xs shrink-0" />
+            <span className="relative z-10 text-white font-extrabold tracking-wide drop-shadow-xs whitespace-nowrap">
+              {mainDegree}
+            </span>
+          </div>
+
+          {/* Right: High Demand badge (top enrollment only) + Course Duration ("4 yr programme") */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {HIGH_DEMAND_IDS.has(p.id) && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 dark:bg-orange-950/40 border border-orange-500/30 text-orange-600 dark:text-orange-400 whitespace-nowrap">
+                High Demand
+              </span>
+            )}
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+              <Clock size={11} className={`${theme.textAccent} shrink-0`} />
+              <span>{formatDuration(p.duration)}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Top Floating Badges */}
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-bold bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 shadow-2xs">
-            <BadgeIcon size={11} className={`${theme.textAccent} shrink-0`} />
-            <span>{badgeText}</span>
-          </span>
+        {/* ── Row 2: Name of the Degree ── */}
+        <h3 className="relative z-10 text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-100 transition-colors line-clamp-2 leading-snug">
+          {title}
+        </h3>
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm">
-            <Clock size={11} className={`${theme.textAccent} shrink-0`} />
-            <span>{p.duration || '4 Years'}</span>
-          </span>
+        {/* Short clean description */}
+        <p className="relative z-10 text-slate-600 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed mt-2 font-sans">
+          {p.description}
+        </p>
+
+        {/* Key Highlights / Eligibility Badge - prevents card from feeling too small or empty */}
+        {p.eligibility && (
+          <div className="relative z-10 mt-2.5 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span className="truncate">Min. {p.minPercent || 60}% in 10+2 • LPUNEST / JEE</span>
+          </div>
+        )}
+
+        {/* ── Row 3: Semester Fee & Scholarship ── */}
+        <div className="relative z-10 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-baseline justify-between">
+          <div>
+            <span className="block text-[11px] font-medium text-slate-500 dark:text-slate-400">
+              Tuition Fee
+            </span>
+            <span className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-base tracking-tight">
+              {formattedFee}
+            </span>
+          </div>
+          <div className="text-right">
+            <span className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+              Up to 50% Waiver
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium">LPUNEST Merit</span>
+          </div>
         </div>
       </div>
 
-      {/* ── PREMIER MAIN DEGREE BAR (SHINING SHIMMER EFFECT + VIBRANT GRADIENT) ── */}
-      <div className="relative z-10 flex items-center gap-2 mb-3">
-        <div className={`relative inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider overflow-hidden shadow-sm ${theme.glow} select-none transition-transform duration-300 group-hover:scale-105`}>
-          {/* Vibrant Gradient Background */}
-          <div className={`absolute inset-0 bg-gradient-to-r ${theme.gradient} opacity-95 group-hover:opacity-100 transition-opacity`} />
-
-          {/* Continuous Ambient Shimmer Light Beam */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
-
-          {/* Interactive Hover Sweep */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-
-          {/* Degree Icon & Bold Label */}
-          <GraduationCap size={13} className="relative z-10 text-white drop-shadow-xs" />
-          <span className="relative z-10 text-white font-extrabold tracking-wide drop-shadow-xs">
-            {mainDegree}
-          </span>
-        </div>
-
-        <span className="text-slate-300 dark:text-slate-700 text-xs">•</span>
-        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide">
-          {p.degree || 'Degree Program'}
-        </span>
-      </div>
-
-      {/* Title */}
-      <h3 className="relative z-10 text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-slate-700 dark:group-hover:text-slate-100 transition-colors line-clamp-2 leading-snug min-h-[3.25rem]">
-        {title}
-      </h3>
-
-      {/* Description */}
-      <p className="relative z-10 text-slate-600 dark:text-slate-400 text-xs sm:text-sm line-clamp-3 leading-relaxed mt-2.5 font-sans flex-1">
-        {p.description}
-      </p>
-
-      {/* Highlights row if available */}
-      {p.eligibility && (
-        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-          <CheckCircle2 size={12} className="text-emerald-500 shrink-0" />
-          <span className="truncate">Min. {p.minPercent || 60}% in Qualifying Exam</span>
-        </div>
-      )}
-
-      {/* Footer Row: Semester Fee + Action Buttons (Compare & View Details) */}
-      <div className="mt-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-3">
-        <div className="flex flex-col rounded-2xl px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800">
-          <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium flex items-center gap-1">
-            <Wallet size={12} className="text-slate-400 dark:text-slate-500" />
-            <span>Semester Fee</span>
-          </span>
-          <span className="text-slate-900 dark:text-white font-extrabold text-sm sm:text-base tracking-tight mt-0.5">
-            {formattedFee}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Functional Compare Toggle Button */}
-          {onCompare && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onCompare(p.id);
-              }}
-              className={`premium-interaction px-3 py-2 rounded-full border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
-                isSelected
-                  ? `${theme.btnClass} border-transparent`
-                  : `border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 ${theme.textAccent} hover:bg-slate-50 dark:hover:bg-slate-800`
-              }`}
-              title={isSelected ? 'Remove from Comparison' : 'Add to Compare'}
-              aria-label={isSelected ? `Remove ${p.name} from comparison` : `Add ${p.name} to comparison`}
-            >
-              <Scale size={13} className={isSelected ? 'text-white' : theme.textAccent} />
-              <span>{isSelected ? 'In Compare' : 'Compare'}</span>
-            </button>
-          )}
-
-          {/* View Details Button */}
+      {/* ── Row 4: Action Buttons (Compare & View Details) with 3D click micro-interaction ── */}
+      <div className="relative z-10 mt-3 pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/90 gap-2">
+        {/* Compare feature: more subtle / lesser than View Details & themed */}
+        {onCompare ? (
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              if (onView) onView(p);
+              onCompare(p.id);
             }}
-            className={`premium-interaction px-4 py-2.5 rounded-full border border-transparent text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${theme.btnClass}`}
+            className={`premium-interaction px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 active:translate-y-0.5 ${
+              isSelected
+                ? `${theme.badgeBg} border-current shadow-xs font-bold`
+                : 'border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-white'
+            }`}
+            title={isSelected ? 'Remove from Comparison' : 'Compare Programme'}
+            aria-label={isSelected ? `Remove ${p.name} from comparison` : `Compare ${p.name}`}
           >
-            <span>View Details</span>
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+            <Scale size={12} className={isSelected ? theme.textAccent : 'text-slate-400'} />
+            <span className="text-[11px]">{isSelected ? '✓ Compared' : 'Compare'}</span>
           </button>
-        </div>
+        ) : <div />}
+
+        {/* View Details Button: Primary, prominent */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onView) onView(p);
+          }}
+          className={`premium-interaction px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95 active:translate-y-0.5 ${theme.btnClass}`}
+        >
+          <span>View Details</span>
+          <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+        </button>
       </div>
     </div>
   );

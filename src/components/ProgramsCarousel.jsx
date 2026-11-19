@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
-  ChevronLeft, ChevronRight, Pause, Play, Sparkles, Compass
+  Pause, Play, Compass, GraduationCap
 } from 'lucide-react';
 import ProgramCard from './ProgramCard';
 import { getDegreeTheme, getMainDegree } from '../utils/degreeUtils';
@@ -62,18 +62,18 @@ export default function ProgramsCarousel({
 
   const N = programs.length;
 
-  // Responsive card dimension calculations
+  // Responsive card dimension calculations - compact, modern proportions
   const { cardWidth, gap } = useMemo(() => {
     if (containerWidth < 640) {
-      // Mobile: allow adjacent cards to peek in by 28-36px
-      return { cardWidth: Math.min(320, containerWidth - 68), gap: 16 };
+      // Mobile
+      return { cardWidth: Math.min(300, containerWidth - 36), gap: 14 };
     }
     if (containerWidth < 1024) {
       // Tablet
-      return { cardWidth: 350, gap: 24 };
+      return { cardWidth: 330, gap: 18 };
     }
-    // Desktop: generous card size matching reference image
-    return { cardWidth: 380, gap: 28 };
+    // Desktop: balanced, ample breathing room
+    return { cardWidth: 360, gap: 20 };
   }, [containerWidth]);
 
   const stepSize = cardWidth + gap;
@@ -187,7 +187,7 @@ export default function ProgramsCarousel({
     }
     const timer = setInterval(() => {
       handleNext(false);
-    }, 2800);
+    }, 5000);
     return () => clearInterval(timer);
   }, [
     prefersReducedMotion,
@@ -283,33 +283,35 @@ export default function ProgramsCarousel({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 flex items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50">
-            <Sparkles size={12} className="text-orange-500 fill-orange-500" />
-            <span>Interactive Carousel</span>
+            <GraduationCap size={13} className="text-orange-500" />
+            <span>Curated Showcase</span>
           </span>
           <span className="text-slate-400 dark:text-slate-500 font-semibold">
             Program <strong className="text-slate-900 dark:text-white font-mono">{activeNormalizedIndex + 1}</strong> of <strong className="text-slate-900 dark:text-white font-mono">{N}</strong>
           </span>
         </div>
 
-        {/* Autoplay Pause / Resume toggle button */}
-        <button
-          type="button"
-          onClick={() => setIsPausedManually((p) => !p)}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
-          title={isPausedManually ? 'Resume automatic sliding' : 'Pause automatic sliding'}
-        >
-          {isPausedManually ? (
-            <>
-              <Play size={11} className="text-orange-500 fill-orange-500" />
-              <span>Resume</span>
-            </>
-          ) : (
-            <>
-              <Pause size={11} className="text-orange-500" />
-              <span>Autoplay</span>
-            </>
-          )}
-        </button>
+        {/* Clean Autoplay Pause / Resume toggle button */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsPausedManually((p) => !p)}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-400 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            title={isPausedManually ? 'Resume automatic sliding' : 'Pause automatic sliding (5s)'}
+          >
+            {isPausedManually ? (
+              <>
+                <Play size={11} className="text-orange-500 fill-orange-500" />
+                <span>Resume</span>
+              </>
+            ) : (
+              <>
+                <Pause size={11} className="text-orange-500" />
+                <span>Autoplay (5s)</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* ── Main Sliding Viewport Container ── */}
@@ -333,26 +335,6 @@ export default function ProgramsCarousel({
           className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 sm:w-28 z-20 bg-gradient-to-l from-[#F8FAFC] dark:from-slate-950 via-[#F8FAFC]/80 dark:via-slate-950/80 to-transparent"
         />
 
-        {/* Floating Circular Left Navigation Arrow (Matching Reference Mockup) */}
-        <button
-          type="button"
-          onClick={() => handlePrev(true)}
-          className="absolute left-3 sm:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:text-orange-600 dark:hover:text-orange-400 border border-slate-200 dark:border-slate-800 shadow-[0_8px_25px_-5px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.6)] hover:border-orange-500/50 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
-          aria-label="Previous Program"
-        >
-          <ChevronLeft size={22} className="stroke-[2.5]" />
-        </button>
-
-        {/* Floating Circular Right Navigation Arrow (Matching Reference Mockup) */}
-        <button
-          type="button"
-          onClick={() => handleNext(true)}
-          className="absolute right-3 sm:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 hover:text-orange-600 dark:hover:text-orange-400 border border-slate-200 dark:border-slate-800 shadow-[0_8px_25px_-5px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_25px_-5px_rgba(0,0,0,0.6)] hover:border-orange-500/50 hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
-          aria-label="Next Program"
-        >
-          <ChevronRight size={22} className="stroke-[2.5]" />
-        </button>
-
         {/* ── The Continuous GPU-Accelerated Track ── */}
         <div
           ref={trackRef}
@@ -373,20 +355,20 @@ export default function ProgramsCarousel({
             const isCentered = distance === 0;
 
             // Smooth scale and opacity calculation based on distance from center
-            let cardScale = 0.84;
-            let cardOpacity = 0.55;
+            let cardScale = 0.88;
+            let cardOpacity = 0.60;
             let zIndex = 10;
 
             if (distance === 0) {
-              cardScale = 1.06;
+              cardScale = 1.02;
               cardOpacity = 1.0;
               zIndex = 30;
             } else if (distance === 1) {
               cardScale = 0.94;
-              cardOpacity = 0.88;
+              cardOpacity = 0.85;
               zIndex = 20;
             } else if (distance === 2) {
-              cardScale = 0.85;
+              cardScale = 0.88;
               cardOpacity = 0.60;
               zIndex = 10;
             }
@@ -423,7 +405,7 @@ export default function ProgramsCarousel({
                       onView={onView}
                       onAsk={onAsk}
                       onCompare={onCompare}
-                      isSelected={isCentered || compareQueue.includes(item.program.id)}
+                      isSelected={compareQueue.includes(item.program.id)}
                     />
                   </div>
                 )}
@@ -435,27 +417,33 @@ export default function ProgramsCarousel({
 
       {/* ── Interactive Pagination Dots & Help Tip (Matches Reference Mockup) ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Pagination Dots / Pills */}
+        {/* Exactly 3 Pagination Dots */}
         <div
-          className="flex items-center gap-2 overflow-x-auto max-w-full py-1 scrollbar-none mx-auto sm:mx-0"
+          className="flex items-center gap-2 max-w-full py-1 mx-auto sm:mx-0"
           role="tablist"
           aria-label="Course carousel pagination"
         >
-          {programs.map((p, idx) => {
-            const isActive = idx === activeNormalizedIndex;
+          {[0, 1, 2].map((dotIdx) => {
+            const currentThird = Math.min(2, Math.floor((activeNormalizedIndex / (N || 1)) * 3));
+            const isActive = currentThird === dotIdx;
+
             return (
               <button
-                key={p.id}
+                key={dotIdx}
+                type="button"
                 role="tab"
                 aria-selected={isActive}
-                onClick={() => handleJumpToSlide(idx)}
+                onClick={() => {
+                  const targetOriginalIdx = Math.floor((dotIdx * (N - 1)) / 2);
+                  handleJumpToSlide(targetOriginalIdx);
+                }}
                 className={`transition-all duration-300 rounded-full cursor-pointer focus-visible:ring-2 focus-visible:ring-orange-500 ${
                   isActive
-                    ? 'w-8 h-2.5 bg-gradient-to-r from-orange-500 to-amber-500 shadow-md shadow-orange-500/40'
+                    ? 'w-7 h-2.5 bg-gradient-to-r from-orange-500 to-amber-500 shadow-sm shadow-orange-500/40'
                     : 'w-2.5 h-2.5 bg-slate-300 dark:bg-slate-700 hover:bg-orange-400 dark:hover:bg-orange-500'
                 }`}
-                title={`Jump to ${p.short}`}
-                aria-label={`Go to slide ${idx + 1}: ${p.name}`}
+                title={`Section ${dotIdx + 1}`}
+                aria-label={`Jump to section ${dotIdx + 1}`}
               />
             );
           })}

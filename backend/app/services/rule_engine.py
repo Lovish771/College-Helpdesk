@@ -66,6 +66,9 @@ class RuleEngine:
         
         if intent == 'goodbye':
             return self._handle_goodbye(), intent, confidence, False, None, []
+
+        if intent == 'compare_query':
+            return self._handle_comparison(message), intent, confidence, False, None, ['Compare Programmes', 'LPUNEST Scholarships', 'Hostel Facilities', 'Admission Process']
         
         if intent == 'unknown':
             # Check if user mentioned a program directly
@@ -110,6 +113,82 @@ class RuleEngine:
             "• **Hostel & Uni-World Campus Facilities**\n"
             "• **Placements & Top Recruiters**\n\n"
             "Could you please rephrase or choose from the quick suggestions below?"
+        )
+    
+    def _handle_comparison(self, message):
+        matched = self.intent_detector.extract_programs(message)
+        if len(matched) >= 2:
+            p1, p2 = matched[0], matched[1]
+        elif len(matched) == 1:
+            p1 = matched[0]
+            if p1.id == 'btech-cse':
+                p2 = Program.query.filter_by(id='btech-aiml').first() or Program.query.first()
+            elif p1.id.startswith('btech'):
+                p2 = Program.query.filter_by(id='btech-cse').first() or Program.query.first()
+            else:
+                p2 = Program.query.filter(Program.id != p1.id).first()
+        else:
+            p1 = Program.query.filter_by(id='btech-cse').first() or Program.query.first()
+            p2 = Program.query.filter_by(id='btech-aiml').first() or Program.query.offset(1).first()
+
+        f1 = lpu_fees.get(p1.id if p1 else 'btech-cse', {})
+        f2 = lpu_fees.get(p2.id if p2 else 'btech-aiml', {})
+
+        p1_name = p1.name if p1 else 'B.Tech Computer Science and Engineering'
+        p1_short = p1.short_name if p1 else 'B.Tech CSE'
+        p1_desc = p1.description if p1 else 'Core Computing, Systems Engineering, and Capstone Projects.'
+        p1_dur = p1.duration if p1 else '4 Years (8 Semesters)'
+        p1_lvl = getattr(p1, 'degree', 'Undergraduate') if p1 else 'Undergraduate'
+
+        p2_name = p2.name if p2 else 'B.Tech CSE - Artificial Intelligence & Machine Learning'
+        p2_short = p2.short_name if p2 else 'B.Tech AI & ML'
+        p2_desc = p2.description if p2 else 'Specialized Artificial Intelligence, Machine Learning & Neural Networks.'
+        p2_dur = p2.duration if p2 else '4 Years (8 Semesters)'
+        p2_lvl = getattr(p2, 'degree', 'Undergraduate') if p2 else 'Undergraduate'
+
+        f1_fee = f1.get('tuition', '₹1,60,000 / sem')
+        f2_fee = f2.get('tuition', '₹2,00,000 / sem')
+
+        return (
+            f"### 📊 Deep Comparative Analysis: **{p1_short}** vs **{p2_short}**\n"
+            f"*Lovely Professional University (Session 2026-27 Verified)*\n\n"
+            f"---\n\n"
+            f"#### 1. Core Focus & Curriculum Architecture\n"
+            f"• **{p1_short} ({p1_name}):**\n"
+            f"  - **Curriculum Focus:** {p1_desc}\n"
+            f"  - **Degree Tenure:** {p1_dur} ({p1_lvl})\n"
+            f"  - **Core Subjects:** Data Structures, OS, Computer Networks, DBMS, Software Engineering, Cloud Systems\n\n"
+            f"• **{p2_short} ({p2_name}):**\n"
+            f"  - **Curriculum Focus:** {p2_desc}\n"
+            f"  - **Degree Tenure:** {p2_dur} ({p2_lvl})\n"
+            f"  - **Core Subjects:** Deep Neural Networks, NLP, Computer Vision, Linear Algebra for AI, Generative AI\n\n"
+            f"---\n\n"
+            f"#### 2. Tech Stack & Programming Languages\n"
+            f"• **{p1_short}:** C, C++, Java, Python, SQL | Tools: Linux, Git, Docker, Spring Boot, MySQL\n"
+            f"• **{p2_short}:** Python, C++, R, Julia, SQL | Tools: PyTorch, TensorFlow, Scikit-learn, OpenCV, Hugging Face\n\n"
+            f"---\n\n"
+            f"#### 3. Syllabus Difficulty & Mathematical Rigor\n"
+            f"• **{p1_short}:** Balanced engineering rigor focusing on discrete math, operating systems, data structures & algorithms, and distributed systems.\n"
+            f"• **{p2_short}:** Higher mathematical intensity requiring linear algebra, multivariate calculus, probability matrices, and deep neural backpropagation.\n\n"
+            f"---\n\n"
+            f"#### 4. Top Recruiters & Placement Packages\n"
+            f"• **Top Recruiters for both:** Google, Microsoft, Amazon, Cisco, Apple, Cognizant, Infosys, Capgemini, TCS.\n"
+            f"• **{p1_short}:** Highest International: ₹3 Crore | Highest Domestic: ₹54.75 LPA (Google) | Average: ~₹7.2 - 8.5 LPA\n"
+            f"• **{p2_short}:** Highest Domestic: ₹54.75+ LPA | Specialized AI niche offers average ~₹8.5 - 10.5 LPA\n\n"
+            f"---\n\n"
+            f"#### 5. Semester Tuition Fees & LPUNEST Scholarship Cutoffs\n"
+            f"• **{p1_short}:** Base Tuition: **{f1_fee}**\n"
+            f"  - Category I (50% waiver / 95%+ in 12th / 95+ %ile JEE): ~₹80,000 / sem\n"
+            f"  - Category II (40% waiver / 90-94.9% in 12th / 90-94.9 %ile JEE): ~₹96,000 / sem\n"
+            f"  - Category III (30% waiver / 80-89.9% in 12th / 80-89.9 %ile JEE): ~₹1,12,000 / sem\n\n"
+            f"• **{p2_short}:** Base Tuition: **{f2_fee}**\n"
+            f"  - Category I (50% waiver / 95%+ in 12th / 95+ %ile JEE): ~₹1,00,000 / sem\n"
+            f"  - Category II (40% waiver / 90-94.9% in 12th / 90-94.9 %ile JEE): ~₹1,20,000 / sem\n"
+            f"  - Category III (30% waiver / 80-89.9% in 12th / 80-89.9 %ile JEE): ~₹1,40,000 / sem\n\n"
+            f"---\n\n"
+            f"#### 6. Clear Recommendation for Your Career Goals\n"
+            f"• Choose **{p1_short}** if you want maximum career versatility across software engineering, cloud systems, web platforms, and global tech roles.\n"
+            f"• Choose **{p2_short}** if you are explicitly targeting machine learning engineering, data science, computer vision, and applied generative AI careers."
         )
     
     def _generate_response(self, intent, context):

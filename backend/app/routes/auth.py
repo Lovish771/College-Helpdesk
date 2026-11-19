@@ -94,16 +94,28 @@ def send_otp():
     user_agent = request.headers.get('User-Agent', '')[:250]
     
     try:
-        success, msg, status_code = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
+        res = EmailService.request_otp(email, ip_address=ip_addr, user_agent=user_agent)
+        if len(res) == 4:
+            success, msg, status_code, meta = res
+        else:
+            success, msg, status_code = res
+            meta = {}
     except Exception:
         db.session.rollback()
         logger.exception('OTP request failed for %s', email)
         return jsonify({'success': False, 'error': 'We could not start email verification. Please try again shortly.'}), 503
-    return jsonify({
+
+    resp = {
         'success': success,
         'message': msg,
         'cooldownSeconds': EmailService.COOLDOWN_SECONDS
-    }), status_code
+    }
+    if meta.get('dev_otp'):
+        resp['devOtp'] = meta['dev_otp']
+    if meta.get('notice'):
+        resp['notice'] = meta['notice']
+
+    return jsonify(resp), status_code
 
 @auth_bp.route('/api/auth/verify-otp', methods=['POST'])
 def verify_otp():

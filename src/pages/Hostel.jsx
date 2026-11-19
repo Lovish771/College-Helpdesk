@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   BedDouble, Utensils, ShieldCheck, Wifi, Dumbbell, BookOpen,
-  MessageCircle, ArrowRight, Shirt, Sparkles, CheckCircle2, Search,
-  Home, Tv, Coffee, Sparkle, Building, Clock, Info, Check, X,
+  MessageCircle, ArrowRight, Shirt, CheckCircle2, Search,
+  Home, Tv, Coffee, Building, Clock, Info, Check, X,
   Maximize2, Wind, Bath, DoorClosed, SlidersHorizontal, Award, Layers,
   Zap, AlertCircle, RefreshCw, ChevronRight, CheckCircle, HelpCircle,
   Users, Calculator, FileText, PhoneCall
@@ -781,7 +781,7 @@ export default function Hostel() {
             <div className="rounded-3xl bg-slate-900 text-white p-5 sm:p-7 border border-orange-900/30 relative overflow-hidden">
               <div className="space-y-2.5 max-w-3xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-600/30 border border-orange-500/40 text-orange-400 text-xs font-bold uppercase tracking-wider">
-                  <Sparkles size={14} />
+                  <BedDouble size={14} />
                   <span>Executive Luxury Living • 100% Air-Conditioned</span>
                 </div>
                 <h2 className="text-xl sm:text-3xl font-extrabold font-display leading-tight text-white">

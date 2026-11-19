@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Search, ChevronDown, ChevronUp, ArrowRight, UserCheck, CreditCard,
   BookOpen, Bed, Users, Briefcase, FileText, LifeBuoy, HelpCircle,
-  Sparkles, CheckCircle2, BookmarkCheck, PhoneCall
+  CheckCircle2, BookmarkCheck, PhoneCall
 } from 'lucide-react';
 import { mockCategories, mockArticles } from '../api/knowledgeApi';
 
@@ -59,7 +59,7 @@ export default function KnowledgeBase({ ask }) {
             onClick={() => ask && ask('What are the key admission deadlines and scholarship cutoffs for 2026-27?')}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200 dark:border-orange-800 text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-100 transition-all cursor-pointer shrink-0"
           >
-            <Sparkles size={14} />
+            <HelpCircle size={14} />
             <span>Ask Custom Question to AI</span>
           </button>
         </div>
@@ -158,7 +158,6 @@ export default function KnowledgeBase({ ask }) {
                 return (
                   <div
                     key={art.id}
-                    onMouseEnter={() => setExpandedId(art.id)}
                     className={`rounded-2xl transition-all duration-200 border overflow-hidden ${
                       isOpen
                         ? 'bg-white dark:bg-slate-900 border-orange-400 dark:border-orange-600 shadow-md ring-1 ring-orange-500/20'
@@ -239,7 +238,7 @@ export default function KnowledgeBase({ ask }) {
                             onClick={() => ask && ask(`Regarding: "${art.title}" — can you give me more specific guidelines and deadlines?`)}
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors cursor-pointer"
                           >
-                            <Sparkles size={13} />
+                            <HelpCircle size={13} />
                             <span>Ask AI for Personalized Details</span>
                           </button>
                         </div>

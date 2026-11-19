@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
-  Sparkles, Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
+  Wallet, Filter, Check, Scale, Layers, ChevronDown, CheckSquare,
   Cpu, Code, Terminal, HeartPulse, Sprout, Landmark, Trophy, LayoutGrid, List,
   Activity, ChevronsUpDown, SlidersHorizontal
 } from 'lucide-react';
@@ -97,33 +97,89 @@ const ACADEMIC_SCHOOLS = [
   },
 ];
 
-const getProgramType = (p) => {
-  const name = (p.name || '').toUpperCase();
-  const short = (p.short || '').toUpperCase();
-  if (name.includes('B.TECH') || short.includes('B.TECH')) return 'B.Tech';
-  if (name.includes('BCA') || short.includes('BCA')) return 'BCA';
-  if (name.includes('B.SC') || short.includes('B.SC')) return 'B.Sc';
-  if (name.includes('LL.B') || name.includes('LL.M') || name.includes('LAW')) return p.degree === 'Postgraduate' ? 'LL.M' : 'Law';
-  if (name.includes('BBA') || short.includes('BBA')) return 'BBA';
-  if (name.includes('B.COM') || short.includes('B.COM')) return 'B.Com';
-  if (name.includes('PHARM') || name.includes('PHYSIOTHERAPY') || short.includes('BPT')) {
-    if (name.includes('PHYSIOTHERAPY') || short.includes('BPT')) return 'BPT';
-    return p.degree === 'Postgraduate' ? 'M.Pharm' : 'B.Pharm';
-  }
-  if (name.includes('DESIGN') || name.includes('ARCH') || name.includes('ANIMATION')) return 'Design & Arch';
-  if (name.includes('MBA') || short.includes('MBA')) return 'MBA';
-  if (name.includes('MCA') || short.includes('MCA')) return 'MCA';
-  if (name.includes('M.TECH') || short.includes('M.TECH')) return 'M.Tech';
-  if (name.includes('M.SC') || short.includes('M.SC')) return 'M.Sc';
-  if (name.includes('JOURNALISM') || short.includes('JMC')) return 'Media & Communication';
-  if (name.includes('EDUCATION') || short === 'B.ED') return 'B.Ed';
-  if (name.includes('HOTEL MANAGEMENT') || short.includes('BHMCT')) return 'Hospitality';
-  return 'Other';
+export const getProgramSchool = (p) => {
+  if (!p) return ACADEMIC_SCHOOLS[0];
+  const id = (p.id || '').toLowerCase();
+  const school = ACADEMIC_SCHOOLS.find((s) =>
+    s.programPrefixes && s.programPrefixes.some((prefix) => id.startsWith(prefix))
+  );
+  return school || ACADEMIC_SCHOOLS[0];
 };
 
-const UG_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'B.Pharm', 'BPT', 'Law', 'Design & Arch', 'Media & Communication', 'B.Ed', 'Hospitality'];
-const PG_DEGREE_TYPES = ['All Degrees', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'M.Pharm', 'LL.M'];
-const ALL_DEGREE_TYPES = ['All Degrees', 'B.Tech', 'BCA', 'B.Sc', 'BBA', 'B.Com', 'MBA', 'MCA', 'M.Tech', 'M.Sc', 'B.Pharm', 'M.Pharm', 'BPT', 'Law', 'LL.M', 'Design & Arch', 'Media & Communication', 'B.Ed', 'Hospitality'];
+const getProgramType = (p) => {
+  const id = (p.id || '').toLowerCase();
+  const name = (p.name || '').toUpperCase();
+  const short = (p.short || '').toUpperCase();
+
+  if (id.startsWith('btech') || name.includes('B.TECH') || short.includes('B.TECH')) return 'B.Tech';
+  if (id.startsWith('mtech') || name.includes('M.TECH') || short.includes('M.TECH')) return 'M.Tech';
+  if (id.startsWith('bca') || name.includes('BCA') || name.includes('BACHELOR OF COMPUTER APPLICATIONS') || short.includes('BCA')) return 'BCA';
+  if (id.startsWith('mca') || name.includes('MCA') || name.includes('MASTER OF COMPUTER APPLICATIONS') || short.includes('MCA')) return 'MCA';
+  if (id.startsWith('mba') || name.includes('MBA') || name.includes('MASTER OF BUSINESS ADMINISTRATION') || short.includes('MBA')) return 'MBA';
+  if (id.startsWith('bba') || name.includes('BBA') || name.includes('BACHELOR OF BUSINESS ADMINISTRATION') || short.includes('BBA')) return 'BBA';
+  if (id.startsWith('bcom') || name.includes('B.COM') || name.includes('BACHELOR OF COMMERCE') || short.includes('B.COM')) return 'B.Com';
+  if (id.startsWith('bsc') || name.includes('B.SC') || short.includes('B.SC')) return 'B.Sc';
+  if (id.startsWith('msc') || name.includes('M.SC') || short.includes('M.SC')) return 'M.Sc';
+  if (name.includes('PHARM') || id.includes('pharm')) return p.degree === 'Postgraduate' ? 'M.Pharm' : 'B.Pharm';
+  if (name.includes('PHYSIOTHERAPY') || short.includes('BPT') || id.includes('bpt')) return 'BPT';
+  if (name.includes('LAW') || name.includes('LL.B') || name.includes('LL.M') || id.includes('law') || id.includes('llb') || id.includes('llm')) {
+    return (p.degree === 'Postgraduate' || name.includes('LL.M')) ? 'LL.M' : 'Law';
+  }
+  if (name.includes('DESIGN') || name.includes('ARCH') || name.includes('ANIMATION') || id.includes('bdes') || id.includes('arch')) return 'Design & Arch';
+  if (name.includes('JOURNALISM') || short.includes('JMC') || id.includes('jmc')) return 'Media & Communication';
+  if (name.includes('EDUCATION') || short.includes('B.ED') || id.includes('bed')) return 'B.Ed';
+  if (name.includes('HOTEL') || short.includes('BHMCT') || id.includes('bhmct')) return 'Hospitality';
+
+  return p.degree === 'Postgraduate' ? 'M.Sc' : 'B.Sc';
+};
+
+const UG_DEGREE_ITEMS = [
+  'All Degrees',
+  'B.Tech',
+  'B.Sc',
+  'BCA',
+  'BBA',
+  'B.Com',
+  'B.Pharm',
+  'Law',
+  'Design & Arch',
+  'BPT',
+  'Media & Communication',
+  'B.Ed',
+  'Hospitality'
+];
+
+const PG_DEGREE_ITEMS = [
+  'All Degrees',
+  'MBA',
+  'MCA',
+  'M.Tech',
+  'M.Sc',
+  'M.Pharm',
+  'LL.M'
+];
+
+const ALL_DEGREE_ITEMS = [
+  'All Degrees',
+  'B.Tech',
+  'B.Sc',
+  'BCA',
+  'BBA',
+  'B.Com',
+  'MBA',
+  'MCA',
+  'M.Tech',
+  'M.Sc',
+  'B.Pharm',
+  'Law',
+  'Design & Arch',
+  'M.Pharm',
+  'LL.M',
+  'BPT',
+  'Media & Communication',
+  'B.Ed',
+  'Hospitality'
+];
 
 
 // Detailed Program View (Comprehensive, Lists All Degree Details)
@@ -406,7 +462,7 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
                   onClick={() => ask(`Give me the full 8-semester curriculum, total credits, and elective choices for ${p.name}`)}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
                 >
-                  <Sparkles size={13} />
+                  <BookOpen size={13} />
                   <span>Ask AI for Full 8-Semester Syllabus</span>
                 </button>
               </div>
@@ -523,30 +579,40 @@ export default function Programs({ ask, onOpenCompare }) {
   const [q, setQ] = useState('');
   const [level, setLevel] = useState('All'); // 'All' | 'UG' | 'PG'
   const [selectedDegreeType, setSelectedDegreeType] = useState('All');
-  const [selectedSchoolId, setSelectedSchoolId] = useState('all');
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [compareQueue, setCompareQueue] = useState([]);
   const [sortBy, setSortBy] = useState('popularity');
   const [viewMode, setViewMode] = useState('carousel'); // 'carousel' | 'grid'
 
-  // Map each program to an Academic School
-  const getProgramSchool = (p) => {
-    for (const school of ACADEMIC_SCHOOLS) {
-      if (school.programPrefixes.some((prefix) => p.id.startsWith(prefix))) {
-        return school;
-      }
-    }
-    // Fallback based on tags
-    if (p.tags?.includes('Computer Science')) return ACADEMIC_SCHOOLS[0];
-    if (p.tags?.includes('Engineering')) return ACADEMIC_SCHOOLS[1];
-    if (p.tags?.includes('Management') || p.tags?.includes('Commerce')) return ACADEMIC_SCHOOLS[3];
-    if (p.tags?.includes('Pharmacy') || p.tags?.includes('Medical')) return ACADEMIC_SCHOOLS[4];
-    if (p.tags?.includes('Agriculture') || p.tags?.includes('Science')) return ACADEMIC_SCHOOLS[5];
-    if (p.tags?.includes('Law')) return ACADEMIC_SCHOOLS[6];
-    return ACADEMIC_SCHOOLS[0];
+  // Degree lists according to study level
+  const currentDegreeTypes = useMemo(() => {
+    if (level === 'UG') return UG_DEGREE_ITEMS;
+    if (level === 'PG') return PG_DEGREE_ITEMS;
+    return ALL_DEGREE_ITEMS;
+  }, [level]);
+
+  // Counts of available programmes by degree type
+  const degreeCounts = useMemo(() => {
+    const map = {};
+    programs.forEach((p) => {
+      if (level === 'UG' && p.degree !== 'Undergraduate') return;
+      if (level === 'PG' && p.degree !== 'Postgraduate') return;
+      const t = getProgramType(p);
+      map[t] = (map[t] || 0) + 1;
+    });
+    return map;
+  }, [level]);
+
+  // Active filter count
+  const activeFilterCount = (level !== 'All' ? 1 : 0) + (selectedDegreeType !== 'All' && selectedDegreeType !== 'All Degrees' ? 1 : 0) + (q.trim() ? 1 : 0);
+
+  const handleResetFilters = () => {
+    setQ('');
+    setLevel('All');
+    setSelectedDegreeType('All');
   };
 
-  // Filtered Programs
+  // Filtered Programs based on Level and Degree (B.Tech, B.Sc, BCA, MBA, etc.)
   const filtered = useMemo(() => {
     return programs.filter((p) => {
       // Level match
@@ -554,28 +620,24 @@ export default function Programs({ ask, onOpenCompare }) {
       if (level === 'PG' && p.degree !== 'Postgraduate') return false;
 
       // Degree Type match
+      const pType = getProgramType(p);
       if (selectedDegreeType !== 'All' && selectedDegreeType !== 'All Degrees') {
-        const pType = getProgramType(p);
         if (pType !== selectedDegreeType) return false;
       }
 
-      // School match
-      const pSchool = getProgramSchool(p);
-      if (selectedSchoolId !== 'all' && pSchool.id !== selectedSchoolId) return false;
-
-      // Query match
+      // Search Query match
       if (q.trim()) {
         const query = q.toLowerCase();
-        const matchesName = p.name.toLowerCase().includes(query);
-        const matchesShort = p.short.toLowerCase().includes(query);
-        const matchesDesc = p.description.toLowerCase().includes(query);
-        const matchesSchool = pSchool.name.toLowerCase().includes(query) || pSchool.short.toLowerCase().includes(query);
-        if (!matchesName && !matchesShort && !matchesDesc && !matchesSchool) return false;
+        const matchesName = (p.name || '').toLowerCase().includes(query);
+        const matchesShort = (p.short || '').toLowerCase().includes(query);
+        const matchesDesc = (p.description || '').toLowerCase().includes(query);
+        const matchesDegree = pType.toLowerCase().includes(query);
+        if (!matchesName && !matchesShort && !matchesDesc && !matchesDegree) return false;
       }
 
       return true;
     });
-  }, [q, level, selectedDegreeType, selectedSchoolId]);
+  }, [q, level, selectedDegreeType]);
 
   // Sorted list according to current sort criteria
   const sortedFiltered = useMemo(() => {
@@ -656,26 +718,6 @@ export default function Programs({ ask, onOpenCompare }) {
     );
   }
 
-  const activeFilterCount =
-    (level !== 'All' ? 1 : 0) +
-    (selectedDegreeType !== 'All' && selectedDegreeType !== 'All Degrees' ? 1 : 0) +
-    (selectedSchoolId !== 'all' ? 1 : 0) +
-    (q.trim() ? 1 : 0);
-
-  const handleResetFilters = () => {
-    setQ('');
-    setLevel('All');
-    setSelectedDegreeType('All');
-    setSelectedSchoolId('all');
-  };
-
-  const currentDegreeTypes =
-    level === 'UG'
-      ? UG_DEGREE_TYPES
-      : level === 'PG'
-      ? PG_DEGREE_TYPES
-      : ALL_DEGREE_TYPES;
-
   return (
     <div className="min-h-screen max-w-full overflow-x-hidden bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors pb-24">
       
@@ -683,70 +725,20 @@ export default function Programs({ ask, onOpenCompare }) {
       <div className="relative bg-white dark:bg-[#070B14] text-slate-900 dark:text-white pt-6 sm:pt-8 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-200 dark:border-slate-800/80 transition-colors">
         <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-orange-50/70 dark:from-[#070B14] dark:via-[#070B14] dark:to-slate-900 pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="max-w-2xl">
-            {/* Pill: Explore Your Future */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-2.5 shadow-2xs">
-              <Sparkles size={12} className="text-orange-500" />
-              <span>Explore Your Future</span>
+            {/* Pill: Explore Programmes */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-2 shadow-2xs">
+              <GraduationCap size={13} className="text-orange-500" />
+              <span>Academic Catalog</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">
               Programmes <span className="text-orange-500">&amp;</span> Specializations
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-sans">
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-sans">
               Explore 44 industry-aligned undergraduate and postgraduate programs across computing, engineering, management, and healthcare.
             </p>
-
-            {/* Compact Search Input Bar */}
-            <div className="mt-5 max-w-xl relative flex items-center bg-slate-50 dark:bg-[#0B101D]/90 border border-slate-200 dark:border-slate-700/80 rounded-full pl-4 pr-1.5 py-1 shadow-sm dark:shadow-xl focus-within:border-orange-500/60 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all">
-              <Search size={16} className="text-slate-400 mr-2 shrink-0" />
-              <input
-                type="text"
-                value={q}
-                maxLength={100}
-                onChange={(e) => setQ(e.target.value.slice(0, 100))}
-                placeholder="Search by degree name, specialization, or school (e.g. AI & ML, B.Tech, MBA)..."
-                aria-label="Search programmes by name or discipline"
-                className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none font-sans"
-              />
-              {q && (
-                <button
-                  onClick={() => setQ('')}
-                  aria-label="Clear search input"
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white mr-1 cursor-pointer"
-                >
-                  <X size={14} />
-                </button>
-              )}
-              <button
-                type="button"
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 flex items-center justify-center text-white shrink-0 shadow-sm transition-all active:scale-95 cursor-pointer ml-1"
-                aria-label="Submit search"
-              >
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Right Floating Card: LPU-NEST Scholarships */}
-          <div className="hidden lg:flex flex-col p-5 rounded-2xl bg-white dark:bg-[#0D1322]/80 border border-slate-200 dark:border-white/10 max-w-xs xl:max-w-sm shadow-sm dark:shadow-xl shrink-0">
-            <div className="flex items-center gap-3 mb-2.5">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                <Trophy size={20} />
-              </div>
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug">LPU-NEST Scholarships</h4>
-                <p className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold mt-0.5">Phase 1 Admissions Open</p>
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
-              Up to 50% tuition fee waiver based on national test performance across all technical programs.
-            </p>
-            <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Category 1 Benefits</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-bold">₹1,00,000+ Waiver</span>
-            </div>
           </div>
         </div>
       </div>
@@ -790,60 +782,114 @@ export default function Programs({ ask, onOpenCompare }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Study level
-                <select
-                  value={level}
-                  onChange={(e) => { setLevel(e.target.value); setSelectedDegreeType('All'); }}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="All">All levels</option>
-                  <option value="UG">Undergraduate</option>
-                  <option value="PG">Postgraduate</option>
-                </select>
-              </label>
+            {/* ── Tiered Degree Filter Bar (Replaces dropdowns with sleek interactive pills) ── */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              {/* Tier 1: Study Level & Filter Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mr-1 shrink-0">
+                    Level:
+                  </span>
+                  {[
+                    { id: 'All', label: 'All Levels' },
+                    { id: 'UG', label: 'Undergraduate (UG)' },
+                    { id: 'PG', label: 'Postgraduate (PG)' },
+                  ].map((lvl) => {
+                    const isSelected = level === lvl.id;
+                    return (
+                      <button
+                        key={lvl.id}
+                        type="button"
+                        onClick={() => {
+                          setLevel(lvl.id);
+                          setSelectedDegreeType('All');
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                          isSelected
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80'
+                        }`}
+                      >
+                        {lvl.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
-              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                School / faculty
-                <select
-                  value={selectedSchoolId}
-                  onChange={(e) => setSelectedSchoolId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="all">All schools</option>
-                  {ACADEMIC_SCHOOLS.map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
-                </select>
-              </label>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResetFilters}
+                    className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 px-2.5 py-1 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors cursor-pointer"
+                  >
+                    <X size={13} />
+                    <span>Reset Filters ({activeFilterCount})</span>
+                  </button>
+                )}
+              </div>
 
-              <label className="flex flex-col gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Degree type
-                <select
-                  value={selectedDegreeType}
-                  onChange={(e) => setSelectedDegreeType(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-xs font-semibold normal-case tracking-normal text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  {currentDegreeTypes.map((type) => (
-                    <option key={type} value={type === 'All Degrees' ? 'All' : type}>
-                      {type === 'All Degrees' ? 'All degree types' : type}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {/* Tier 2: Degree Category Dropdown & Quick-Select Pills */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 shrink-0">
+                    Select Degree:
+                  </span>
+                  <select
+                    value={selectedDegreeType === 'All' ? 'All Degrees' : selectedDegreeType}
+                    onChange={(e) => setSelectedDegreeType(e.target.value === 'All Degrees' ? 'All' : e.target.value)}
+                    className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-orange-500 cursor-pointer"
+                    aria-label="Filter courses by specific degree"
+                  >
+                    {currentDegreeTypes.map((type) => {
+                      const isAll = type === 'All Degrees';
+                      const count = isAll
+                        ? Object.values(degreeCounts).reduce((a, b) => a + b, 0)
+                        : degreeCounts[type] || 0;
+                      return (
+                        <option key={type} value={type}>
+                          {type} ({count})
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
 
-              <div className="flex items-end justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5 border border-slate-200 dark:border-slate-700">
-                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300" aria-live="polite">
-                  {activeFilterCount ? `${activeFilterCount} filter${activeFilterCount === 1 ? '' : 's'} active` : 'No filters applied'}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleResetFilters}
-                  disabled={!activeFilterCount}
-                  className="premium-interaction inline-flex items-center gap-1 text-xs font-bold text-orange-700 dark:text-orange-300 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed"
-                >
-                  <X size={13} />
-                  Reset
-                </button>
+                {/* Pills for one-tap quick switching */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  {currentDegreeTypes.map((type) => {
+                    const isAll = type === 'All Degrees';
+                    const isSelected = isAll
+                      ? selectedDegreeType === 'All' || selectedDegreeType === 'All Degrees'
+                      : selectedDegreeType === type;
+                    const count = isAll
+                      ? Object.values(degreeCounts).reduce((a, b) => a + b, 0)
+                      : degreeCounts[type] || 0;
+
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setSelectedDegreeType(isAll ? 'All' : type)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                          isSelected
+                            ? 'bg-orange-600 text-white shadow-xs font-bold ring-2 ring-orange-500/20'
+                            : 'bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/50'
+                        }`}
+                      >
+                        <span>{type}</span>
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

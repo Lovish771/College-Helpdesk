@@ -117,6 +117,9 @@ function AppContent() {
     isThemeChangingRef.current = true;
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
+    // Enable smooth 60fps color transition class across all elements
+    document.documentElement.classList.add('theme-transitioning');
+
     const finishTransition = () => {
       document.documentElement.classList.remove('theme-transitioning');
       isThemeChangingRef.current = false;
@@ -138,23 +141,24 @@ function AppContent() {
         });
 
         transition.ready.then(() => {
-          const clipPath = [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`
-          ];
-          document.documentElement.animate(
-            {
-              clipPath: clipPath,
-            },
-            {
-              duration: 850,
-              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-              pseudoElement: '::view-transition-new(root)',
-            }
-          );
+          try {
+            document.documentElement.animate(
+              {
+                clipPath: [
+                  `circle(0px at ${x}px ${y}px)`,
+                  `circle(${endRadius}px at ${x}px ${y}px)`
+                ],
+              },
+              {
+                duration: 750,
+                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                pseudoElement: '::view-transition-new(root)',
+              }
+            );
+          } catch {}
         });
         transition.finished.then(finishTransition, finishTransition);
-        window.setTimeout(finishTransition, 1000);
+        window.setTimeout(finishTransition, 800);
         return;
       } catch {
         // Fallback below
@@ -162,14 +166,9 @@ function AppContent() {
     }
 
     // Smooth fallback with global transition class
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.add('theme-transitioning');
-      flushSync(() => setTheme(nextTheme));
-      applyThemeToDom(nextTheme);
-      window.setTimeout(finishTransition, 950);
-    } else {
-      setTheme(nextTheme);
-    }
+    flushSync(() => setTheme(nextTheme));
+    applyThemeToDom(nextTheme);
+    window.setTimeout(finishTransition, 750);
   }, [theme, applyThemeToDom]);
 
   const chat = useChat();

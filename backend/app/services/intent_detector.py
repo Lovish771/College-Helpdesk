@@ -12,6 +12,10 @@ class IntentDetector:
         """
         message_lower = message.lower().strip()
         
+        # Priority check: Compare / versus queries take absolute precedence
+        if re.search(r'\b(compare|comparison|comparative|vs\.?|versus|difference\s+between)\b', message_lower):
+            return 'compare_query', 0.99, 'compare_pattern'
+
         # Load active intent patterns from database ordered by priority
         patterns = IntentPattern.query.filter_by(is_active=True).order_by(IntentPattern.priority.desc()).all()
         
@@ -66,6 +70,34 @@ class IntentDetector:
                     continue
         
         return None
+
+    def extract_programs(self, message):
+        """Extract multiple program references from message"""
+        programs = Program.query.filter_by(is_active=True).all()
+        msg_lower = message.lower()
+        matched = []
+        
+        sorted_programs = sorted(
+            programs,
+            key=lambda p: (
+                p.id == 'btech-cse',
+                -len(p.short_name)
+            )
+        )
+        
+        for program in sorted_programs:
+            if program.short_name.lower() in msg_lower or program.name.lower() in msg_lower:
+                if program not in matched:
+                    matched.append(program)
+            elif program.match_pattern:
+                try:
+                    if re.search(program.match_pattern, msg_lower, re.IGNORECASE):
+                        if program not in matched:
+                            matched.append(program)
+                except re.error:
+                    continue
+        
+        return matched
     
     def extract_semester(self, message):
         """Extract semester/year from message"""

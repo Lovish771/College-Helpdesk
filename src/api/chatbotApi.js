@@ -1,10 +1,12 @@
 import { programs, fees, scholarships, documents, admissionSteps, deadlines, contact } from '../data/mockData';
+import { getProgramComparisonDetails } from '../data/programComparisonData';
 import { USE_MOCK, wait, request } from './client';
 
 // ---- MOCK ENGINE (used when VITE_USE_MOCK=true) ----
 const memory = {}; // conversation_id -> { pending, program, semester }
 const INTENTS = [
   ['greeting', /^(hi|hello|hey|namaste|good\s*(morning|evening|afternoon))/i],
+  ['compare_query', /\b(?:compar(?:e|ison|ative|ing)|vs\.?|versus|difference\s+between)\b/i],
   ['fee_query', /fee|cost|tuition|charges|price|per sem|how much/i],
   ['hostel_query', /hostel|accommodation|room|mess|seater|food court|living|stay/i],
   ['scholarship_query', /scholar|financial aid|waiver|concession|discount|cat[- ]?[123]/i],
@@ -17,10 +19,106 @@ const INTENTS = [
   ['contact_query', /contact|phone|email|office|address|call|toll free|helpline/i],
   ['curriculum_query', /curriculum|subjects|syllabus|course|what.*study|what.*learn/i],
 ];
+
 const findProgram = (t) => {
   // Check specializations and specific programs before generic core CSE
   const sorted = [...programs].sort((a, b) => (a.id === 'btech-cse' ? 1 : b.id === 'btech-cse' ? -1 : b.short.length - a.short.length));
   return sorted.find((p) => new RegExp(p.match, 'i').test(t));
+};
+
+const findComparingPrograms = (t) => {
+  const matched = [];
+  // Sort by specificity
+  const sorted = [...programs].sort((a, b) => (a.id === 'btech-cse' ? 1 : b.id === 'btech-cse' ? -1 : b.short.length - a.short.length));
+  for (const p of sorted) {
+    const regShort = new RegExp(`\\b${p.short.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    const regMatch = p.match ? new RegExp(p.match, 'i') : null;
+    const regName = new RegExp(p.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    if (regShort.test(t) || (regMatch && regMatch.test(t)) || regName.test(t)) {
+      if (!matched.some((m) => m.id === p.id)) {
+        matched.push(p);
+      }
+    }
+  }
+  if (matched.length === 1) {
+    if (matched[0].id === 'btech-cse') {
+      const peer = programs.find((p) => p.id === 'btech-aiml');
+      if (peer) matched.push(peer);
+    } else if (matched[0].id.startsWith('btech')) {
+      const peer = programs.find((p) => p.id === 'btech-cse');
+      if (peer) matched.push(peer);
+    }
+  }
+  return matched.length >= 2 ? matched : [programs.find((p) => p.id === 'btech-cse'), programs.find((p) => p.id === 'btech-aiml')];
+};
+
+const formatComparisonResponse = (p1, p2) => {
+  const c1 = getProgramComparisonDetails(p1) || {};
+  const c2 = getProgramComparisonDetails(p2) || {};
+  const f1 = fees[p1.id] || { tuition: '₹1,60,000 / sem' };
+  const f2 = fees[p2.id] || { tuition: '₹2,00,000 / sem' };
+
+  return `### 📊 Deep Comparative Analysis: **${p1.short}** vs **${p2.short}**
+*Lovely Professional University (Session 2026-27 Verified)*
+
+---
+
+#### 1. Core Focus & Curriculum Architecture
+• **${p1.short} (${p1.name}):**
+  - **Curriculum Focus:** ${p1.description}
+  - **Core Subjects:** ${c1.coreElectives || 'Data Structures, Operating Systems, Computer Networks, DBMS, Software Engineering, Cloud Systems'}
+  - **Practicum & Labs:** ${c1.labsAndInternships || 'Systems Programming Lab, Cloud Computing Sandbox, 6-Month Industry Capstone Internship'}
+
+• **${p2.short} (${p2.name}):**
+  - **Curriculum Focus:** ${p2.description}
+  - **Specialized AI/ML Modules:** ${c2.aiTopics ? c2.aiTopics.join(', ') : 'Deep Learning, NLP, Computer Vision, Generative AI'}
+  - **Core Subjects:** ${c2.coreElectives || 'Applied Machine Learning, Pattern Recognition, Linear Algebra for AI, Neural Networks'}
+  - **Practicum & Labs:** ${c2.labsAndInternships || 'AI Innovation Cluster, Deep Learning GPU Lab, Industry AI Capstone'}
+
+---
+
+#### 2. Programming Languages & Tech Stacks
+• **${p1.short}:** Languages: ${c1.languages?.join(', ') || 'C, C++, Java, Python, SQL'} | Tools: ${c1.techStack?.join(', ') || 'Linux, Git, Docker, Spring Boot, MySQL'}
+• **${p2.short}:** Languages: ${c2.languages?.join(', ') || 'Python, C++, R, Julia, SQL'} | Tools: ${c2.techStack?.join(', ') || 'PyTorch, TensorFlow, Scikit-learn, OpenCV, Hugging Face'}
+
+---
+
+#### 3. Syllabus Difficulty & Mathematical Intensity
+• **${p1.short}:** Balanced engineering rigor centered around discrete mathematics, computational logic, data structures, and distributed software systems.
+• **${p2.short}:** High mathematical intensity requiring strong foundations in multivariate calculus, linear algebra, probability matrices, Bayesian inference, and neural backpropagation.
+
+---
+
+#### 4. Industry Demand & Corporate Recruiters
+• **Recruiters for both:** Google, Microsoft, Amazon, Cisco, Apple, Cognizant, Infosys, Capgemini, TCS, Wipro.
+• **Primary Career Roles:**
+  - **${p1.short}:** ${c1.careerRoles?.join(', ') || 'Software Development Engineer (SDE), Full-Stack Architect, Cloud Engineer'}
+  - **${p2.short}:** ${c2.careerRoles?.join(', ') || 'AI/ML Research Engineer, NLP Specialist, Computer Vision Engineer, Data Scientist'}
+
+---
+
+#### 5. Placement Packages & Statistics
+• **${p1.short}:** Highest International: ₹3 Crore | Highest Domestic: ₹54.75 LPA (Google) | Average Package: ~₹7.2 - 8.5 LPA
+• **${p2.short}:** Highest Domestic: ₹54.75+ LPA | Specialized AI niche offers average ~₹8.5 - 10.5 LPA
+
+---
+
+#### 6. Tuition Fees & LPUNEST Merit Scholarships (Per Semester)
+• **${p1.short}:** Base Tuition: **${f1.tuition || '₹1,60,000 / sem'}**
+  - Category I (50% waiver / 95%+ in 12th / 95+ %ile JEE): ~₹80,000 / sem
+  - Category II (40% waiver / 90-94.9% in 12th / 90-94.9 %ile JEE): ~₹96,000 / sem
+  - Category III (30% waiver / 80-89.9% in 12th / 80-89.9 %ile JEE): ~₹1,12,000 / sem
+
+• **${p2.short}:** Base Tuition: **${f2.tuition || '₹2,00,000 / sem'}**
+  - Category I (50% waiver / 95%+ in 12th / 95+ %ile JEE): ~₹1,00,000 / sem
+  - Category II (40% waiver / 90-94.9% in 12th / 90-94.9 %ile JEE): ~₹1,20,000 / sem
+  - Category III (30% waiver / 80-89.9% in 12th / 80-89.9 %ile JEE): ~₹1,40,000 / sem
+
+---
+
+#### 7. Clear Recommendation for Your Career Goals
+• Choose **${p1.short}** if you want maximum versatile career flexibility across full-stack development, cloud architecture, system design, and the widest breadth of tech corporate roles worldwide.
+• Choose **${p2.short}** if you are explicitly passionate about machine learning models, artificial intelligence research, algorithmic data modeling, and specialized AI engineer careers.`;
 };
 const list = (a) => a.map((x) => `• ${x}`).join('\n');
 const names = programs.map((p) => p.short);
@@ -81,6 +179,19 @@ function mockReply(message, cid) {
       intent,
       confidence: 0.98,
       suggestions: ['Available Programs', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities'],
+    };
+  }
+
+  if (intent === 'compare_query') {
+    const pair = findComparingPrograms(message);
+    const p1 = pair[0] || programs[0];
+    const p2 = pair[1] || programs[1];
+    return {
+      ...base,
+      reply: formatComparisonResponse(p1, p2),
+      intent: 'compare_query',
+      confidence: 0.99,
+      suggestions: [`Fee for ${p1.short}`, `Fee for ${p2.short}`, 'LPUNEST Scholarships', 'Hostel Facilities'],
     };
   }
 
