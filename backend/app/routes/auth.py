@@ -110,6 +110,8 @@ def send_otp():
         'message': msg,
         'cooldownSeconds': EmailService.COOLDOWN_SECONDS
     }
+    if not success:
+        resp['error'] = msg
     if meta.get('dev_otp'):
         resp['devOtp'] = meta['dev_otp']
     if meta.get('notice'):

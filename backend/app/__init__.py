@@ -1,37 +1,71 @@
 import re
+import sys
+import os
+import tempfile
+import shutil
+import logging
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
+# Self-alias to 'app' if loaded as 'backend.app' so legacy absolute imports resolve cleanly
+cur_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(cur_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+if cur_dir not in sys.path:
+    sys.path.insert(0, cur_dir)
+
+if 'app' not in sys.modules:
+    try:
+        import backend.app as _backend_app
+        sys.modules['app'] = _backend_app
+    except Exception:
+        pass
+
 db = SQLAlchemy()
+logger = logging.getLogger(__name__)
 
 def create_app(config_name=None, **kwargs):
     app = Flask(__name__)
     
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'lpu-cse276-dev-secret-key-2026')
+    
+    # Compute safe SQLite fallback path seeded from bundled database
+    tmp_dir = tempfile.gettempdir()
+    tmp_db = os.path.join(tmp_dir, 'lpu_helpdesk.db')
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    source_db = os.path.join(base_dir, 'lpu_helpdesk.db')
+    root_source_db = os.path.abspath(os.path.join(base_dir, '..', 'backend', 'lpu_helpdesk.db'))
+    
+    if not os.path.exists(tmp_db):
+        for candidate in [source_db, root_source_db, 'backend/lpu_helpdesk.db', 'lpu_helpdesk.db']:
+            if os.path.exists(candidate):
+                try:
+                    shutil.copyfile(candidate, tmp_db)
+                    break
+                except Exception:
+                    pass
+    norm_tmp_db = tmp_db.replace('\\', '/')
+    sqlite_fallback_uri = f'sqlite:///{norm_tmp_db}'
+
     if config_name == 'testing':
         app.config['TESTING'] = True
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     else:
         database_url = os.getenv('DATABASE_URL', '').strip()
         if database_url:
-            # Providers still commonly issue the legacy postgres:// scheme;
-            # SQLAlchemy 2 expects postgresql://.
             if database_url.startswith('postgres://'):
                 database_url = 'postgresql://' + database_url[len('postgres://'):]
             app.config['SQLALCHEMY_DATABASE_URI'] = database_url
         elif os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
-            # Vercel serverless environment: only /tmp is writable
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/lpu_helpdesk.db'
+            app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
         else:
-            # Use absolute or instance-relative database path so running from any directory works
-            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-            db_path = os.path.join(base_dir, 'lpu_helpdesk.db')
+            db_path = os.path.join(base_dir, 'lpu_helpdesk.db').replace('\\', '/')
             app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
@@ -83,6 +117,17 @@ def create_app(config_name=None, **kwargs):
             'timestamp': datetime.now(timezone.utc).isoformat()
         }, e.code
 
+    @app.errorhandler(Exception)
+    def handle_generic_exception(e):
+        logger.exception("Internal server exception: %s", e)
+        return {
+            'error': True,
+            'code': 500,
+            'name': 'Internal Server Error',
+            'message': 'A temporary server error occurred. Please try again shortly.',
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }, 500
+
     # Initialize extensions
     db.init_app(app)
     
@@ -106,9 +151,22 @@ def create_app(config_name=None, **kwargs):
             "api_health": "/api/programs/health"
         }, 200
     
-    # Create tables and auto-seed users if empty
+    # Ensure tables and migrations run safely without crashing container
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as err:
+            logger.warning("Primary database connection/creation failed: %s. Falling back to SQLite: %s", err, sqlite_fallback_uri)
+            app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
+            try:
+                db.engine.dispose()
+            except Exception:
+                pass
+            try:
+                db.create_all()
+            except Exception as err2:
+                logger.error("SQLite database creation failed: %s", err2)
+
         try:
             from sqlalchemy import text
             db.session.execute(text("ALTER TABLE conversation_sessions ADD COLUMN user_id INTEGER"))

@@ -122,13 +122,14 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
             msg.attach(MIMEText(text_content, 'plain'))
             msg.attach(MIMEText(html_content, 'html'))
 
-            ports_to_try = [587, 465]
+            ports_to_try = [smtp_port, 587, 465]
+            ports_to_try = list(dict.fromkeys(ports_to_try))
             for p in ports_to_try:
                 try:
                     if p == 465:
-                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=4, context=ssl.create_default_context())
+                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=6, context=ssl.create_default_context())
                     else:
-                        server = smtplib.SMTP(smtp_server, p, timeout=4)
+                        server = smtplib.SMTP(smtp_server, p, timeout=6)
                         server.starttls(context=ssl.create_default_context())
                     with server:
                         server.login(smtp_user, smtp_pass)
