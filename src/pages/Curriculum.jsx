@@ -1,48 +1,67 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   ChevronRight, ChevronDown, BookOpen, Layers,
   Calendar, CheckCircle2, Award, ArrowRight, Laptop, FlaskConical,
   GraduationCap, FileText
 } from 'lucide-react';
-import { programs, curriculum } from '../data/mockData';
+import { programs } from '../data/mockData';
+import { getProgramCurriculum, LPU_TERMS } from '../data/curriculumData';
 
 export default function Curriculum({ ask, go }) {
   const [selectedProgramId, setSelectedProgramId] = useState('btech-cse');
   const [selectedSemester, setSelectedSemester] = useState('Semester 1');
   const [termFilter, setTermFilter] = useState('all'); // 'all' | 'Autumn' | 'Spring'
 
-  const semesters = ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8'];
+  const activeProgram = useMemo(() => {
+    return programs.find((p) => p.id === selectedProgramId) || programs[0];
+  }, [selectedProgramId]);
 
-  // Current semester number (1 - 8)
+  // Calculate dynamic maximum semesters based on the actual degree duration
+  const maxSemesters = useMemo(() => {
+    if (!activeProgram?.duration) return 8;
+    const semMatch = activeProgram.duration.match(/(\d+)\s*Sem/i);
+    if (semMatch) return parseInt(semMatch[1], 10);
+    const yrMatch = activeProgram.duration.match(/(\d+(?:\.\d+)?)\s*Year/i);
+    if (yrMatch) return Math.round(parseFloat(yrMatch[1]) * 2);
+    return 8;
+  }, [activeProgram]);
+
+  const semesters = useMemo(() => {
+    return Array.from({ length: maxSemesters }, (_, i) => `Semester ${i + 1}`);
+  }, [maxSemesters]);
+
+  // Clamp selected semester if switching from e.g. 8-sem B.Tech to 4-sem MBA
+  useEffect(() => {
+    const cur = parseInt(selectedSemester.replace('Semester ', ''), 10) || 1;
+    if (cur > maxSemesters) {
+      setSelectedSemester('Semester 1');
+    }
+  }, [maxSemesters, selectedSemester]);
+
+  // Current semester number
   const semNumber = selectedSemester.replace('Semester ', '');
 
-  // Term metadata
-  const termInfo = curriculum.terms?.[semNumber] || {
+  // Term metadata (Autumn vs Spring)
+  const termInfo = LPU_TERMS[semNumber] || {
     name: Number(semNumber) % 2 === 1 ? 'Autumn Term' : 'Spring Term',
     period: Number(semNumber) % 2 === 1 ? 'August - December' : 'January - June',
     type: Number(semNumber) % 2 === 1 ? 'Autumn' : 'Spring',
   };
 
-  // Lookup course data
+  // Lookup authentic discipline-specific course data
   const courseList = useMemo(() => {
-    return (
-      curriculum.courses?.[selectedProgramId]?.[semNumber] ||
-      curriculum.courses?.['btech-cse']?.[semNumber] ||
-      []
-    );
+    return getProgramCurriculum(selectedProgramId, semNumber, programs);
   }, [selectedProgramId, semNumber]);
 
-  // Overall credits across all 8 semesters for this program
+  // Overall credits across all semesters for this specific program
   const totalDegreeCredits = useMemo(() => {
-    const progCourses = curriculum.courses?.[selectedProgramId] || curriculum.courses?.['btech-cse'] || {};
     let sum = 0;
-    Object.values(progCourses).forEach((termCourses) => {
-      if (Array.isArray(termCourses)) {
-        sum += termCourses.reduce((acc, c) => acc + (c.credits || 0), 0);
-      }
-    });
+    for (let s = 1; s <= maxSemesters; s++) {
+      const list = getProgramCurriculum(selectedProgramId, s, programs);
+      sum += list.reduce((acc, c) => acc + (c.credits || 0), 0);
+    }
     return sum || 160;
-  }, [selectedProgramId]);
+  }, [selectedProgramId, maxSemesters]);
 
   // Metrics for current semester
   const semesterCredits = courseList.reduce((acc, c) => acc + (c.credits || 0), 0);
@@ -59,8 +78,6 @@ export default function Curriculum({ ask, go }) {
       return termFilter === 'Autumn' ? isOdd : !isOdd;
     });
   }, [termFilter, semesters]);
-
-  const activeProgram = programs.find((p) => p.id === selectedProgramId) || programs[0];
 
   const handleAskSyllabus = (courseName, courseCode) => {
     if (ask) {
@@ -146,7 +163,7 @@ export default function Curriculum({ ask, go }) {
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              All 8 Semesters
+              All {maxSemesters} Semesters
             </button>
             <button
               onClick={() => setTermFilter('Autumn')}
@@ -213,7 +230,7 @@ export default function Curriculum({ ask, go }) {
                 const num = parseInt(s.replace('Semester ', ''), 10);
                 const isOdd = num % 2 === 1;
                 const termName = isOdd ? 'Autumn Term' : 'Spring Term';
-                const semCourses = curriculum.courses?.[selectedProgramId]?.[num] || curriculum.courses?.['btech-cse']?.[num] || [];
+                const semCourses = getProgramCurriculum(selectedProgramId, num, programs);
                 const cr = semCourses.reduce((acc, c) => acc + (c.credits || 0), 0);
 
                 return (

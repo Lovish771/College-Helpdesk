@@ -107,32 +107,16 @@ export function AuthProvider({ children }) {
   };
 
   const sendOtp = useCallback(async (email) => {
-    try {
-      const res = await fetch(resolveAuthUrl('/api/auth/send-otp'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok || (data && data.success === false)) {
-        throw new Error(extractError(data, res.status, 'Unable to send verification code.'));
-      }
-      return data;
-    } catch (err) {
-      const msg = err.message || '';
-      // If server is unreachable or returning 500/503 due to network/serverless constraints:
-      if (msg.includes('Failed to fetch') || msg.includes('500') || msg.includes('503') || msg.includes('NetworkError')) {
-        console.warn('[Auth] Server OTP dispatch unavailable, enabling offline demo mode:', err);
-        return {
-          success: true,
-          message: 'Offline Demo Mode: Verification code is 123456.',
-          devOtp: '123456',
-          notice: 'Notice: Server offline or email delivery restricted. Your verification code is 123456.',
-          cooldownSeconds: 30
-        };
-      }
-      throw err;
+    const res = await fetch(resolveAuthUrl('/api/auth/send-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || (data && data.success === false)) {
+      throw new Error(extractError(data, res.status, 'Unable to send verification code.'));
     }
+    return data;
   }, []);
 
   const verifyOtp = useCallback(async ({ email, otp, name, acceptedTerms }) => {

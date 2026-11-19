@@ -70,15 +70,10 @@ class EmailService:
                 'detail': delivery_detail
             }
 
-        # If SMTP is blocked or unconfigured (e.g. Vercel serverless environment),
-        # return dev_otp and notice so student or administrator is never blocked.
-        meta = {
+        return False, 'Unable to dispatch verification email via SMTP. Please try again shortly.', 503, {
             'delivered_online': False,
-            'dev_otp': otp_code,
-            'notice': f'Demo/Offline Notice: Verification code is {otp_code}. (Live email is restricted in this cloud environment)',
             'detail': delivery_detail
         }
-        return True, f'Verification code generated. Code: {otp_code}', 200, meta
 
     @classmethod
     def _send_email(cls, email: str, otp_code: str) -> tuple[bool, str]:
@@ -127,14 +122,13 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
             msg.attach(MIMEText(text_content, 'plain'))
             msg.attach(MIMEText(html_content, 'html'))
 
-            ports_to_try = [smtp_port, 587] if smtp_port != 587 else [587, 465]
-            ports_to_try = list(dict.fromkeys(ports_to_try))
+            ports_to_try = [587, 465]
             for p in ports_to_try:
                 try:
                     if p == 465:
-                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=5, context=ssl.create_default_context())
+                        server = smtplib.SMTP_SSL(smtp_server, p, timeout=4, context=ssl.create_default_context())
                     else:
-                        server = smtplib.SMTP(smtp_server, p, timeout=5)
+                        server = smtplib.SMTP(smtp_server, p, timeout=4)
                         server.starttls(context=ssl.create_default_context())
                     with server:
                         server.login(smtp_user, smtp_pass)

@@ -92,9 +92,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
       const res = await sendOtp(cleanEmail);
       setStep(2);
       setTimer(res?.cooldownSeconds || 30);
-      if (res?.notice) setDevNotice(res.notice);
-      if (res?.devOtp) setOtp(res.devOtp);
-      else setOtp('');
+      setOtp('');
     } catch (err) {
       setError(sanitizeError(err, 'Failed to dispatch verification code. Please check your network or try again in a moment.'));
     } finally {
@@ -109,9 +107,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
     try {
       const res = await sendOtp(email.trim().toLowerCase());
       setTimer(res?.cooldownSeconds || 30);
-      if (res?.notice) setDevNotice(res.notice);
-      if (res?.devOtp) setOtp(res.devOtp);
-      else setOtp('');
+      setOtp('');
     } catch (err) {
       setError(sanitizeError(err, 'Unable to resend OTP at this time. Please wait a moment.'));
     } finally {
@@ -337,18 +333,6 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
                 </p>
               </div>
             </div>
-
-            {/* Offline/Serverless Demo Notice if active */}
-            {devNotice && (
-              <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-700 dark:text-orange-300 text-xs flex items-center justify-between gap-2 animate-fade-in">
-                <span className="leading-snug">{devNotice}</span>
-                {otp && (
-                  <span className="shrink-0 px-2 py-0.5 rounded bg-orange-500 text-white font-mono font-bold text-[11px] shadow-sm">
-                    {otp}
-                  </span>
-                )}
-              </div>
-            )}
 
             <div>
               <div className="flex items-center justify-between mb-1.5">

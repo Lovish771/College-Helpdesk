@@ -231,33 +231,28 @@ export default function Fees({ ask, onOpenCompare, go }) {
           </button>
         </PageHead>
 
-        {/* ── Main Category Switcher (Strictly One Single Horizontal Line) ── */}
+        {/* ── Main Category Switcher (Strictly One Single Horizontal Line with Hover Transitions) ── */}
         <div className="w-full max-w-5xl overflow-x-auto scrollbar-none py-1">
           <div className="inline-flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-200/70 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shadow-2xs whitespace-nowrap">
             {[
-              { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet, badge: `${programs.length} Courses` },
-              { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator, badge: 'Interactive' },
+              { id: 'program-fees', label: 'Programme Tuition & Directory', icon: Wallet },
+              { id: 'degree-planner', label: 'Tenure Budget Calculator', icon: Calculator },
               { id: 'residential-fees', label: 'Hostel, Mess & Laundry Rates', icon: BedDouble },
               { id: 'scholarships', label: 'Scholarship Policies', icon: Award },
-            ].map(({ id, label, icon: Icon, badge }) => {
+            ].map(({ id, label, icon: Icon }) => {
               const active = activeTab === id;
               return (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`inline-flex items-center gap-2 py-2 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
+                  className={`group relative inline-flex items-center gap-2 py-2 px-4 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap cursor-pointer shrink-0 transition-all duration-300 ease-out active:scale-95 ${
                     active
-                      ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-md ring-1 ring-orange-500/20 scale-[1.01]'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-white/80 dark:hover:bg-slate-900/60 hover:-translate-y-0.5 hover:shadow-xs'
                   }`}
                 >
-                  <Icon size={14} className="shrink-0" />
-                  <span className="whitespace-nowrap">{label}</span>
-                  {badge && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-600 text-white uppercase shrink-0">
-                      {badge}
-                    </span>
-                  )}
+                  <Icon size={14} className="shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:text-orange-500" />
+                  <span className="whitespace-nowrap transition-colors">{label}</span>
                 </button>
               );
             })}
