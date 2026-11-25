@@ -255,6 +255,7 @@ export default function useChat() {
   }, []);
 
   return {
+    cid,
     messages,
     loading,
     history,

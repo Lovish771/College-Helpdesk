@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, RotateCcw } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
 import { request } from '../api/client';
@@ -31,53 +31,98 @@ function sanitizeInput(raw) {
 }
 
 /**
- * Format markdown bold **text**, bullet points, and links into clean, sanitized JSX
+ * Render inline markdown (**bold**, `code`, [label](https://...)) safely
+ */
+function renderInline(text) {
+  const parts = text.split(/(\*\*.*?\*\*|`[^`]+`|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g);
+  return parts.map((part, pIdx) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return (
+        <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
+      return (
+        <code
+          key={pIdx}
+          className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-orange-700 dark:text-orange-300 font-mono text-[12px]"
+        >
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    const linkMatch = part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+    if (linkMatch) {
+      return (
+        <a
+          key={pIdx}
+          href={linkMatch[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-orange-600 dark:text-orange-400 underline underline-offset-2 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
+        >
+          {linkMatch[1]}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
+/**
+ * Format markdown headings, bold text, bullet/numbered lists, and links into clean, sanitized JSX
  */
 function FormattedText({ text }) {
   if (!text) return null;
   const rawText = typeof text === "string" ? text : String(text || "");
   const sanitized = sanitizeInput(rawText);
-
-  // Split by newlines
   const lines = sanitized.split('\n');
 
   return (
     <div className="space-y-1.5 leading-relaxed font-sans">
       {lines.map((line, idx) => {
-        if (!line.trim()) {
+        const trimmed = line.trim();
+        if (!trimmed) {
           return <div key={idx} className="h-1" />;
         }
 
-        // Bullet point check
-        const isBullet = line.trim().startsWith('•') || line.trim().startsWith('-');
-        const cleanLine = isBullet ? line.trim().replace(/^[•\-]\s*/, '') : line;
+        const headingMatch = trimmed.match(/^#{2,3}\s+(.*)$/);
+        if (headingMatch) {
+          return (
+            <h4 key={idx} className="text-[13.5px] sm:text-sm font-bold text-slate-900 dark:text-white pt-1">
+              {renderInline(headingMatch[1])}
+            </h4>
+          );
+        }
 
-        // Parse bold segments (**bold**)
-        const parts = cleanLine.split(/(\*\*.*?\*\*)/g);
+        const numberedMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+        if (numberedMatch) {
+          return (
+            <div key={idx} className="flex items-start gap-2 text-[13px] sm:text-[13.5px]">
+              <span className="text-orange-600 dark:text-orange-400 font-bold shrink-0 min-w-[1.1rem]">
+                {numberedMatch[1]}.
+              </span>
+              <span className="flex-1 text-slate-800 dark:text-slate-200">{renderInline(numberedMatch[2])}</span>
+            </div>
+          );
+        }
 
-        const renderedLine = parts.map((part, pIdx) => {
-          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-            return (
-              <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">
-                {part.slice(2, -2)}
-              </strong>
-            );
-          }
-          return part;
-        });
-
+        const isBullet = trimmed.startsWith('•') || trimmed.startsWith('- ');
         if (isBullet) {
+          const cleanLine = trimmed.replace(/^[•\-]\s*/, '');
           return (
             <div key={idx} className="flex items-start gap-2 text-[13px] sm:text-[13.5px]">
               <span className="text-orange-500 font-bold shrink-0 mt-0.5">•</span>
-              <span className="flex-1 text-slate-800 dark:text-slate-200">{renderedLine}</span>
+              <span className="flex-1 text-slate-800 dark:text-slate-200">{renderInline(cleanLine)}</span>
             </div>
           );
         }
 
         return (
           <p key={idx} className="text-[13px] sm:text-[13.5px] text-slate-800 dark:text-slate-200">
-            {renderedLine}
+            {renderInline(line)}
           </p>
         );
       })}
@@ -85,7 +130,7 @@ function FormattedText({ text }) {
   );
 }
 
-function ChatMessageComponent({ m, onRetry, onContact }) {
+function ChatMessageComponent({ m, sessionId, onRetry, onContact }) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState(null); // 'like' | 'dislike'
 
@@ -118,7 +163,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
         {
           method: 'POST',
           body: JSON.stringify({
-            session_id: 'chat_turn',
+            session_id: sessionId || 'chat_turn',
             is_helpful: type === 'like',
             comment: type === 'like' ? 'Helpful answer' : 'Needs improvement',
           }),
@@ -139,7 +184,7 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
       {/* Bubble Container */}
       <div className={`flex flex-col ${isBot ? 'w-full max-w-full sm:max-w-[94%] items-start' : 'max-w-[85%] sm:max-w-[75%] items-end'}`}>
         <div
-          className={`px-4 py-3.5 rounded-2xl shadow-xs transition-all ${
+          className={`px-4 py-3.5 rounded-2xl shadow-xs transition-colors ${
             isBot
               ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm w-full'
               : 'bg-orange-600 text-white rounded-tr-sm font-medium'
@@ -212,10 +257,22 @@ function ChatMessageComponent({ m, onRetry, onContact }) {
           )}
         </div>
 
-        {/* Timestamp */}
-        <span className="mt-1 text-[10px] font-medium text-slate-400 px-1">
-          {fmt(m.time)}
-        </span>
+        {/* Timestamp & Retry */}
+        <div className="mt-1 flex items-center gap-2 px-1">
+          <span className="text-[10px] font-medium text-slate-400">
+            {fmt(m.time)}
+          </span>
+          {!isBot && m.status === 'error' && onRetry && (
+            <button
+              type="button"
+              onClick={() => onRetry(m)}
+              className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+            >
+              <RotateCcw size={10} />
+              <span>Retry</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

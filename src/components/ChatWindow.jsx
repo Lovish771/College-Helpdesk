@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Lock, LogIn } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Lock, LogIn, ArrowDown } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
@@ -7,19 +7,26 @@ import LpuLogo from './LpuLogo';
 
 export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
   const scrollContainerRef = useRef(null);
+  const [showScrollDown, setShowScrollDown] = useState(false);
+
+  const scrollToBottom = (behavior = 'smooth') => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+  };
 
   // Auto-scroll to latest message whenever new messages or loading state change
   useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const timer = setTimeout(() => {
-      el.scrollTo({
-        top: el.scrollHeight,
-        behavior: 'smooth',
-      });
-    }, 60);
+    const timer = setTimeout(() => scrollToBottom('smooth'), 60);
     return () => clearTimeout(timer);
   }, [chat.messages, chat.loading]);
+
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setShowScrollDown(distanceFromBottom > 140);
+  };
 
   const safeMessages = Array.isArray(chat?.messages) ? chat.messages : [];
   const lastBotMessage = [...safeMessages].reverse().find(m => m?.role === 'bot');
@@ -45,6 +52,7 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
       {/* Scrollable conversation history - Isolated internal scroll container */}
       <div
         ref={scrollContainerRef}
+        onScroll={handleScroll}
         className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-6 scrollbar-thin space-y-4"
         role="log"
         aria-live="polite"
@@ -54,6 +62,7 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
             <ChatMessage
               key={m.id}
               m={m}
+              sessionId={chat?.cid}
               onRetry={(x) => handleSendMessage(x?.text || '')}
               onContact={() => go && go('contact')}
             />
@@ -87,8 +96,21 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
         </div>
       </div>
 
+      {/* Jump to latest floating button */}
+      {showScrollDown && (
+        <button
+          type="button"
+          onClick={() => scrollToBottom('smooth')}
+          className="absolute bottom-24 right-5 z-20 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          aria-label="Scroll to latest message"
+        >
+          <ArrowDown size={13} className="text-orange-500" />
+          <span>Latest</span>
+        </button>
+      )}
+
       {/* Input area fixed at bottom of chat panel */}
-      <div className="shrink-0 z-10 border-t border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg">
+      <div className="shrink-0 z-10 border-t border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
         {!isAuthenticated ? (
           <div className="p-3 sm:p-4">
             <div className="mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40">

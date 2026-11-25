@@ -82,7 +82,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
         <div className="p-3.5 shrink-0">
           <button
             onClick={act(handleNewChat)}
-            className="w-full flex items-center justify-center gap-2 rounded-md bg-orange-600 hover:bg-orange-700 py-3 text-xs font-medium text-white transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 py-3 text-xs font-semibold text-white transition-colors cursor-pointer"
           >
             <Plus size={15} />
             <span>New Enquiry</span>
@@ -129,33 +129,52 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
                 </button>
               </div>
               <div className="space-y-1 mt-1">
-                {chat.history.map((h) => (
-                  <div
-                    key={h.id}
-                    className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs hover:bg-orange-50/70 dark:hover:bg-slate-800 group transition-colors"
-                  >
-                    <button
-                      onClick={act(() => chat.open(h))}
-                      className="flex items-center gap-2 truncate text-left flex-1 min-w-0 cursor-pointer"
-                      title={h.title}
+                {chat.history.map((h) => {
+                  const isActive = h.id === chat.cid;
+                  return (
+                    <div
+                      key={h.id}
+                      className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs group transition-colors ${
+                        isActive
+                          ? 'bg-orange-50 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50'
+                          : 'hover:bg-orange-50/70 dark:hover:bg-slate-800 border border-transparent'
+                      }`}
                     >
-                      <MessageSquare size={12} className="text-slate-400 group-hover:text-orange-600 shrink-0" />
-                      <span className="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white truncate">
-                        {h.title}
-                      </span>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setConfirmDialog({ type: 'single', session: h });
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-opacity cursor-pointer shrink-0 ml-1"
-                      title="Permanently delete conversation"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        onClick={act(() => chat.open(h))}
+                        className="flex items-center gap-2 truncate text-left flex-1 min-w-0 cursor-pointer"
+                        title={h.title}
+                      >
+                        <MessageSquare
+                          size={12}
+                          className={`shrink-0 ${
+                            isActive ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400 group-hover:text-orange-600'
+                          }`}
+                        />
+                        <span
+                          className={`font-semibold truncate ${
+                            isActive
+                              ? 'text-orange-700 dark:text-orange-300'
+                              : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'
+                          }`}
+                        >
+                          {h.title}
+                        </span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDialog({ type: 'single', session: h });
+                        }}
+                        className="opacity-70 lg:opacity-0 lg:group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 rounded transition-opacity cursor-pointer shrink-0 ml-1"
+                        title="Permanently delete conversation"
+                        aria-label={`Delete conversation ${h.title}`}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -232,7 +251,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
         {/* Mobile Slide-over Drawer */}
         {drawer && (
           <div className="fixed inset-0 z-50 lg:hidden flex">
-            <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs" onClick={() => setDrawer(false)} />
+            <div className="fixed inset-0 bg-slate-950/60" onClick={() => setDrawer(false)} />
             <div className="relative w-72 bg-white dark:bg-slate-900 h-full z-10 shadow-2xl flex flex-col animate-slide-in">
               <button
                 className="absolute right-3 top-3 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
