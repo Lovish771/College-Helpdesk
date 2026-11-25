@@ -203,13 +203,18 @@ def create_app(config_name=None, **kwargs):
         try:
             db.create_all()
         except Exception as err:
-            logger.warning("Primary database connection/creation failed: %s. Falling back to SQLite: %s", err, sqlite_fallback_uri)
+            err_msg = re.sub(r'://[^@]+@', '://***@', str(err))
+            logger.warning("Primary database connection/creation failed: %s. Falling back to SQLite: %s", err_msg, sqlite_fallback_uri)
+            app.config['DB_FALLBACK_REASON'] = f"{type(err).__name__}: {err_msg}"
             app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
             try:
                 db.engine.dispose()
             except Exception:
                 pass
             try:
+                app.extensions.pop('sqlalchemy', None)
+                db.init_app(app)
                 db.create_all()
             except Exception as err2:
                 logger.error("SQLite database creation failed: %s", err2)

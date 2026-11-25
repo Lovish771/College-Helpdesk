@@ -60,12 +60,21 @@ def health():
     except Exception:
         pass
 
+    from flask import current_app
+    dialect = None
+    try:
+        dialect = db.engine.dialect.name
+    except Exception:
+        pass
+
     return jsonify({
         'status': 'healthy' if db_status == 'connected' else 'degraded',
         'version': '1.0.0',
         'service': 'LPU Helpdesk Backend',
         'university': 'Lovely Professional University',
         'database': db_status,
+        'database_dialect': dialect,
+        'fallback_reason': current_app.config.get('DB_FALLBACK_REASON'),
         'memory_mb': memory_mb
     })
 
