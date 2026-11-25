@@ -66,16 +66,22 @@ def create_app(config_name=None, **kwargs):
 
             if database_url.startswith('postgresql'):
                 try:
-                    import psycopg2  # noqa: F401
+                    import psycopg  # noqa: F401
+                    if '+psycopg' not in database_url and '+pg8000' not in database_url:
+                        database_url = 'postgresql+psycopg://' + database_url.split('://', 1)[1]
                     driver_valid = True
                 except ImportError:
                     try:
-                        import pg8000  # noqa: F401
-                        database_url = 'postgresql+pg8000://' + database_url.split('://', 1)[1]
+                        import psycopg2  # noqa: F401
                         driver_valid = True
                     except ImportError:
-                        logger.warning("PostgreSQL DATABASE_URL provided but neither psycopg2 nor pg8000 driver is available. Falling back to SQLite.")
-                        driver_valid = False
+                        try:
+                            import pg8000  # noqa: F401
+                            database_url = 'postgresql+pg8000://' + database_url.split('://', 1)[1]
+                            driver_valid = True
+                        except ImportError:
+                            logger.warning("PostgreSQL DATABASE_URL provided but no psycopg/psycopg2/pg8000 driver is available. Falling back to SQLite.")
+                            driver_valid = False
             else:
                 driver_valid = True
 
@@ -171,7 +177,9 @@ def create_app(config_name=None, **kwargs):
         db.init_app(app)
     except Exception as exc:
         logger.warning("Primary database init failed (%s). Falling back to SQLite: %s", exc, sqlite_fallback_uri)
+        app.config['DB_FALLBACK_REASON'] = f"{type(exc).__name__}: {exc}"
         app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
         try:
             app.extensions.pop('sqlalchemy', None)
         except Exception:

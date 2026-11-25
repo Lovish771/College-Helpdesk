@@ -100,10 +100,14 @@ def send_otp():
         else:
             success, msg, status_code = res
             meta = {}
-    except Exception:
+    except Exception as exc:
         db.session.rollback()
         logger.exception('OTP request failed for %s', email)
-        return jsonify({'success': False, 'error': 'We could not start email verification. Please try again shortly.'}), 503
+        return jsonify({
+            'success': False,
+            'error': 'We could not start email verification. Please try again shortly.',
+            'error_type': type(exc).__name__,
+        }), 503
 
     resp = {
         'success': success,
