@@ -236,14 +236,5 @@ def create_app(config_name=None, **kwargs):
                 db.session.commit()
         except Exception:
             db.session.rollback()
-
-        if config_name != 'testing':
-            try:
-                from app.models.user import User
-                if User.query.count() < 2:
-                    from scripts.seed_database import seed_users
-                    seed_users()
-            except Exception:
-                pass
     
     return app

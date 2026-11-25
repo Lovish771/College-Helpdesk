@@ -116,17 +116,22 @@ function AppContent() {
     if (isThemeChangingRef.current) return;
     isThemeChangingRef.current = true;
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
-
-    // Enable smooth 60fps color transition class across all elements
-    document.documentElement.classList.add('theme-transitioning');
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     const finishTransition = () => {
       document.documentElement.classList.remove('theme-transitioning');
       isThemeChangingRef.current = false;
     };
 
-    // Premium circular view transition if supported by browser
-    if (typeof document !== 'undefined' && document.startViewTransition) {
+    // GPU-composited circular View Transition (do NOT combine with CSS transitions,
+    // otherwise ::view-transition-new(root) snapshots mid-transition colors and jitters)
+    if (
+      !prefersReducedMotion &&
+      typeof document !== 'undefined' &&
+      typeof document.startViewTransition === 'function'
+    ) {
       try {
         const x = event?.clientX ?? (window.innerWidth - 80);
         const y = event?.clientY ?? 30;
@@ -150,25 +155,29 @@ function AppContent() {
                 ],
               },
               {
-                duration: 750,
-                easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                duration: 480,
+                easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                fill: 'both',
                 pseudoElement: '::view-transition-new(root)',
               }
             );
           } catch {}
         });
         transition.finished.then(finishTransition, finishTransition);
-        window.setTimeout(finishTransition, 800);
+        window.setTimeout(finishTransition, 550);
         return;
       } catch {
         // Fallback below
       }
     }
 
-    // Smooth fallback with global transition class
+    // Lightweight fallback for browsers without View Transitions API
+    if (!prefersReducedMotion) {
+      document.documentElement.classList.add('theme-transitioning');
+    }
     flushSync(() => setTheme(nextTheme));
     applyThemeToDom(nextTheme);
-    window.setTimeout(finishTransition, 750);
+    window.setTimeout(finishTransition, prefersReducedMotion ? 0 : 250);
   }, [theme, applyThemeToDom]);
 
   const chat = useChat();

@@ -502,7 +502,6 @@ def main():
         seed_intent_patterns()
         seed_knowledge_entries()
         create_admin_user()
-        seed_users()
         print("\n✓ Database seeding successfully complete with official LPU content!")
 
 if __name__ == '__main__':
