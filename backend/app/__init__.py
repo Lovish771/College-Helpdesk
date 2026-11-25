@@ -58,18 +58,19 @@ def create_app(config_name=None, **kwargs):
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     else:
         database_url = os.getenv('DATABASE_URL', '').strip()
+        is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
         driver_valid = False
         if database_url:
             if database_url.startswith('postgres://'):
                 database_url = 'postgresql://' + database_url[len('postgres://'):]
-            
+
             if database_url.startswith('postgresql'):
                 try:
-                    import psycopg2
+                    import psycopg2  # noqa: F401
                     driver_valid = True
                 except ImportError:
                     try:
-                        import pg8000
+                        import pg8000  # noqa: F401
                         database_url = 'postgresql+pg8000://' + database_url.split('://', 1)[1]
                         driver_valid = True
                     except ImportError:
@@ -80,13 +81,23 @@ def create_app(config_name=None, **kwargs):
 
         if driver_valid:
             app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-        elif os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
+            engine_options = {
+                'pool_pre_ping': True,
+                'pool_recycle': 300,
+            }
+            if is_serverless:
+                from sqlalchemy.pool import NullPool
+                engine_options['poolclass'] = NullPool
+            if 'supabase.' in database_url and 'sslmode=' not in database_url and '+pg8000' not in database_url:
+                engine_options['connect_args'] = {'sslmode': 'require'}
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
+        elif is_serverless:
             app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_fallback_uri
         else:
             db_path = os.path.join(base_dir, 'lpu_helpdesk.db').replace('\\', '/')
             app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True}
+    app.config.setdefault('SQLALCHEMY_ENGINE_OPTIONS', {'pool_pre_ping': True})
     
     # CORS configuration - restrict to permitted origins with credentials support
     allowed_origins = [
@@ -195,9 +206,12 @@ def create_app(config_name=None, **kwargs):
                 logger.error("SQLite database creation failed: %s", err2)
 
         try:
-            from sqlalchemy import text
-            db.session.execute(text("ALTER TABLE conversation_sessions ADD COLUMN user_id INTEGER"))
-            db.session.commit()
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+            cols = [c['name'] for c in inspector.get_columns('conversation_sessions')]
+            if 'user_id' not in cols:
+                db.session.execute(text("ALTER TABLE conversation_sessions ADD COLUMN user_id INTEGER"))
+                db.session.commit()
         except Exception:
             db.session.rollback()
 

@@ -40,7 +40,7 @@ def admin_metrics():
         db.func.count(User.id)
     ).filter(User.created_at >= cutoff).group_by(db.func.date(User.created_at)).all()
 
-    registration_trends = [{'date': d, 'count': c} for d, c in users_by_date]
+    registration_trends = [{'date': str(d) if d else None, 'count': c} for d, c in users_by_date]
 
     # Intent / category distribution
     category_counts = db.session.query(
