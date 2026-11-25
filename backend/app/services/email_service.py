@@ -50,12 +50,12 @@ class EmailService:
         )
         db.session.add(new_otp)
 
-        # Log security audit
+        # Log security audit (truncate to column lengths for strict PostgreSQL limits)
         sec_log = SecurityLog(
             event_type='otp_sent',
-            email=email,
-            ip_address=ip_address,
-            user_agent=user_agent,
+            email=email[:255],
+            ip_address=(ip_address or '')[:45] or None,
+            user_agent=(user_agent or '')[:250] or None,
             details=f'OTP generated, expires in {cls.EXPIRATION_MINUTES} min'
         )
         db.session.add(sec_log)
@@ -180,8 +180,8 @@ This code expires in {cls.EXPIRATION_MINUTES} minutes. If you did not request th
         # Log success
         sec_log = SecurityLog(
             event_type='otp_verified',
-            email=email,
-            ip_address=ip_address,
+            email=email[:255],
+            ip_address=(ip_address or '')[:45] or None,
             details='OTP successfully verified'
         )
         db.session.add(sec_log)

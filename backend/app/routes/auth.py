@@ -153,27 +153,27 @@ def verify_otp():
     role = 'admin' if email in admin_emails else 'student'
 
     # Find or create User
-    user = User.query.filter_by(email=email).first()
-    if not user:
-        user = User(
-            email=email,
-            name=name,
-            role=role,
-            is_verified=True,
-            accepted_terms=accepted_terms,
-            created_at=datetime.utcnow(),
-            last_login=datetime.utcnow()
-        )
-        db.session.add(user)
-    else:
-        if name:
-            user.name = name
-        if role == 'admin':
-            user.role = 'admin'
-        user.last_login = datetime.utcnow()
-        user.accepted_terms = accepted_terms
-
     try:
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(
+                email=email,
+                name=name,
+                role=role,
+                is_verified=True,
+                accepted_terms=accepted_terms,
+                created_at=datetime.utcnow(),
+                last_login=datetime.utcnow()
+            )
+            db.session.add(user)
+        else:
+            if name:
+                user.name = name
+            if role == 'admin':
+                user.role = 'admin'
+            user.last_login = datetime.utcnow()
+            user.accepted_terms = accepted_terms
+
         db.session.commit()
     except Exception:
         db.session.rollback()

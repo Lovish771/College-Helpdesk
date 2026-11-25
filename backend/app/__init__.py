@@ -88,7 +88,16 @@ def create_app(config_name=None, **kwargs):
             if is_serverless:
                 from sqlalchemy.pool import NullPool
                 engine_options['poolclass'] = NullPool
-            if 'supabase.' in database_url and 'sslmode=' not in database_url and '+pg8000' not in database_url:
+            if '+pg8000' in database_url:
+                # pg8000 does not accept sslmode= in URL query or connect_args
+                if '?' in database_url:
+                    base_uri, qs = database_url.split('?', 1)
+                    params = [p for p in qs.split('&') if p and not p.lower().startswith('sslmode=')]
+                    app.config['SQLALCHEMY_DATABASE_URI'] = f"{base_uri}?{'&'.join(params)}" if params else base_uri
+                if 'supabase.' in database_url or 'sslmode=require' in database_url:
+                    import ssl
+                    engine_options['connect_args'] = {'ssl_context': ssl.create_default_context()}
+            elif 'supabase.' in database_url and 'sslmode=' not in database_url:
                 engine_options['connect_args'] = {'sslmode': 'require'}
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_options
         elif is_serverless:
