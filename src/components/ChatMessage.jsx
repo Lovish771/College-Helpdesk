@@ -3,17 +3,9 @@ import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, RotateCcw } from 'lucide
 import DOMPurify from 'dompurify';
 import LpuLogo from './LpuLogo';
 import { request } from '../api/client';
+import { formatISTTime } from '../utils/dateUtils';
 
-const fmt = (d) => {
-  if (!d) return 'Just now';
-  try {
-    const date = typeof d === 'string' || typeof d === 'number' ? new Date(d) : d;
-    if (isNaN(date?.getTime?.())) return 'Just now';
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch {
-    return 'Just now';
-  }
-};
+const fmt = (d) => formatISTTime(d);
 
 /**
  * Clean & sanitize text through DOMPurify to defend against XSS & payload injections

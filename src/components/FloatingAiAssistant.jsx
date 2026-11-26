@@ -70,6 +70,7 @@ export default function FloatingAiAssistant({ go, page }) {
 
   // Widget state
   const [isOpen, setIsOpen] = useState(false);
+  const [panelSize, setPanelSize] = useState('md'); // 'sm' | 'md' | 'lg'
   const [orbState, setOrbState] = useState('idle'); // 'idle' | 'hover' | 'listening' | 'thinking' | 'speaking'
   const [isEdgeSnapped, setIsEdgeSnapped] = useState(false);
   const [snapSide, setSnapSide] = useState('right'); // 'left' | 'right'
@@ -95,7 +96,7 @@ export default function FloatingAiAssistant({ go, page }) {
       id: 1,
       sender: 'bot',
       text: "Hello! I'm your LPU Student Helpdesk Assistant 👋\nAsk me anything about programmes, semester fees, scholarships, or hostel life.",
-      time: 'Online',
+      time: 'Just now',
     },
   ]);
   const [inputText, setInputText] = useState('');
@@ -349,9 +350,9 @@ export default function FloatingAiAssistant({ go, page }) {
         isOpen
           ? {
               position: 'fixed',
-              right: '20px',
-              bottom: '20px',
-              zIndex: 50,
+              right: '16px',
+              bottom: '16px',
+              zIndex: 55,
               userSelect: 'none',
             }
           : {
@@ -361,27 +362,34 @@ export default function FloatingAiAssistant({ go, page }) {
               transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
               willChange: 'transform',
               transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-              zIndex: 50,
+              zIndex: 40,
               touchAction: 'none',
               userSelect: 'none',
             }
       }
       className="select-none"
     >
-      {/* ── MODE 1: EXPANDED CHAT PANEL (Theme-matched Light & Dark) ── */}
+      {/* ── MODE 1: EXPANDED CHAT PANEL (Theme-matched Light & Dark, Adjustable Size) ── */}
       {isOpen ? (
         <div
           role="dialog"
           aria-label="AI Assistant"
           onClick={(e) => e.stopPropagation()}
-          className="relative w-[calc(100vw-28px)] sm:w-[440px] max-w-[440px] flex flex-col rounded-3xl overflow-hidden
+          className={`relative flex flex-col rounded-3xl overflow-hidden transition-all duration-200
             bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800
             shadow-[0_24px_60px_-15px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)]
-            text-slate-800 dark:text-slate-100 animate-scale-up"
+            text-slate-800 dark:text-slate-100 animate-scale-up
+            max-w-[calc(100vw-32px)] max-h-[calc(100vh-96px)] ${
+              panelSize === 'sm'
+                ? 'w-[340px]'
+                : panelSize === 'lg'
+                ? 'w-[540px]'
+                : 'w-[430px]'
+            }`}
         >
-          {/* ── Header: 3D AI Orb + Title + Window Controls ── */}
-          <div className="px-4 py-3.5 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
-            <div className="flex items-center gap-2.5">
+          {/* ── Header: 3D AI Orb + Title + Size & Window Controls ── */}
+          <div className="px-4 py-3 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative w-10 h-10 -my-1 shrink-0">
                 <ThreeAiOrb
                   size={44}
@@ -390,23 +398,35 @@ export default function FloatingAiAssistant({ go, page }) {
                 />
               </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-display tracking-tight text-slate-900 dark:text-white font-bold text-sm">
-                    LPU Helpdesk
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Online
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              <div className="min-w-0">
+                <span className="font-display tracking-tight text-slate-900 dark:text-white font-bold text-sm block truncate">
+                  LPU Helpdesk
+                </span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                   Fees, scholarships, hostels &amp; admissions
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 shrink-0">
+              {/* Size Selector (S / M / L) */}
+              <div className="hidden sm:flex items-center rounded-lg bg-slate-200/60 dark:bg-slate-800 p-0.5 mr-1">
+                {['sm', 'md', 'lg'].map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => setPanelSize(sz)}
+                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase transition-colors cursor-pointer ${
+                      panelSize === sz
+                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title={`Panel size: ${sz.toUpperCase()}`}
+                  >
+                    {sz === 'sm' ? 'S' : sz === 'md' ? 'M' : 'L'}
+                  </button>
+                ))}
+              </div>
               {go && (
                 <button
                   type="button"
@@ -440,7 +460,9 @@ export default function FloatingAiAssistant({ go, page }) {
           </div>
 
           {/* ── Messages Transcript Area ── */}
-          <div className="max-h-72 min-h-[180px] overflow-y-auto px-4 py-3.5 space-y-3 text-xs relative z-10 bg-[#F8FAFC]/60 dark:bg-slate-950/40">
+          <div className={`overflow-y-auto px-4 py-3.5 space-y-3 text-xs relative z-10 bg-[#F8FAFC]/60 dark:bg-slate-950/40 ${
+            panelSize === 'sm' ? 'max-h-56 min-h-[150px]' : panelSize === 'lg' ? 'max-h-[400px] min-h-[240px]' : 'max-h-72 min-h-[180px]'
+          }`}>
             {messages.map((m) => (
               <div
                 key={m.id}

@@ -19,14 +19,14 @@ const CAMPUS_HIGHLIGHTS = [
     title: 'Central Library',
     location: 'Central Campus · 9 Storeys',
     desc: 'Over 1.5 million physical and digital titles, automated circulation, and silent research cubicles.',
-    image: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1000&auto=format&fit=crop&q=80',
+    image: '/images/lpu-central-library.jpg',
   },
   {
     id: 'unimall',
     title: 'Uni-Mall & Lifestyle Complex',
     location: 'Residential Sector',
     desc: 'Six floors of departmental stores, food courts, brand outlets, and banking services.',
-    image: 'https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?w=1000&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=1920&auto=format&fit=crop&q=95',
   },
 ];
 

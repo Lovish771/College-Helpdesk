@@ -53,13 +53,6 @@ def admin_metrics():
     ).group_by(ConversationMessage.detected_intent).order_by(db.func.count(ConversationMessage.id).desc()).limit(8).all()
 
     chat_volume = [{'category': intent.replace('_', ' ').title(), 'count': count} for intent, count in category_counts]
-    if not chat_volume:
-        chat_volume = [
-            {'category': 'Fees & Slabs', 'count': 420},
-            {'category': 'Hostel & Living', 'count': 340},
-            {'category': 'Admissions & LPUNEST', 'count': 290},
-            {'category': 'Placements', 'count': 180},
-        ]
 
     return jsonify({
         'success': True,
@@ -117,8 +110,10 @@ def admin_users():
 @bp.route('/admin/users/<int:user_id>', methods=['DELETE'])
 @admin_required
 def delete_user(user_id):
-    """Delete a user account and associated records."""
+    """Delete a non-admin user account and associated records."""
     user = User.query.get_or_404(user_id)
+    if user.role == 'admin':
+        return jsonify({'success': False, 'error': 'Administrator accounts cannot be deleted.'}), 400
     if user.email == getattr(g.current_user, 'email', None):
         return jsonify({'success': False, 'error': 'Cannot delete your own administrator account.'}), 400
 
@@ -130,6 +125,45 @@ def delete_user(user_id):
     return jsonify({
         'success': True,
         'message': f'User {user.email} has been permanently deleted.'
+    }), 200
+
+@bp.route('/admin/users/promote', methods=['POST'])
+@admin_required
+def promote_user_to_admin():
+    """Promote an email-verified user to administrator from the frontend."""
+    data = request.get_json(force=True, silent=True) or {}
+    user_id = data.get('user_id')
+    email = (data.get('email') or '').strip().lower()
+
+    user = None
+    if user_id:
+        user = db.session.get(User, int(user_id))
+    elif email:
+        user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'success': False, 'error': 'User account not found. Ask them to sign in with email OTP first.'}), 404
+
+    if not user.is_verified:
+        return jsonify({'success': False, 'error': 'User must complete email OTP verification before being promoted to admin.'}), 400
+
+    if user.role == 'admin':
+        return jsonify({'success': True, 'message': f'{user.email} is already an administrator.', 'user': user.to_dict()}), 200
+
+    user.role = 'admin'
+    log = SecurityLog(
+        event_type='admin_promoted',
+        email=user.email,
+        ip_address=request.remote_addr or '127.0.0.1',
+        details=f'Promoted to admin by {getattr(g.current_user, "email", "admin")}'
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'{user.email} has been promoted to Administrator.',
+        'user': user.to_dict()
     }), 200
 
 @bp.route('/admin/users/<int:user_id>/details', methods=['GET'])
@@ -370,3 +404,54 @@ def admin_db_explorer():
         'limit': limit,
         'totalPages': max(1, (total + limit - 1) // limit)
     }), 200
+
+@bp.route('/admin/unanswered-tracker', methods=['GET'])
+@admin_required
+def admin_unanswered_tracker():
+    """Return real unanswered queries from live chats and test each against current RuleEngine to show Fixed vs Pending."""
+    from app.services.rule_engine import RuleEngine
+    engine = RuleEngine()
+
+    queries = UnansweredQuery.query.order_by(UnansweredQuery.last_seen.desc()).limit(100).all()
+    items = []
+    for uq in queries:
+        # Test against current RuleEngine to see if we have since fixed it
+        try:
+            reply, intent, conf, _, _, _ = engine.process_message(uq.query_text, f'eval-{uq.id}')
+            is_fixed_now = (intent != 'unknown' and conf >= 0.5)
+        except Exception:
+            reply, intent, conf, is_fixed_now = '', 'unknown', 0.0, False
+
+        items.append({
+            'id': uq.id,
+            'query': uq.query_text,
+            'originalIntent': uq.detected_intent or 'unknown',
+            'occurrenceCount': uq.occurrence_count or 1,
+            'firstSeen': uq.first_seen.isoformat() if uq.first_seen else None,
+            'lastSeen': uq.last_seen.isoformat() if uq.last_seen else None,
+            'dbStatus': uq.status or 'pending',
+            'isFixedNow': is_fixed_now or (uq.status == 'resolved'),
+            'currentIntent': intent,
+            'currentConfidence': conf,
+            'currentReplyPreview': (reply or '')[:220] + ('...' if len(reply or '') > 220 else ''),
+        })
+
+    fixed_count = sum(1 for i in items if i['isFixedNow'])
+    pending_count = len(items) - fixed_count
+
+    return jsonify({
+        'success': True,
+        'total': len(items),
+        'fixedCount': fixed_count,
+        'pendingCount': pending_count,
+        'items': items,
+    }), 200
+
+@bp.route('/admin/unanswered-tracker/<int:query_id>/resolve', methods=['POST'])
+@admin_required
+def resolve_unanswered_query(query_id):
+    """Mark an unanswered query as resolved/fixed."""
+    uq = UnansweredQuery.query.get_or_404(query_id)
+    uq.status = 'resolved'
+    db.session.commit()
+    return jsonify({'success': True, 'id': uq.id, 'status': uq.status}), 200

@@ -10,6 +10,7 @@ import {
 import useAuth from '../hooks/useAuth';
 import { resolveApiUrl } from '../api/client';
 import { PageHead } from '../utils/useAsync';
+import { formatISTTime, formatISTDate, formatISTDateTime } from '../utils/dateUtils';
 
 export default function AdminDashboard({ go, onOpenAuth }) {
   const { user, token, isAdmin } = useAuth();
@@ -38,6 +39,16 @@ export default function AdminDashboard({ go, onOpenAuth }) {
   const [conversationsSearch, setConversationsSearch] = useState('');
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [selectedUserEmail, setSelectedUserEmail] = useState(null);
+
+  // Admin promotion state
+  const [promoteEmail, setPromoteEmail] = useState('');
+  const [promotingUser, setPromotingUser] = useState(false);
+  const [promoteFeedback, setPromoteFeedback] = useState(null);
+
+  // Real Unanswered vs Fixed tracker state
+  const [unansweredTracker, setUnansweredTracker] = useState(null);
+  const [loadingTracker, setLoadingTracker] = useState(false);
 
   // Supabase / Database Explorer state
   const [dbTable, setDbTable] = useState('users');
@@ -151,6 +162,66 @@ export default function AdminDashboard({ go, onOpenAuth }) {
       setLoadingConversations(false);
     }
   }, [token, conversationsPage, conversationsSearch]);
+
+  const fetchUnansweredTracker = useCallback(async () => {
+    if (!token) return;
+    setLoadingTracker(true);
+    try {
+      const res = await fetch(resolveApiUrl('/api/admin/unanswered-tracker'), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) setUnansweredTracker(data);
+      }
+    } catch (err) {
+      console.error('Error fetching unanswered tracker:', err);
+    } finally {
+      setLoadingTracker(false);
+    }
+  }, [token]);
+
+  const handleResolveUnanswered = async (queryId) => {
+    if (!token) return;
+    try {
+      const res = await fetch(resolveApiUrl(`/api/admin/unanswered-tracker/${queryId}/resolve`), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) fetchUnansweredTracker();
+    } catch (err) {
+      console.error('Failed to resolve query:', err);
+    }
+  };
+
+  const handlePromoteUser = async (target) => {
+    if (!token) return;
+    setPromotingUser(true);
+    setPromoteFeedback(null);
+    try {
+      const res = await fetch(resolveApiUrl('/api/admin/users/promote'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(typeof target === 'string' ? { email: target } : { user_id: target.id })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setPromoteFeedback({ type: 'success', text: data.message });
+        setPromoteEmail('');
+        fetchUsers();
+        fetchLogs();
+      } else {
+        setPromoteFeedback({ type: 'error', text: data.error || 'Could not promote user.' });
+      }
+    } catch {
+      setPromoteFeedback({ type: 'error', text: 'Network error while promoting user.' });
+    } finally {
+      setPromotingUser(false);
+    }
+  };
 
   const fetchDbExplorer = useCallback(async (tableOverride, pageOverride) => {
     if (!token) return;
@@ -290,6 +361,35 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     serverHealth: null
   };
 
+  const groupedConversationsByEmail = useMemo(() => {
+    const map = {};
+    for (const c of conversations) {
+      const email = c.userEmail || 'Anonymous Guest Student';
+      if (!map[email]) {
+        map[email] = {
+          email,
+          userName: c.userName || 'Student',
+          sessions: [],
+          totalMessages: 0,
+          lastActivity: c.lastActivity,
+          lastMessage: c.lastMessage,
+        };
+      }
+      map[email].sessions.push(c);
+      map[email].totalMessages += c.messageCount || 0;
+      if (c.lastActivity && (!map[email].lastActivity || c.lastActivity > map[email].lastActivity)) {
+        map[email].lastActivity = c.lastActivity;
+        map[email].lastMessage = c.lastMessage;
+      }
+    }
+    return Object.values(map).sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''));
+  }, [conversations]);
+
+  const activeEmailGroup = useMemo(() => {
+    if (!groupedConversationsByEmail.length) return null;
+    return groupedConversationsByEmail.find((g) => g.email === selectedUserEmail) || groupedConversationsByEmail[0];
+  }, [groupedConversationsByEmail, selectedUserEmail]);
+
   const maxVolume = Math.max(...(metrics?.chatVolume || []).map((i) => i.count), 1);
   const health = m.serverHealth;
   const healthOk = !health || health.status === 'healthy';
@@ -419,6 +519,21 @@ export default function AdminDashboard({ go, onOpenAuth }) {
           >
             <ShieldAlert className="w-4 h-4" />
             <span>Security Audit Logs</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('unanswered_tracker');
+              fetchUnansweredTracker();
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'unanswered_tracker'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span>Unanswered &amp; Fixed</span>
           </button>
 
           <button
@@ -1088,20 +1203,60 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                 </p>
               </div>
 
-              <div className="relative max-w-xs w-full">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search by name or email..."
-                  value={usersSearch}
-                  onChange={(e) => {
-                    setUsersSearch(e.target.value);
-                    setUsersPage(1);
-                  }}
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-                />
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative max-w-xs w-full">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={usersSearch}
+                    onChange={(e) => {
+                      setUsersSearch(e.target.value);
+                      setUsersPage(1);
+                    }}
+                    className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Promote Verified User to Admin Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (promoteEmail.trim()) handlePromoteUser(promoteEmail.trim());
+              }}
+              className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+                <span>Make Admin (Email-Verified Users):</span>
+              </div>
+              <input
+                type="email"
+                value={promoteEmail}
+                onChange={(e) => setPromoteEmail(e.target.value)}
+                placeholder="Enter verified user email (e.g. colleague@gmail.com)"
+                className="flex-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-purple-500"
+              />
+              <button
+                type="submit"
+                disabled={!promoteEmail.trim() || promotingUser}
+                className="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold transition-colors cursor-pointer shrink-0"
+              >
+                {promotingUser ? 'Promoting...' : 'Make Admin'}
+              </button>
+            </form>
+
+            {promoteFeedback && (
+              <div className={`px-3.5 py-2 rounded-xl text-xs font-semibold border ${
+                promoteFeedback.type === 'success'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+              }`}>
+                {promoteFeedback.text}
+              </div>
+            )}
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
@@ -1131,21 +1286,37 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
-                          {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
+                          {formatISTDate(u.created_at)}
                         </td>
                         <td className="py-3 px-4 text-slate-500 dark:text-slate-400">
-                          {u.last_login ? new Date(u.last_login).toLocaleDateString() : 'N/A'}
+                          {formatISTDateTime(u.last_login)}
                         </td>
                         <td className="py-3 px-4 text-right">
-                          {u.email !== user?.email && (
-                            <button
-                              onClick={() => setUserToDelete(u)}
-                              className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                              title="Delete account"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                          <div className="inline-flex items-center gap-1.5">
+                            {u.role !== 'admin' && u.is_verified && (
+                              <button
+                                type="button"
+                                onClick={() => handlePromoteUser(u)}
+                                disabled={promotingUser}
+                                className="px-2 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-600 hover:text-white text-[10px] font-bold transition-colors cursor-pointer"
+                                title="Promote verified user to Admin"
+                              >
+                                Make Admin
+                              </button>
+                            )}
+                            {u.role !== 'admin' && u.email !== user?.email && (
+                              <button
+                                onClick={() => setUserToDelete(u)}
+                                className="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                                title="Delete student account"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {u.role === 'admin' && (
+                              <span className="text-[10px] font-semibold text-slate-400 px-1.5">Protected</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -1218,51 +1389,50 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               </div>
             </div>
 
-            {/* Split Screen Grid: Sessions List (Left) + Transcript (Right) */}
+            {/* Split Screen Grid: Email Directory (Left) + All User Chats with IST Time (Right) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
-              {/* Left Column: Session List */}
-              <div className="lg:col-span-5 border-r border-slate-100 dark:border-slate-800 p-3 space-y-2 max-h-[600px] overflow-y-auto">
+              {/* Left Column: Email-wise Directory */}
+              <div className="lg:col-span-4 border-r border-slate-100 dark:border-slate-800 p-3 space-y-2 max-h-[620px] overflow-y-auto">
                 {loadingConversations ? (
                   <div className="p-8 text-center text-xs text-slate-400 italic">
-                    Loading live conversation sessions...
+                    Loading user chats...
                   </div>
-                ) : conversations.length === 0 ? (
+                ) : groupedConversationsByEmail.length === 0 ? (
                   <div className="p-8 text-center text-xs text-slate-400 italic">
-                    No conversation sessions logged yet.
+                    No user chats recorded yet.
                   </div>
                 ) : (
-                  conversations.map((c) => {
-                    const isSelected = selectedConversation?.sessionId === c.sessionId;
+                  groupedConversationsByEmail.map((group) => {
+                    const isSelected = activeEmailGroup?.email === group.email;
                     return (
                       <button
-                        key={c.sessionId}
-                        onClick={() => setSelectedConversation(c)}
+                        key={group.email}
+                        type="button"
+                        onClick={() => setSelectedUserEmail(group.email)}
                         className={`w-full text-left p-3 rounded-2xl transition-all cursor-pointer border ${
                           isSelected
                             ? 'bg-orange-50/80 dark:bg-orange-950/30 border-orange-400 dark:border-orange-600 shadow-2xs ring-1 ring-orange-500/20'
                             : 'bg-white dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800/80'
                         }`}
                       >
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="font-bold text-slate-900 dark:text-white truncate max-w-[200px]">
-                            {c.userEmail}
+                        <div className="flex items-center justify-between text-xs mb-1 gap-2">
+                          <span className="font-bold text-slate-900 dark:text-white truncate">
+                            {group.email}
                           </span>
                           <span className="text-[10px] text-slate-400 shrink-0">
-                            {c.lastActivity ? new Date(c.lastActivity).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            {formatISTTime(group.lastActivity)}
                           </span>
                         </div>
 
                         <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 font-medium mb-1.5">
-                          "{c.lastMessage}"
+                          "{group.lastMessage}"
                         </p>
 
                         <div className="flex items-center justify-between text-[10px] text-slate-400">
                           <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-bold">
-                            {c.messageCount} messages
+                            {group.sessions.length} {group.sessions.length === 1 ? 'session' : 'sessions'} • {group.totalMessages} msgs
                           </span>
-                          <span className="truncate max-w-[120px] font-mono">
-                            ID: {c.sessionId.slice(0, 8)}...
-                          </span>
+                          <span>{formatISTDate(group.lastActivity)}</span>
                         </div>
                       </button>
                     );
@@ -1270,74 +1440,83 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                 )}
               </div>
 
-              {/* Right Column: Active Conversation Transcript View */}
-              <div className="lg:col-span-7 p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col justify-between max-h-[600px] overflow-y-auto">
-                {selectedConversation ? (
-                  <div className="space-y-4">
-                    {/* Transcript Header */}
-                    <div className="pb-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs">
+              {/* Right Column: All Chats for Selected Email */}
+              <div className="lg:col-span-8 p-4 sm:p-6 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col max-h-[620px] overflow-y-auto">
+                {activeEmailGroup ? (
+                  <div className="space-y-5">
+                    <div className="pb-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div>
-                        <span className="text-slate-400 text-[11px] block">Active User Transcript:</span>
-                        <strong className="text-slate-900 dark:text-white text-sm">
-                          {selectedConversation.userEmail}
+                        <span className="text-slate-400 text-[11px] block">User Email &amp; Complete Chat History:</span>
+                        <strong className="text-slate-900 dark:text-white text-sm font-mono">
+                          {activeEmailGroup.email}
                         </strong>
                       </div>
-                      <span className="text-[11px] text-slate-400">
-                        Started: {selectedConversation.startedAt ? new Date(selectedConversation.startedAt).toLocaleString() : 'N/A'}
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                        Last Active: {formatISTDateTime(activeEmailGroup.lastActivity)}
                       </span>
                     </div>
 
-                    {/* Messages Scroll Area */}
-                    <div className="space-y-3 pr-1">
-                      {selectedConversation.messages && selectedConversation.messages.length > 0 ? (
-                        selectedConversation.messages.map((m, idx) => {
-                          const isUser = m.role === 'user';
-                          return (
-                            <div
-                              key={m.id || idx}
-                              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
-                            >
-                              <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-slate-400">
-                                <span>{isUser ? 'Student' : 'AI Helpdesk'}</span>
-                                {m.intent && (
-                                  <span className="px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-slate-800 font-mono text-[9px] text-slate-600 dark:text-slate-300">
-                                    intent: {m.intent}
-                                  </span>
-                                )}
-                                {m.confidence !== null && m.confidence !== undefined && (
-                                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px]">
-                                    ({Math.round(m.confidence * 100)}% conf)
-                                  </span>
-                                )}
-                              </div>
-
-                              <div
-                                className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
-                                  isUser
-                                    ? 'bg-orange-600 text-white rounded-tr-xs shadow-xs'
-                                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-slate-200/80 dark:border-slate-800 shadow-xs'
-                                }`}
-                              >
-                                {m.content}
-                              </div>
-
-                              <span className="text-[9px] text-slate-400 mt-0.5 px-1">
-                                {m.timestamp ? new Date(m.timestamp).toLocaleTimeString() : ''}
-                              </span>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="text-center py-12 text-slate-400 text-xs italic">
-                          No messages recorded in this session.
+                    {activeEmailGroup.sessions.map((sess, sIdx) => (
+                      <div key={sess.sessionId} className="space-y-3 rounded-2xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800 p-4">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 pb-2 border-b border-slate-100 dark:border-slate-800">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">
+                            Session #{activeEmailGroup.sessions.length - sIdx}
+                          </span>
+                          <span>{formatISTDateTime(sess.startedAt)}</span>
                         </div>
-                      )}
-                    </div>
+
+                        <div className="space-y-3">
+                          {sess.messages && sess.messages.length > 0 ? (
+                            sess.messages.map((m, idx) => {
+                              const isUser = m.role === 'user';
+                              return (
+                                <div
+                                  key={m.id || idx}
+                                  className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                                >
+                                  <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-slate-400">
+                                    <span>{isUser ? 'User' : 'AI Helpdesk'}</span>
+                                    {m.intent && (
+                                      <span className="px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-slate-800 font-mono text-[9px] text-slate-600 dark:text-slate-300">
+                                        {m.intent}
+                                      </span>
+                                    )}
+                                    {m.confidence !== null && m.confidence !== undefined && (
+                                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px]">
+                                        {Math.round(m.confidence * 100)}%
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <div
+                                    className={`p-3 rounded-2xl max-w-[85%] text-xs leading-relaxed whitespace-pre-wrap ${
+                                      isUser
+                                        ? 'bg-orange-600 text-white rounded-tr-xs shadow-xs'
+                                        : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-xs border border-slate-200/80 dark:border-slate-800 shadow-xs'
+                                    }`}
+                                  >
+                                    {m.content}
+                                  </div>
+
+                                  <span className="text-[9px] text-slate-400 mt-0.5 px-1">
+                                    {formatISTTime(m.timestamp)} IST
+                                  </span>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="text-center py-4 text-slate-400 text-xs italic">
+                              No messages in this session.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center text-xs text-slate-400 py-16">
                     <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-700 mb-2" />
-                    <span>Select a student session from the left list to inspect the full chat transcript.</span>
+                    <span>Select a user email from the left list to inspect all their chats.</span>
                   </div>
                 )}
               </div>
@@ -1405,7 +1584,113 @@ export default function AdminDashboard({ go, onOpenAuth }) {
         )}
 
         {/* ══════════════════════════════════════════════════════════════════
-            TAB 6: DATABASE / SUPABASE TABLE EXPLORER
+            TAB 6: REAL UNANSWERED VS FIXED QUERIES TRACKER
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'unanswered_tracker' && (
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">
+                  Live Unanswered &amp; Fixed Queries Tracker
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Real questions from user chats that the AI could not answer at the time, automatically re-tested against the current engine to show which ones are now fixed.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                  Fixed: {unansweredTracker?.fixedCount ?? 0}
+                </span>
+                <span className="px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-bold text-amber-700 dark:text-amber-300">
+                  Pending: {unansweredTracker?.pendingCount ?? 0}
+                </span>
+                <button
+                  type="button"
+                  onClick={fetchUnansweredTracker}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 text-slate-600 dark:text-slate-300 cursor-pointer"
+                  title="Re-test queries"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingTracker ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400">
+                    <th className="py-3 px-4 font-bold">User Question</th>
+                    <th className="py-3 px-3 font-bold text-center">Asked</th>
+                    <th className="py-3 px-3 font-bold">Last Seen (IST)</th>
+                    <th className="py-3 px-3 font-bold text-center">Current Engine Status</th>
+                    <th className="py-3 px-4 font-bold text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {loadingTracker ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-slate-400 italic">
+                        Evaluating live unanswered queries...
+                      </td>
+                    </tr>
+                  ) : unansweredTracker?.items?.length > 0 ? (
+                    unansweredTracker.items.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                        <td className="py-3 px-4">
+                          <p className="font-semibold text-slate-900 dark:text-white">{item.query}</p>
+                          {item.isFixedNow && item.currentReplyPreview && (
+                            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1 line-clamp-1">
+                              Now answers: {item.currentReplyPreview}
+                            </p>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                          {item.occurrenceCount}x
+                        </td>
+                        <td className="py-3 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                          {formatISTDateTime(item.lastSeen)}
+                        </td>
+                        <td className="py-3 px-3 text-center whitespace-nowrap">
+                          {item.isFixedNow ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                              <CheckCheck className="w-3 h-3" /> Fixed Now ({Math.round((item.currentConfidence || 0) * 100)}%)
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-bold">
+                              <AlertTriangle className="w-3 h-3" /> Still Unanswered
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          {item.dbStatus !== 'resolved' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleResolveUnanswered(item.id)}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white text-[11px] font-bold transition-colors cursor-pointer"
+                            >
+                              Mark Fixed
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-semibold">Resolved</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="py-10 text-center text-slate-400 italic">
+                        No unanswered queries logged in the database yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TAB 7: DATABASE / SUPABASE TABLE EXPLORER
         ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'db_explorer' && (
           <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">

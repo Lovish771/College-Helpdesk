@@ -6,17 +6,14 @@ bp = Blueprint('analytics', __name__)
 
 @bp.route('/analytics', methods=['GET'])
 def get_analytics():
-    """Get live analytics data from conversation database"""
+    """Get live analytics data from conversation database (real data only)"""
     total_conversations = ConversationSession.query.count()
     total_messages = ConversationMessage.query.filter_by(role='bot').count()
     answered_messages = ConversationMessage.query.filter_by(role='bot', answer_status='answered').count()
     unanswered_queries = UnansweredQuery.query.count()
-    
-    effective_total = max(total_messages, 2400)
-    effective_answered = max(answered_messages, 2280)
-    # Calculate answer rate based on active or baseline statistics
-    answer_rate = (effective_answered / effective_total * 100) if effective_total > 0 else 96.5
-    
+
+    answer_rate = (answered_messages / total_messages * 100) if total_messages > 0 else 0.0
+
     # Topic distribution with human-readable names
     intent_label_map = {
         'fee_query': 'Fees & Expenses',
@@ -29,8 +26,9 @@ def get_analytics():
         'placement_query': 'Placements & Packages',
         'campus_life': 'Campus Infrastructure',
         'contact_query': 'Contact & Helpline',
+        'knowledge_query': 'FAQs & Guidelines',
     }
-    
+
     topic_distribution = db.session.query(
         ConversationMessage.detected_intent,
         db.func.count(ConversationMessage.id)
@@ -40,42 +38,25 @@ def get_analytics():
         ConversationMessage.detected_intent != 'greeting',
         ConversationMessage.detected_intent != 'goodbye'
     ).group_by(ConversationMessage.detected_intent).order_by(db.func.count(ConversationMessage.id).desc()).limit(6).all()
-    
+
     topics = [[intent_label_map.get(intent, intent.replace('_', ' ').title()), count] for intent, count in topic_distribution]
-    
-    # Provide sensible default topic distribution if empty
-    if not topics:
-        topics = [
-            ['Fees & Expenses', 380],
-            ['Hostel & Living', 290],
-            ['Admissions & LPUNEST', 260],
-            ['Scholarships & Aid', 190],
-            ['Placements & Packages', 140],
-        ]
-    
-    # Recent unanswered queries
+
+    # Recent unanswered queries from real database
     recent_unanswered = UnansweredQuery.query.order_by(
         UnansweredQuery.last_seen.desc()
-    ).limit(6).all()
-    
+    ).limit(10).all()
+
     recent = [
-        [q.query_text, q.detected_intent or 'unknown', q.status or 'Needs review', q.last_seen.strftime('%Y-%m-%d') if q.last_seen else '2026-10-26']
+        [q.query_text, q.detected_intent or 'unknown', q.status or 'Needs review', q.last_seen.isoformat() if q.last_seen else '']
         for q in recent_unanswered
     ]
-    
-    if not recent:
-        recent = [
-            ['Can I transfer credits from another university in second year?', 'unknown', 'Needs review', '2026-10-26'],
-            ['Are there foreign student exchange programs with UK universities?', 'unknown', 'Unanswered', '2026-10-26'],
-            ['What is the cutoff for offline LPUNEST exam?', 'entrance_exam', 'Needs review', '2026-10-25'],
-        ]
-    
+
     return jsonify({
         'totals': {
-            'conversations': max(total_conversations, 1250),
-            'messages': max(total_messages, 2400),
-            'answered': max(answered_messages, 2280),
-            'unanswered': max(unanswered_queries, 120),
+            'conversations': total_conversations,
+            'messages': total_messages,
+            'answered': answered_messages,
+            'unanswered': unanswered_queries,
             'rate': round(answer_rate, 1)
         },
         'topics': topics,

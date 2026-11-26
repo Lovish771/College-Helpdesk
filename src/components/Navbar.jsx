@@ -420,7 +420,7 @@ export default function Navbar({
 
         {/* Mobile Drawer */}
         {open && (
-          <div className="xl:hidden mt-2 p-3 sm:p-4 rounded-3xl backdrop-blur-2xl shadow-2xl animate-fade-in border bg-white/98 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-[80vh] overflow-y-auto no-scrollbar">
+          <div className="xl:hidden mt-2 p-3 sm:p-4 rounded-3xl shadow-2xl animate-fade-in border bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 max-h-[80vh] overflow-y-auto no-scrollbar relative z-50">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Navigation Menu
