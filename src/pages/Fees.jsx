@@ -127,9 +127,19 @@ export default function Fees({ ask, onOpenCompare, go }) {
   const effectiveWaiverPercent = rawTuitionNum > 0 ? Math.round((totalConcessionPerSem / rawTuitionNum) * 100) : 0;
 
   // Calculate year-by-year and total tenure cost
-  const { yearlyBreakdowns, totalTenureCost, totalTuitionCost, totalHostelCost, totalMessCost, totalLaundryCost } = useMemo(() => {
+  const {
+    yearlyBreakdowns,
+    totalTenureCost,
+    totalTuitionOnly,
+    totalExamCost,
+    totalLivingCost,
+    totalHostelCost,
+    totalMessCost,
+    totalLaundryCost,
+  } = useMemo(() => {
     let tTenure = 0;
-    let tTuition = 0;
+    let tTuitionOnly = 0;
+    let tExam = 0;
     let tHostel = 0;
     let tMess = 0;
     let tLaundry = 0;
@@ -145,7 +155,8 @@ export default function Fees({ ask, onOpenCompare, go }) {
       const yTotal = tCost + eCost + hCost + mCost + lCost;
 
       tTenure += yTotal;
-      tTuition += (tCost + eCost);
+      tTuitionOnly += tCost;
+      tExam += eCost;
       tHostel += hCost;
       tMess += mCost;
       tLaundry += lCost;
@@ -160,6 +171,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
         messName: MESS_RATES[plan.mess]?.name || 'No Mess',
         laundry: lCost,
         hasLaundry: plan.laundry,
+        living: hCost + mCost + lCost,
         total: yTotal,
       });
     }
@@ -167,7 +179,9 @@ export default function Fees({ ask, onOpenCompare, go }) {
     return {
       yearlyBreakdowns: breakdowns,
       totalTenureCost: tTenure,
-      totalTuitionCost: tTuition,
+      totalTuitionOnly: tTuitionOnly,
+      totalExamCost: tExam,
+      totalLivingCost: tHostel + tMess + tLaundry,
       totalHostelCost: tHostel,
       totalMessCost: tMess,
       totalLaundryCost: tLaundry,
@@ -561,10 +575,34 @@ export default function Fees({ ask, onOpenCompare, go }) {
                           </div>
                         </div>
 
-                        {/* Streamlined summary chip */}
-                        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                          <span>Tuition + Exam:</span>
-                          <span className="font-bold text-slate-700 dark:text-slate-300">₹{(item.tuition + item.exam).toLocaleString()}</span>
+                        {/* Ordered itemized breakdown: Fee/Sem -> Hostel -> Mess -> Tuition & Exam */}
+                        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-1.5 text-[11px]">
+                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                            <span>1. Fee per Sem (Tuition):</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{netTuitionPerSem.toLocaleString()} / sem</span>
+                          </div>
+                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                            <span>2. Hostel Fee (Annual):</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.hostel.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                            <span>3. Mess Fee (Annual):</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.mess.toLocaleString()}</span>
+                          </div>
+                          {item.laundry > 0 && (
+                            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                              <span>Laundry Service:</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.laundry.toLocaleString()}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
+                            <span>4. Tuition (2 Sems) + Exam:</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.tuition.toLocaleString()} + ₹{item.exam.toLocaleString()}</span>
+                          </div>
+                          <div className="pt-1.5 mt-1 border-t border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                            <span className="font-bold text-slate-700 dark:text-slate-200">Year {item.year} Total (All Included):</span>
+                            <span className="font-extrabold text-orange-600 dark:text-orange-400">₹{item.total.toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
                     );
@@ -574,28 +612,37 @@ export default function Fees({ ask, onOpenCompare, go }) {
 
               {/* Overall Total Tenure Expenditure Banner */}
               <div className="rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-orange-200/80 dark:border-orange-900/50 shadow-sm p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                <div className="space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-orange-600 text-white uppercase tracking-wider">
                       Grand Total Estimate
                     </span>
+                    <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      Tuition + Exam + Hostel + Mess Included
+                    </span>
                     <span className="text-xs text-slate-500 dark:text-slate-400">
-                      Across all {tenureYears} Years ({activeCourse.short})
+                      {tenureYears} Years ({activeCourse.short})
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex flex-wrap items-baseline gap-2.5">
                     <span className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 dark:text-white">
                       ₹{totalTenureCost.toLocaleString()}
                     </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Total Expected Expenditure</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      Academic (Tuition + Exam): <strong className="text-slate-700 dark:text-slate-200">₹{(totalTuitionOnly + totalExamCost).toLocaleString()}</strong> • Living: <strong className="text-slate-700 dark:text-slate-200">₹{totalLivingCost.toLocaleString()}</strong>
+                    </span>
                   </div>
                   
-                  {/* Metric Chips */}
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300 pt-1">
-                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg">Tuition: ₹{totalTuitionCost.toLocaleString()}</span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-lg">Hostel: ₹{totalHostelCost.toLocaleString()}</span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-lg">Mess: ₹{totalMessCost.toLocaleString()}</span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-lg">Laundry: ₹{totalLaundryCost.toLocaleString()}</span>
+                  {/* Ordered Metric Chips */}
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-700 dark:text-slate-200 pt-1">
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">1. Fee / Sem: ₹{netTuitionPerSem.toLocaleString()}</span>
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">2. Hostel ({tenureYears} Yrs): ₹{totalHostelCost.toLocaleString()}</span>
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">3. Mess ({tenureYears} Yrs): ₹{totalMessCost.toLocaleString()}</span>
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">4. Tuition ({tenureYears * 2} Sems): ₹{totalTuitionOnly.toLocaleString()}</span>
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">Exam ({tenureYears} Yrs): ₹{totalExamCost.toLocaleString()}</span>
+                    {totalLaundryCost > 0 && (
+                      <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg font-medium">Laundry: ₹{totalLaundryCost.toLocaleString()}</span>
+                    )}
                   </div>
                 </div>
 
@@ -763,6 +810,10 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       <ArrowRight size={13} />
                     </button>
                   </div>
+                  <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-700/70 rounded-xl px-3 py-2 flex items-center gap-1.5">
+                    <Info size={13} className="text-orange-500 shrink-0" />
+                    <span>Tuition &amp; Exam Fee only — Hostel &amp; Mess fees are separate (use <strong>Degree Budget Planner</strong> to combine both).</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -939,7 +990,11 @@ export default function Fees({ ask, onOpenCompare, go }) {
             TAB 3: HOSTEL, MESS & LAUNDRY RATES
         ════════════════════════════════════════════════════════════ */}
         {activeTab === 'residential-fees' && (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-6 animate-fade-in">
+            <div className="rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 px-4 py-3 flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300">
+              <Info size={15} className="text-orange-600 dark:text-orange-400 shrink-0" />
+              <span><strong>Hostel, Mess &amp; Laundry rates only:</strong> Programme Tuition &amp; Examination fees are charged separately. Use the <strong>Degree Budget Planner</strong> tab to view your combined total.</span>
+            </div>
             <div className="grid gap-8 lg:grid-cols-3">
               {RESIDENTIAL_SERVICES.map((cat) => {
                 const Icon = cat.icon;

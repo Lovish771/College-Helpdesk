@@ -919,7 +919,7 @@ export const scholarships = [
 export const hostel = {
   facilities: [
     ['Furnished Standard & Studio Rooms', 'Furnished with wooden bed, foam mattress, study desk, ergonomic chair, wardrobe, book rack, geyser in attached bathrooms, and AC / air-cooling options.'],
-    ['Multi-Cuisine Mess & Dining Halls', "Nutritious dining halls offering Standard Vegetarian Mess (Standard 4-Meal ~₹48,000/yr, Standard 3-Meal ~₹38,000/yr, Special Mess ~₹58,000/yr, and South Indian meal plans, alongside Uni-Mall food courts featuring Domino's, Subway, CCD, and Haldiram's."],
+    ['Multi-Cuisine Mess & Dining Halls', "Nutritious dining halls offering Standard Vegetarian Mess (Standard 4-Meal ₹50,000/yr, Standard 3-Meal ₹46,000/yr, Standard 2-Meal ₹42,000/yr, Special Multi-Cuisine Mess ₹58,000/yr), alongside Uni-Mall food courts featuring Domino's, Subway, CCD, and Haldiram's."],
     ['Uni-Hospital (24/7 Medical Care)', 'On-campus 50+ bed hospital with residential doctors, round-the-clock emergency care, in-house pharmacy, dental clinic, and ambulance service.'],
     ['Uni-Mall (6-Storey Commercial Mall)', 'On-campus mall with department stores, clothing outlets, banks, ATMs, post office, salons, electronics, stationery, and cafes.'],
     ['Multi-Tier Security & Biometrics', '24/7 security personnel, automated turnstiles, biometric entry/exit logs, and 4,000+ CCTV surveillance cameras across all residential towers.'],
@@ -931,8 +931,8 @@ export const hostel = {
     ['3-Seater Studio Apartment (AC)', 'Triple-occupancy air-conditioned apartment suite with attached bathroom, kitchenette, and study units. (Annual Fee: ₹1,20,000 / year per student)'],
     ['4-Seater Studio Apartment (AC)', 'Four-occupancy air-conditioned apartment suite with attached bathroom, kitchenette, and study units. (Annual Fee: ₹1,00,000 / year per student)'],
     ['1-Seater Standard Room (AC)', 'Private single room with attached bathroom, study desk, wardrobe, geyser, and air conditioner. (Annual Fee: ₹1,53,000 / year)'],
-    ['2-Seater Room (Air-Cooled / AC)', 'Shared by two students with twin study tables and wardrobes. (Air-Cooled: ₹1,03,000 / year | AC: ₹1,33,000 / year)'],
-    ['3-Seater Room (Air-Cooled / AC)', 'Spacious room shared by three students with all amenities. (Air-Cooled: ₹93,000 / year | AC: ₹1,03,000 / year)'],
+    ['2-Seater Room (Air-Cooled / AC)', 'Shared by two students with twin study tables and wardrobes. (Air-Cooled: ₹1,13,000 / year | AC: ₹1,33,000 / year)'],
+    ['3-Seater Room (Air-Cooled / AC)', 'Spacious room shared by three students with all amenities. (Air-Cooled: ₹98,000 / year | AC: ₹1,13,000 / year)'],
     ['4-Seater Room (Air-Cooled / AC)', 'Economical shared room option with attached washroom. (Air-Cooled: ₹83,000 / year | AC: ₹93,000 / year)'],
   ],
 };
