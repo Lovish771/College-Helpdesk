@@ -325,7 +325,7 @@ export default function Navbar({
                   aria-expanded={userDropdownOpen}
                   title={user.name || user.email}
                 >
-                  {(user.name ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AD')}
+                  {(user.email ? user.email.trim()[0].toUpperCase() : (user.name ? user.name.trim()[0].toUpperCase() : 'U'))}
                 </button>
 
                 {userDropdownOpen && (

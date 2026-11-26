@@ -125,9 +125,8 @@ function AppContent() {
       isThemeChangingRef.current = false;
     };
 
-    // GPU-composited circular View Transition (skip on full-screen chat to avoid 100dvh scroll-container snapshot glitch)
+    // GPU-composited circular View Transition across all pages including chat
     if (
-      page !== 'chat' &&
       !prefersReducedMotion &&
       typeof document !== 'undefined' &&
       typeof document.startViewTransition === 'function'

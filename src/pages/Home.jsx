@@ -26,7 +26,7 @@ const CAMPUS_HIGHLIGHTS = [
     title: 'Uni-Mall & Lifestyle Complex',
     location: 'Residential Sector',
     desc: 'Six floors of departmental stores, food courts, brand outlets, and banking services.',
-    image: 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=1920&auto=format&fit=crop&q=95',
+    image: '/images/lpu-unimall.jpg',
   },
 ];
 
