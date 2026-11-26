@@ -75,7 +75,7 @@ export async function request(path, mock, options = {}) {
   }
 
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timeoutId = controller ? setTimeout(() => controller.abort(), options.timeoutMs || 5000) : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), options.timeoutMs || 12000) : null;
 
   try {
     const res = await fetch(fullUrl, {

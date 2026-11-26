@@ -280,16 +280,11 @@ export default function Navbar({
             <button
               type="button"
               onClick={onOpenSearch}
-              className="hidden lg:flex items-center justify-between gap-2 w-48 xl:w-56 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-colors cursor-pointer shadow-xs"
-              title="Search (Ctrl+K)"
+              className="hidden lg:flex items-center gap-2 w-44 xl:w-52 px-3.5 py-1.5 rounded-full bg-slate-50 dark:bg-slate-900/90 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs transition-colors cursor-pointer shadow-xs"
+              title="Search"
             >
-              <span className="flex items-center gap-2 min-w-0">
-                <Search size={13} className="text-slate-400 shrink-0" />
-                <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
-              </span>
-              <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
-                Ctrl K
-              </kbd>
+              <Search size={13} className="text-slate-400 shrink-0" />
+              <span className="truncate text-slate-500 dark:text-slate-400 text-xs font-normal">Search anything...</span>
             </button>
 
             {/* Mobile / Tablet search icon button */}

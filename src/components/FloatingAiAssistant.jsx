@@ -113,57 +113,34 @@ export default function FloatingAiAssistant({ go, page }) {
     };
   }, []);
 
-  // Initialize position from storage
-  useEffect(() => {
-    let initialPos = getDefaultPos();
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (
-          typeof parsed.x === 'number' &&
-          typeof parsed.y === 'number' &&
-          parsed.x >= 0 &&
-          parsed.x <= window.innerWidth - 60 &&
-          parsed.y >= 0 &&
-          parsed.y <= window.innerHeight - 60
-        ) {
-          initialPos = parsed;
-        }
-      }
-    } catch {}
+  const hasCustomPosRef = useRef(false);
 
+  // Initialize position (always start in bottom-right corner)
+  useEffect(() => {
+    const initialPos = getDefaultPos();
     posRef.current = initialPos;
     setPos(initialPos);
-
-    if (initialPos.x < 35) {
-      setIsEdgeSnapped(true);
-      setSnapSide('left');
-    } else if (initialPos.x > window.innerWidth - 145) {
-      setIsEdgeSnapped(true);
-      setSnapSide('right');
-    }
   }, [getDefaultPos]);
 
-  // Screen resize clamping
+  // Screen resize: stay anchored to bottom-right if not manually dragged, otherwise clamp
   useEffect(() => {
     const handleResize = () => {
-      const orbDim = 120;
-      const current = posRef.current;
-      const clamped = {
-        x: Math.min(Math.max(12, current.x), Math.max(12, window.innerWidth - orbDim - 12)),
-        y: Math.min(Math.max(12, current.y), Math.max(12, window.innerHeight - orbDim - 12)),
-      };
-      posRef.current = clamped;
-      setPos(clamped);
+      const next = hasCustomPosRef.current
+        ? {
+            x: Math.min(Math.max(12, posRef.current.x), Math.max(12, window.innerWidth - 132)),
+            y: Math.min(Math.max(12, posRef.current.y), Math.max(12, window.innerHeight - 132)),
+          }
+        : getDefaultPos();
+      posRef.current = next;
+      setPos(next);
       if (widgetRef.current) {
-        widgetRef.current.style.transform = `translate3d(${clamped.x}px, ${clamped.y}px, 0)`;
+        widgetRef.current.style.transform = `translate3d(${next.x}px, ${next.y}px, 0)`;
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [getDefaultPos]);
 
   // Scroll to bottom on new messages
   useEffect(() => {

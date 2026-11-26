@@ -1,4 +1,5 @@
 import { programs, fees, scholarships, documents, admissionSteps, deadlines, contact } from '../data/mockData';
+import { mockArticles } from './knowledgeApi';
 import { getProgramComparisonDetails } from '../data/programComparisonData';
 import { USE_MOCK, wait, request } from './client';
 
@@ -162,6 +163,30 @@ function mockReply(message, cid) {
   if (!intent && prog) intent = 'program_query';
 
   if (!intent) {
+    const stopwords = new Set(['what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you', 'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does', 'rule']);
+    const tokens = (message.toLowerCase().match(/[a-z0-9]{2,}/g) || []).filter((t) => !stopwords.has(t));
+    if (tokens.length > 0) {
+      let bestArt = null;
+      let bestScore = 0;
+      for (const art of mockArticles) {
+        const hay = `${art.title} ${art.category} ${art.tag} ${art.answer}`.toLowerCase();
+        let score = tokens.reduce((acc, tok) => acc + (hay.includes(tok) ? 1 : 0), 0);
+        if (tokens.some((tok) => art.title.toLowerCase().includes(tok))) score += 1;
+        if (score > bestScore) {
+          bestScore = score;
+          bestArt = art;
+        }
+      }
+      if (bestArt && bestScore >= 2) {
+        return {
+          ...base,
+          reply: `**${bestArt.title}**\n\n${bestArt.answer}`,
+          intent: 'knowledge_query',
+          confidence: 0.9,
+          suggestions: ['Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities', 'Admission Process'],
+        };
+      }
+    }
     return {
       ...base,
       reply: "I'm sorry, I couldn't identify that enquiry.\n\nI can help with Lovely Professional University (LPU) information on:\n• Programmes & Specializations\n• LPUNEST & Admissions\n• Fee Structure & Slabs\n• Scholarships up to 50%\n• Hostel & Campus Facilities\n• Placement Statistics\n• Eligibility & Documents\n\nCould you please rephrase your question?",
