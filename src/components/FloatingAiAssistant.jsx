@@ -180,7 +180,7 @@ export default function FloatingAiAssistant({ go, page }) {
     }, 220);
   }, []);
 
-  // Click outside to minimize
+  // Click outside to minimize + clamp panel on viewport resize
   useEffect(() => {
     if (!isOpen) return;
     const handleOutside = (e) => {
@@ -188,8 +188,25 @@ export default function FloatingAiAssistant({ go, page }) {
         closePanel();
       }
     };
+    const handleResize = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      setPanelDim((prevDim) => {
+        const w = Math.min(Math.max(300, prevDim.w), Math.max(300, vw - 24));
+        const h = Math.min(Math.max(290, prevDim.h), Math.max(290, vh - 96));
+        setPanelPos((prevPos) => ({
+          x: Math.min(Math.max(12, prevPos.x), Math.max(12, vw - w - 12)),
+          y: Math.min(Math.max(72, prevPos.y), Math.max(72, vh - h - 12)),
+        }));
+        return { w, h };
+      });
+    };
     document.addEventListener('pointerdown', handleOutside);
-    return () => document.removeEventListener('pointerdown', handleOutside);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      document.removeEventListener('pointerdown', handleOutside);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [isOpen, closePanel]);
 
   // Free-move drag for open panel header
@@ -498,7 +515,7 @@ export default function FloatingAiAssistant({ go, page }) {
             className="px-4 py-3 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 cursor-grab active:cursor-grabbing"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="relative w-10 h-10 -my-1 shrink-0">
+              <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
                 <ThreeAiOrb
                   size={44}
                   state={orbState}
@@ -632,7 +649,7 @@ export default function FloatingAiAssistant({ go, page }) {
               </button>
             </form>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px]">
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
               {[
                 { label: 'Fees', icon: Wallet },
                 { label: 'Scholarships', icon: Award },

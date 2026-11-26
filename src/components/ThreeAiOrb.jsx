@@ -38,8 +38,8 @@ export default function ThreeAiOrb({
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-    // Camera positioned in front (+Z) looking directly at the face
-    camera.position.set(0, 0.08, 4.3);
+    // Camera positioned in front (+Z) with comfortable margin for ground rings
+    camera.position.set(0, 0.02, 4.85);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,

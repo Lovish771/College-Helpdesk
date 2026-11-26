@@ -47,11 +47,11 @@ function ChatInputComponent({ onSend, disabled }) {
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, MAX_CHAT_LENGTH))}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about LPU admissions, fees, hostels, or rules... (Shift+Enter for new line)"
+            placeholder="Ask about LPU fees, hostels, scholarships, or admissions..."
             disabled={disabled}
             maxLength={MAX_CHAT_LENGTH}
             aria-label="Ask a question about Lovely Professional University"
-            className="flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus-visible:outline-none max-h-[140px] leading-relaxed"
+            className={`flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus-visible:outline-none max-h-[140px] leading-relaxed ${text ? 'overflow-y-auto' : 'overflow-hidden'}`}
           />
 
           {/* Character warning indicator when approaching cap */}

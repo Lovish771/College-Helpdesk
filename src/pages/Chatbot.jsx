@@ -79,7 +79,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
     <div className="flex h-full flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-colors">
       <div className="flex flex-col h-full min-h-0">
         {/* + New Chat Button in LPU Orange */}
-        <div className="p-3.5 shrink-0">
+        <div className="p-3.5 pr-12 lg:pr-3.5 shrink-0">
           <button
             onClick={act(handleNewChat)}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 py-3 text-xs font-semibold text-white transition-colors cursor-pointer"
@@ -254,7 +254,7 @@ export default function Chatbot({ chat, go, pending, clearPending, onOpenAuth })
             <div className="fixed inset-0 bg-slate-950/60" onClick={() => setDrawer(false)} />
             <div className="relative w-72 bg-white dark:bg-slate-900 h-full z-10 shadow-2xl flex flex-col animate-slide-in">
               <button
-                className="absolute right-3 top-3 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                className="absolute right-2.5 top-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 onClick={() => setDrawer(false)}
                 aria-label="Close drawer"
               >
