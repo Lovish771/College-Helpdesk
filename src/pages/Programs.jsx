@@ -184,7 +184,7 @@ const ALL_DEGREE_ITEMS = [
 
 
 // Detailed Program View (Comprehensive, Lists All Degree Details)
-function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
+function ProgramDetailsView({ p, onBack, ask, onOpenCompare, go }) {
   const tabs = ['Overview & Pathways', 'Curriculum & Semester 1', 'Placements & Recruiters', 'Eligibility & Criteria', 'Fee & Scholarships'];
   const [activeTab, setActiveTab] = useState('Overview & Pathways');
 
@@ -549,10 +549,28 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
               </div>
               <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
                 <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Examination &amp; Admin Fee</span>
-                <span className="text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1 block">₹5,000 / sem</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Standard university examination fee</span>
+                <span className="text-2xl font-extrabold text-slate-900 dark:text-white font-display mt-1 block">₹5,000 / year</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 block">Charged once annually in 2nd semester</span>
               </div>
             </div>
+
+            {go && (
+              <div className="p-4 rounded-2xl bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="text-xs text-slate-700 dark:text-slate-300">
+                  Want to calculate your <strong>{p.short}</strong> scholarship, hostel &amp; mess budget?
+                </p>
+                <button
+                  onClick={() => {
+                    try { sessionStorage.setItem('lpu_fee_jump_course', p.id); } catch {}
+                    go('fees');
+                  }}
+                  className="btn-primary inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer shrink-0"
+                >
+                  <span>Open in Fee Planner</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            )}
 
             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
               <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">LPUNEST Scholarship Concession Slabs</h3>
@@ -580,7 +598,7 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
     </div>
   );
 }
-export default function Programs({ ask, onOpenCompare }) {
+export default function Programs({ ask, onOpenCompare, go }) {
   const [q, setQ] = useState('');
   const [level, setLevel] = useState('All'); // 'All' | 'UG' | 'PG'
   const [selectedDegreeType, setSelectedDegreeType] = useState('All');
@@ -719,6 +737,7 @@ export default function Programs({ ask, onOpenCompare }) {
         onBack={() => setSelectedProgram(null)}
         ask={ask}
         onOpenCompare={onOpenCompare}
+        go={go}
       />
     );
   }

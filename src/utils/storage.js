@@ -30,8 +30,8 @@ const STORAGE_SCHEMAS = {
       applyDefense: false,
       applyTeacher: false,
       yearPlans: {
-        1: { hostel: 'standard-4', mess: 'std-4', laundry: true },
-        2: { hostel: 'standard-4', mess: 'none', laundry: true },
+        1: { hostel: 'none', mess: 'none', laundry: false },
+        2: { hostel: 'none', mess: 'none', laundry: false },
         3: { hostel: 'none', mess: 'none', laundry: false },
         4: { hostel: 'none', mess: 'none', laundry: false },
         5: { hostel: 'none', mess: 'none', laundry: false },
