@@ -105,15 +105,42 @@ class RuleEngine:
         return "Thank you for connecting with the Lovely Professional University Helpdesk. If you need any further assistance, feel free to ask anytime. Best of luck with your academic journey!"
     
     def _search_knowledge_fallback(self, message):
-        """Search KnowledgeEntry records by keyword overlap when primary intent is unknown."""
+        """Search KnowledgeEntry records and built-in LPU FAQ knowledge by keyword overlap."""
         import re
-        stopwords = {'what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you', 'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does'}
+        stopwords = {'what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you', 'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does', 'rule'}
         tokens = [t for t in re.findall(r'[a-z0-9]{2,}', message.lower()) if t not in stopwords]
         if not tokens:
             return None
-        entries = KnowledgeEntry.query.filter_by(is_active=True).all()
-        best_entry = None
+
+        # Built-in verified LPU FAQ entries so attendance, loans, studio rooms, UMS, exams always resolve accurately
+        builtin_faqs = [
+            ('Mandatory 75% Attendance & UMS Duty Leave Rule',
+             'At LPU, students must maintain a minimum of **75% attendance** in every registered course to be eligible for End-Term Examinations (ETE). Attendance is tracked via biometric punches and UMS. Medical certificates and official event Duty Leaves (DL) must be uploaded on UMS within 3 working days.'),
+            ('Education Loan Process & On-Campus Banks',
+             'Download your official Bonafide Certificate & Multi-Year Fee Estimate Letter from UMS or the Loan Helpdesk (Block 29, Room 104). Apply via the Vidya Lakshmi portal selecting on-campus branches (SBI, PNB, Canara Bank, HDFC, ICICI) for direct university disbursement and CSIS interest subsidy eligibility.'),
+            ('Continuous Assessment (CA), MTE & ETE Examination Pattern',
+             'LPU follows the UGC-CBCS grading system: **30% Continuous Assessment (CA)** (best 2 of 3 class tests, labs, and assignments), **20% Mid-Term Examination (MTE)**, and **50% End-Term Examination (ETE)** evaluated on a 10-point relative grading scale.'),
+            ('Studio Apartments & Luxury Hostel Facilities',
+             'LPU Studio Apartments include Split AC, private kitchenette with induction, attached geyser washroom, study desks, and weekly housekeeping. Annual rates: 1-Seater ₹1,90,000; 2-Seater ₹1,40,000; 3-Seater ₹1,20,000; 4-Seater ₹1,00,000 per academic year.'),
+            ('Hostel Reallocation, Mess & Laundry Policy',
+             'Students can change room types, opt in or out of mess plans (₹42,000–₹58,000/yr), add Uni-Laundry (₹5,400/yr), or convert to Day Scholar status annually via the UMS reallocation window in April–May.'),
+        ]
+
+        best_title = None
+        best_content = None
         best_score = 0
+
+        for title, content in builtin_faqs:
+            haystack = f"{title} {content}".lower()
+            score = sum(1 for tok in tokens if tok in haystack)
+            if any(tok in title.lower() for tok in tokens):
+                score += 1
+            if score > best_score:
+                best_score = score
+                best_title = title
+                best_content = content
+
+        entries = KnowledgeEntry.query.filter_by(is_active=True).all()
         for entry in entries:
             haystack = f"{entry.title or ''} {entry.category or ''} {entry.content or ''}".lower()
             score = sum(1 for tok in tokens if tok in haystack)
@@ -121,9 +148,11 @@ class RuleEngine:
                 score += 1
             if score > best_score:
                 best_score = score
-                best_entry = entry
-        if best_entry and best_score >= 2:
-            reply = f"**{best_entry.title}**\n\n{best_entry.content}"
+                best_title = entry.title
+                best_content = entry.content
+
+        if best_title and best_score >= 2:
+            reply = f"**{best_title}**\n\n{best_content}"
             return reply, 'knowledge_query'
         return None
 

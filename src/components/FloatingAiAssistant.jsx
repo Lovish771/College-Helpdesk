@@ -345,17 +345,27 @@ export default function FloatingAiAssistant({ go, page }) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      style={{
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
-        willChange: 'transform',
-        transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-        zIndex: 50,
-        touchAction: 'none',
-        userSelect: 'none',
-      }}
+      style={
+        isOpen
+          ? {
+              position: 'fixed',
+              right: '20px',
+              bottom: '20px',
+              zIndex: 50,
+              userSelect: 'none',
+            }
+          : {
+              position: 'fixed',
+              left: 0,
+              top: 0,
+              transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+              willChange: 'transform',
+              transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+              zIndex: 50,
+              touchAction: 'none',
+              userSelect: 'none',
+            }
+      }
       className="select-none"
     >
       {/* ── MODE 1: EXPANDED CHAT PANEL (Theme-matched Light & Dark) ── */}
