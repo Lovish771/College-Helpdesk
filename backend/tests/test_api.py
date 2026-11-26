@@ -159,7 +159,7 @@ def test_chat_greeting(client):
     assert res.status_code == 200
     data = res.get_json()
     assert data['intent'] == 'greeting'
-    assert 'Lovely Professional University' in data['reply']
+    assert 'Student Helpdesk' in data['reply']
 
 def test_chat_slot_filling_flow(client):
     cid = 'pytest_slot_flow_session'

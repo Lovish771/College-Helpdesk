@@ -8,7 +8,7 @@ const defaultWelcomeChat = () => [
   {
     id: 'welcome-bot',
     role: 'bot',
-    text: `Hello! Welcome to the Lovely Professional University (LPU) Student Helpdesk.
+    text: `Hello! Welcome to Student Helpdesk.
 
 I can assist you with:
 • Admissions criteria, cutoff & application deadlines (2026-27)

@@ -95,14 +95,14 @@ class RuleEngine:
     
     def _handle_greeting(self):
         return (
-            "Hello! Welcome to the Lovely Professional University (LPU) Admission Assistant. 🎓\n\n"
+            "Hello! Welcome to Student Helpdesk Assistant. 🎓\n\n"
             "I can help you explore 150+ degree programmes, calculate semester fee structures, "
             "check LPUNEST cutoff & scholarship slabs, view semester curricula, and guide your admission process.\n\n"
             "What would you like to know today?"
         )
     
     def _handle_goodbye(self):
-        return "Thank you for connecting with the Lovely Professional University Helpdesk. If you need any further assistance, feel free to ask anytime. Best of luck with your academic journey!"
+        return "Thank you for connecting with Student Helpdesk. If you need any further assistance, feel free to ask anytime. Best of luck with your academic journey!"
     
     def _search_knowledge_fallback(self, message):
         """Search KnowledgeEntry records and built-in LPU FAQ knowledge by keyword overlap."""

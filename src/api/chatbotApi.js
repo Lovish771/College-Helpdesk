@@ -200,7 +200,7 @@ function mockReply(message, cid) {
   if (intent === 'greeting') {
     return {
       ...base,
-      reply: 'Hello! 👋 Welcome to the Lovely Professional University (LPU) Admission Assistant.\n\nI can help you explore 150+ degree programmes, check LPUNEST cutoff & scholarship slabs, view semester fee structures, and guide your admission step-by-step.\n\nWhat would you like to know today?',
+      reply: 'Hello! 👋 Welcome to Student Helpdesk.\n\nI can help you explore 150+ degree programmes, check LPUNEST cutoff & scholarship slabs, view semester fee structures, and guide your admission step-by-step.\n\nWhat would you like to know today?',
       intent,
       confidence: 0.98,
       suggestions: ['Available Programs', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities'],

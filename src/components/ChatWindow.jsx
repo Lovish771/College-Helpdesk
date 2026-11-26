@@ -3,7 +3,8 @@ import { Lock, LogIn, ArrowDown } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
-import LpuLogo from './LpuLogo';
+import ThreeAiOrb from './ThreeAiOrb';
+import OrbAvatar from './OrbAvatar';
 
 export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
   const scrollContainerRef = useRef(null);
@@ -49,6 +50,23 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
 
   return (
     <div className="flex flex-col h-full w-full min-h-0 bg-[#F8FAFC] dark:bg-slate-950 transition-colors overflow-hidden relative">
+      {/* Premium Full-Screen Chat Header with Live 3D Orb */}
+      <div className="shrink-0 px-4 sm:px-6 py-2.5 border-b border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 -my-1 shrink-0">
+            <ThreeAiOrb size={44} state={chat.loading ? 'thinking' : 'hover'} enableLookAt={true} />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-base font-extrabold font-display text-slate-900 dark:text-white truncate">
+              Student Helpdesk Assistant
+            </h2>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              {chat.loading ? 'Thinking through your enquiry...' : 'Programmes, fees, scholarships, hostels & admissions'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Scrollable conversation history - Isolated internal scroll container */}
       <div
         ref={scrollContainerRef}
@@ -73,23 +91,28 @@ export default function ChatWindow({ chat, go, isAuthenticated, onOpenAuth }) {
             <QuickActions items={lastBotMessage.suggestions} onPick={handlePickSuggestion} />
           )}
 
-          {/* Typing Indicator */}
+          {/* Premium Thinking Process Indicator */}
           {chat.loading && (
-            <div className="flex items-center gap-3 animate-fade-in pl-1">
-              <div className="shrink-0">
-                <LpuLogo size={26} />
+            <div className="flex items-start gap-3 animate-fade-in">
+              <div className="shrink-0 mt-1">
+                <OrbAvatar size={34} className="animate-pulse" />
               </div>
-              <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 px-4 py-3 text-xs text-slate-500 dark:text-slate-400 shadow-xs flex items-center gap-1.5">
-                <span>Assistant is typing</span>
-                <span className="flex gap-1 ml-1">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="dot h-1.5 w-1.5 rounded-full bg-orange-500 inline-block animate-pulse"
-                      style={{ animationDelay: `${i * 0.2}s` }}
-                    />
-                  ))}
-                </span>
+              <div className="rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-orange-200/80 dark:border-orange-900/50 px-4 py-3 text-xs shadow-sm space-y-1.5 max-w-sm">
+                <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-100">
+                  <span>Thinking</span>
+                  <span className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="dot h-1.5 w-1.5 rounded-full bg-orange-500 inline-block animate-pulse"
+                        style={{ animationDelay: `${i * 0.2}s` }}
+                      />
+                    ))}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Analyzing question &amp; matching LPU records...
+                </p>
               </div>
             </div>
           )}

@@ -5,6 +5,7 @@ import {
   ExternalLink, Layers, Wallet, Award, BedDouble, GraduationCap, UserCheck
 } from 'lucide-react';
 import ThreeAiOrb from './ThreeAiOrb';
+import OrbAvatar from './OrbAvatar';
 import { sendMessage } from '../api/chatbotApi';
 
 const STORAGE_KEY = 'lpu_ai_orb_position_v3';
@@ -101,7 +102,7 @@ export default function FloatingAiAssistant({ go, page }) {
     {
       id: 1,
       sender: 'bot',
-      text: "Hello! I'm your LPU Student Helpdesk Assistant 👋\nAsk me anything about programmes, semester fees, scholarships, or hostel life.",
+      text: "Hello! I'm your Student Helpdesk Assistant 👋\nAsk me anything about programmes, semester fees, scholarships, or hostel life.",
       time: 'Just now',
     },
   ]);
@@ -507,10 +508,10 @@ export default function FloatingAiAssistant({ go, page }) {
 
               <div className="min-w-0">
                 <span className="font-display tracking-tight text-slate-900 dark:text-white font-bold text-sm block truncate">
-                  LPU Helpdesk
+                  Student Helpdesk
                 </span>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Drag header to move • Drag edges to resize
+                  Student Helpdesk Assistant
                 </p>
               </div>
             </div>
@@ -556,9 +557,7 @@ export default function FloatingAiAssistant({ go, page }) {
                 className={`flex gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {m.sender === 'bot' && (
-                  <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800/60 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Bot size={13} />
-                  </div>
+                  <OrbAvatar size={28} className="mt-0.5" />
                 )}
                 <div
                   className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl leading-relaxed break-words ${
@@ -589,13 +588,14 @@ export default function FloatingAiAssistant({ go, page }) {
 
             {isSending && (
               <div className="flex gap-2 items-center text-slate-500 dark:text-slate-400 text-xs py-1">
-                <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center">
-                  <Bot size={12} className="animate-pulse" />
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.4s]" />
+                <OrbAvatar size={26} className="animate-pulse" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl rounded-tl-xs bg-white dark:bg-slate-900 border border-orange-200/70 dark:border-orange-900/50 text-[11px] shadow-2xs">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">Thinking</span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.4s]" />
+                  </span>
                 </div>
               </div>
             )}

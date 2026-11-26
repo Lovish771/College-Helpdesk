@@ -129,7 +129,7 @@ export default function Home({ go, ask, onOpenCompare }) {
             {/* Pill: Student Portal */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 text-xs font-bold mb-3 shadow-2xs">
               <GraduationCap size={13} className="text-orange-500" />
-              <span>LPU Student Helpdesk Gateway</span>
+              <span>Student Helpdesk</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">

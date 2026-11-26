@@ -177,7 +177,7 @@ export default function AuthModal({ isOpen, onClose, onOpenLegal, onLoginSuccess
               {tab === 'signin' ? 'Sign In to Helpdesk' : 'Register New Account'}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Lovely Professional University Helpdesk
+              Student Helpdesk
             </p>
           </div>
         </div>

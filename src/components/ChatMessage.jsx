@@ -1,7 +1,7 @@
 import React, { useState, memo } from 'react';
 import { ThumbsUp, ThumbsDown, Copy, Check, ArrowRight, RotateCcw } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import LpuLogo from './LpuLogo';
+import OrbAvatar from './OrbAvatar';
 import { request } from '../api/client';
 import { formatISTTime } from '../utils/dateUtils';
 
@@ -170,20 +170,20 @@ function ChatMessageComponent({ m, sessionId, onRetry, onContact }) {
 
   return (
     <div className={`flex gap-3 animate-fade-up ${isBot ? 'items-start' : 'items-end justify-end'}`}>
-      {/* Bot Avatar */}
+      {/* Bot 3D Orb Avatar */}
       {isBot && (
         <div className="shrink-0 mt-1">
-          <LpuLogo variant="light" size={28} />
+          <OrbAvatar size={34} />
         </div>
       )}
 
       {/* Bubble Container */}
-      <div className={`flex flex-col ${isBot ? 'w-full max-w-full sm:max-w-[94%] items-start' : 'max-w-[85%] sm:max-w-[75%] items-end'}`}>
+      <div className={`flex flex-col ${isBot ? 'w-full max-w-full sm:max-w-[92%] items-start' : 'max-w-[85%] sm:max-w-[75%] items-end'}`}>
         <div
-          className={`px-4 py-3.5 rounded-2xl shadow-xs transition-colors ${
+          className={`px-4 py-3.5 sm:px-5 sm:py-4 rounded-2xl transition-colors ${
             isBot
-              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-tl-sm w-full'
-              : 'bg-orange-600 text-white rounded-tr-sm font-medium'
+              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-800 shadow-[0_6px_24px_-8px_rgba(15,23,42,0.08)] dark:shadow-[0_6px_24px_-8px_rgba(0,0,0,0.45)] rounded-tl-sm w-full'
+              : 'bg-gradient-to-br from-orange-600 to-amber-600 text-white rounded-tr-sm font-medium shadow-md shadow-orange-600/20'
           }`}
         >
           {/* Formatted body */}
