@@ -73,8 +73,8 @@ def create_app(config_name=None, **kwargs):
                     driver_valid = True
                 except ImportError:
                     try:
-                    import psycopg2  # noqa: F401
-                    driver_valid = True
+                        import psycopg2  # noqa: F401
+                        driver_valid = True
                     except ImportError:
                         try:
                             import pg8000  # noqa: F401
