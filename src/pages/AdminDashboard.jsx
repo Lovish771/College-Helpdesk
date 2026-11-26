@@ -1550,7 +1550,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                     logs.map((l) => (
                       <tr key={l.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                         <td className="py-2.5 px-3 text-slate-400 font-mono text-[11px]">
-                          {l.timestamp ? new Date(l.timestamp).toLocaleString() : 'N/A'}
+                          {formatISTDateTime(l.timestamp)}
                         </td>
                         <td className="py-2.5 px-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
