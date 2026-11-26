@@ -236,5 +236,39 @@ def create_app(config_name=None, **kwargs):
                 db.session.commit()
         except Exception:
             db.session.rollback()
+
+        if config_name != 'testing':
+            try:
+                from app.models import (
+                    Program,
+                    CurriculumCourse,
+                    IntentPattern,
+                    KnowledgeEntry,
+                    AdminUser,
+                    User,
+                )
+                from scripts.seed_database import (
+                    seed_programs,
+                    seed_curriculum,
+                    seed_intent_patterns,
+                    seed_knowledge_entries,
+                    create_admin_user,
+                    seed_users,
+                )
+                if Program.query.count() == 0:
+                    seed_programs()
+                if CurriculumCourse.query.count() == 0:
+                    seed_curriculum()
+                if IntentPattern.query.count() == 0:
+                    seed_intent_patterns()
+                if KnowledgeEntry.query.count() == 0:
+                    seed_knowledge_entries()
+                if AdminUser.query.count() == 0:
+                    create_admin_user()
+                if User.query.count() < 2:
+                    seed_users()
+            except Exception as seed_err:
+                db.session.rollback()
+                logger.warning("Auto-seed check notice: %s", seed_err)
     
     return app
