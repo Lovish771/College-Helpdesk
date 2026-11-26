@@ -15,6 +15,11 @@ import Chatbot from './pages/Chatbot';
 import Programs from './pages/Programs';
 import Eligibility from './pages/Eligibility';
 import Contact from './pages/Contact';
+import Curriculum from './pages/Curriculum';
+import KnowledgeBase from './pages/KnowledgeBase';
+import Admissions from './pages/Admissions';
+import Fees from './pages/Fees';
+import Hostel from './pages/Hostel';
 import NotFound from './pages/NotFound';
 
 // Helper to handle dynamic chunk load failures after new deployments
@@ -40,12 +45,7 @@ function lazyWithRetry(componentImport) {
   );
 }
 
-// Heavy secondary routes dynamically chunked with auto-retry
-const Curriculum = lazyWithRetry(() => import('./pages/Curriculum'));
-const KnowledgeBase = lazyWithRetry(() => import('./pages/KnowledgeBase'));
-const Admissions = lazyWithRetry(() => import('./pages/Admissions'));
-const Fees = lazyWithRetry(() => import('./pages/Fees'));
-const Hostel = lazyWithRetry(() => import('./pages/Hostel'));
+// Admin dashboard dynamically chunked with auto-retry
 const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
 
 // Heavy overlay modals dynamically loaded on demand with auto-retry
@@ -276,11 +276,11 @@ function AppContent() {
         className={`flex flex-1 flex-col pt-16 sm:pt-20 ${page === 'chat' ? 'min-h-0 overflow-hidden' : 'animate-page-enter'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
-          <Suspense fallback={<PageSkeleton />}>
+          <Suspense fallback={<div className="flex-1 bg-[#F8FAFC] dark:bg-slate-950" />}>
             {page === 'chat' ? (
               <Chatbot chat={chat} go={go} pending={pending} clearPending={() => setPending(null)} onOpenAuth={handleOpenAuth} />
             ) : page === 'admin' && authLoading ? (
-              <PageSkeleton />
+              <div className="flex-1 bg-[#F8FAFC] dark:bg-slate-950" />
             ) : (
               <Page {...props} />
             )}

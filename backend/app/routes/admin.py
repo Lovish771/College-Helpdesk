@@ -294,10 +294,30 @@ def admin_conversations():
     total = query.count()
     sessions = query.order_by(ConversationSession.last_activity.desc()).offset((page - 1) * limit).limit(limit).all()
 
+    # Batch-load all users and messages in 2 bulk queries (eliminates N+1 round-trips)
+    session_ids = [s.id for s in sessions]
+    session_user_ids = list({s.user_id for s in sessions if s.user_id})
+
+    user_map = {}
+    if session_user_ids:
+        for u in User.query.filter(User.id.in_(session_user_ids)).all():
+            user_map[u.id] = u
+
+    msgs_by_session = {sid: [] for sid in session_ids}
+    if session_ids:
+        all_msgs = (
+            ConversationMessage.query
+            .filter(ConversationMessage.session_id.in_(session_ids))
+            .order_by(ConversationMessage.timestamp.asc())
+            .all()
+        )
+        for m in all_msgs:
+            msgs_by_session.setdefault(m.session_id, []).append(m)
+
     results = []
     for s in sessions:
-        user = User.query.get(s.user_id) if s.user_id else None
-        msgs = ConversationMessage.query.filter_by(session_id=s.id).order_by(ConversationMessage.timestamp.asc()).all()
+        user = user_map.get(s.user_id)
+        msgs = msgs_by_session.get(s.id, [])
 
         results.append({
             'sessionId': s.id,
@@ -412,15 +432,18 @@ def admin_unanswered_tracker():
     from app.services.rule_engine import RuleEngine
     engine = RuleEngine()
 
-    queries = UnansweredQuery.query.order_by(UnansweredQuery.last_seen.desc()).limit(100).all()
+    queries = UnansweredQuery.query.order_by(UnansweredQuery.last_seen.desc()).limit(30).all()
     items = []
     for uq in queries:
-        # Test against current RuleEngine to see if we have since fixed it
-        try:
-            reply, intent, conf, _, _, _ = engine.process_message(uq.query_text, f'eval-{uq.id}')
-            is_fixed_now = (intent != 'unknown' and conf >= 0.5)
-        except Exception:
-            reply, intent, conf, is_fixed_now = '', 'unknown', 0.0, False
+        if uq.status == 'resolved':
+            reply, intent, conf, is_fixed_now = '', 'resolved', 1.0, True
+        else:
+            # Test against current RuleEngine to see if we have since fixed it
+            try:
+                reply, intent, conf, _, _, _ = engine.process_message(uq.query_text, f'eval-{uq.id}')
+                is_fixed_now = (intent != 'unknown' and conf >= 0.5)
+            except Exception:
+                reply, intent, conf, is_fixed_now = '', 'unknown', 0.0, False
 
         items.append({
             'id': uq.id,

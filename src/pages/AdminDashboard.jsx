@@ -263,15 +263,17 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     }
   }, [token]);
 
+  // Fetch only the active tab's data on demand for instant initial load
   useEffect(() => {
-    if (isAdmin) {
-      fetchMetrics();
-      fetchUsers();
-      fetchLogs();
-      fetchConversations();
-      fetchNlpEvaluation();
-    }
-  }, [isAdmin, fetchMetrics, fetchUsers, fetchLogs, fetchConversations, fetchNlpEvaluation]);
+    if (!isAdmin) return;
+    if (activeTab === 'overview') fetchMetrics();
+    else if (activeTab === 'users') fetchUsers();
+    else if (activeTab === 'conversations') fetchConversations();
+    else if (activeTab === 'security_logs') fetchLogs();
+    else if (activeTab === 'unanswered_tracker') fetchUnansweredTracker();
+    else if (activeTab === 'db_explorer') fetchDbExplorer();
+    else if (activeTab === 'nlp_study') fetchNlpEvaluation();
+  }, [isAdmin, activeTab, fetchMetrics, fetchUsers, fetchConversations, fetchLogs, fetchUnansweredTracker, fetchDbExplorer, fetchNlpEvaluation]);
 
   const handleTestNlpPipeline = async (queryText) => {
     const q = (queryText !== undefined ? queryText : interactiveQuery).trim();

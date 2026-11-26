@@ -116,7 +116,7 @@ export default function PageSkeleton() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 pb-20 animate-fade-in" role="status" aria-label="Loading page content">
       {/* Hero placeholder */}
-      <div className="bg-slate-900 py-12 sm:py-16 px-4 sm:px-6">
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <div className="flex justify-center">
             <SkeletonBlock className="h-6 w-44 rounded-full" />
