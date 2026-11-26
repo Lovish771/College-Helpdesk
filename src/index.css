@@ -282,10 +282,10 @@ html.theme-transitioning h4,
 html.theme-transitioning span,
 html.theme-transitioning button,
 html.theme-transitioning input {
-  transition: background-color 2200ms cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 2200ms cubic-bezier(0.22, 1, 0.36, 1),
-              color 1800ms cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 2200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: background-color 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 900ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 1100ms cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
 }
 

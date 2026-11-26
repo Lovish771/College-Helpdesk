@@ -65,15 +65,21 @@ export default function FloatingAiAssistant({ go, page }) {
   if (page === 'chat') return null;
 
   const widgetRef = useRef(null);
+  const panelRef = useRef(null);
   const chatBottomRef = useRef(null);
   const inputRef = useRef(null);
 
   // Widget state
   const [isOpen, setIsOpen] = useState(false);
-  const [panelSize, setPanelSize] = useState('md'); // 'sm' | 'md' | 'lg'
+  const [panelVisible, setPanelVisible] = useState(false);
   const [orbState, setOrbState] = useState('idle'); // 'idle' | 'hover' | 'listening' | 'thinking' | 'speaking'
   const [isEdgeSnapped, setIsEdgeSnapped] = useState(false);
   const [snapSide, setSnapSide] = useState('right'); // 'left' | 'right'
+
+  // Free-stretch size & draggable position for open chat box
+  const [panelDim, setPanelDim] = useState({ w: 420, h: 460 });
+  const [panelPos, setPanelPos] = useState({ x: 20, y: 80 });
+  const closeTimerRef = useRef(null);
 
   // Position & Drag state
   const [pos, setPos] = useState(null);
@@ -142,6 +148,116 @@ export default function FloatingAiAssistant({ go, page }) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [getDefaultPos]);
+
+  // Open / close with smooth 60fps transition
+  const openPanel = useCallback(() => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const w = Math.min(Math.max(310, panelDim.w), vw - 24);
+    const h = Math.min(Math.max(300, panelDim.h), vh - 96);
+    const x = Math.max(12, vw - w - 20);
+    const y = Math.max(76, vh - h - 20);
+    setPanelDim({ w, h });
+    setPanelPos({ x, y });
+    setIsOpen(true);
+    setPanelVisible(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPanelVisible(true));
+    });
+  }, [panelDim.w, panelDim.h]);
+
+  const closePanel = useCallback(() => {
+    setPanelVisible(false);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      setIsOpen(false);
+      closeTimerRef.current = null;
+    }, 220);
+  }, []);
+
+  // Click outside to minimize
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleOutside = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target) && (!widgetRef.current || !widgetRef.current.contains(e.target))) {
+        closePanel();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutside);
+    return () => document.removeEventListener('pointerdown', handleOutside);
+  }, [isOpen, closePanel]);
+
+  // Free-move drag for open panel header
+  const startPanelDrag = (e) => {
+    if (e.target.closest('button, input, textarea, a')) return;
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origX = panelPos.x;
+    const origY = panelPos.y;
+
+    const onMove = (ev) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const nx = Math.min(Math.max(12, origX + (ev.clientX - startX)), Math.max(12, vw - panelDim.w - 12));
+      const ny = Math.min(Math.max(72, origY + (ev.clientY - startY)), Math.max(72, vh - panelDim.h - 12));
+      setPanelPos({ x: nx, y: ny });
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  // Free-stretch resize from any edge or corner
+  const startPanelResize = (dir) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const orig = { x: panelPos.x, y: panelPos.y, w: panelDim.w, h: panelDim.h };
+
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let { x, y, w, h } = orig;
+
+      if (dir.includes('e')) {
+        w = Math.min(Math.max(310, orig.w + dx), vw - orig.x - 12);
+      }
+      if (dir.includes('s')) {
+        h = Math.min(Math.max(290, orig.h + dy), vh - orig.y - 12);
+      }
+      if (dir.includes('w')) {
+        const nextW = Math.min(Math.max(310, orig.w - dx), orig.x + orig.w - 12);
+        x = orig.x + (orig.w - nextW);
+        w = nextW;
+      }
+      if (dir.includes('n')) {
+        const nextH = Math.min(Math.max(290, orig.h - dy), orig.y + orig.h - 72);
+        y = orig.y + (orig.h - nextH);
+        h = nextH;
+      }
+
+      setPanelPos({ x, y });
+      setPanelDim({ w, h });
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -258,7 +374,7 @@ export default function FloatingAiAssistant({ go, page }) {
     } else {
       // Tap / Click on the Orb
       if (!isOpen) {
-        setIsOpen(true);
+        openPanel();
       }
     }
   };
@@ -340,55 +456,46 @@ export default function FloatingAiAssistant({ go, page }) {
   if (!pos) return null;
 
   return (
-    <div
-      ref={widgetRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      style={
-        isOpen
-          ? {
-              position: 'fixed',
-              right: '16px',
-              bottom: '16px',
-              zIndex: 55,
-              userSelect: 'none',
-            }
-          : {
-              position: 'fixed',
-              left: 0,
-              top: 0,
-              transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
-              willChange: 'transform',
-              transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
-              zIndex: 40,
-              touchAction: 'none',
-              userSelect: 'none',
-            }
-      }
-      className="select-none"
-    >
-      {/* ── MODE 1: EXPANDED CHAT PANEL (Theme-matched Light & Dark, Adjustable Size) ── */}
+    <>
       {isOpen ? (
+        /* ── MODE 1: FREELY MOVABLE & STRETCHABLE CHAT PANEL ── */
         <div
+          ref={panelRef}
           role="dialog"
           aria-label="AI Assistant"
           onClick={(e) => e.stopPropagation()}
-          className={`relative flex flex-col rounded-3xl overflow-hidden transition-all duration-200
+          style={{
+            position: 'fixed',
+            left: `${panelPos.x}px`,
+            top: `${panelPos.y}px`,
+            width: `${panelDim.w}px`,
+            height: `${panelDim.h}px`,
+            zIndex: 55,
+            transformOrigin: 'bottom right',
+            transform: panelVisible ? 'scale(1) translateY(0)' : 'scale(0.92) translateY(14px)',
+            opacity: panelVisible ? 1 : 0,
+            transition: 'transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease',
+          }}
+          className="flex flex-col rounded-3xl overflow-hidden select-none
             bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800
             shadow-[0_24px_60px_-15px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)]
-            text-slate-800 dark:text-slate-100 animate-scale-up
-            max-w-[calc(100vw-32px)] max-h-[calc(100vh-96px)] ${
-              panelSize === 'sm'
-                ? 'w-[340px]'
-                : panelSize === 'lg'
-                ? 'w-[540px]'
-                : 'w-[430px]'
-            }`}
+            text-slate-800 dark:text-slate-100"
         >
-          {/* ── Header: 3D AI Orb + Title + Size & Window Controls ── */}
-          <div className="px-4 py-3 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+          {/* Free-stretch edge & corner resize handles */}
+          <div onPointerDown={startPanelResize('n')} className="absolute inset-x-3 top-0 h-1.5 cursor-ns-resize z-30" />
+          <div onPointerDown={startPanelResize('s')} className="absolute inset-x-3 bottom-0 h-1.5 cursor-ns-resize z-30" />
+          <div onPointerDown={startPanelResize('w')} className="absolute inset-y-3 left-0 w-1.5 cursor-ew-resize z-30" />
+          <div onPointerDown={startPanelResize('e')} className="absolute inset-y-3 right-0 w-1.5 cursor-ew-resize z-30" />
+          <div onPointerDown={startPanelResize('nw')} className="absolute top-0 left-0 w-3.5 h-3.5 cursor-nwse-resize z-30" />
+          <div onPointerDown={startPanelResize('ne')} className="absolute top-0 right-0 w-3.5 h-3.5 cursor-nesw-resize z-30" />
+          <div onPointerDown={startPanelResize('sw')} className="absolute bottom-0 left-0 w-3.5 h-3.5 cursor-nesw-resize z-30" />
+          <div onPointerDown={startPanelResize('se')} className="absolute bottom-0 right-0 w-3.5 h-3.5 cursor-nwse-resize z-30" />
+
+          {/* ── Draggable Header: 3D AI Orb + Title + Window Controls ── */}
+          <div
+            onPointerDown={startPanelDrag}
+            className="px-4 py-3 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 cursor-grab active:cursor-grabbing"
+          >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative w-10 h-10 -my-1 shrink-0">
                 <ThreeAiOrb
@@ -403,35 +510,17 @@ export default function FloatingAiAssistant({ go, page }) {
                   LPU Helpdesk
                 </span>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                  Fees, scholarships, hostels &amp; admissions
+                  Drag header to move • Drag edges to resize
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 shrink-0">
-              {/* Size Selector (S / M / L) */}
-              <div className="hidden sm:flex items-center rounded-lg bg-slate-200/60 dark:bg-slate-800 p-0.5 mr-1">
-                {['sm', 'md', 'lg'].map((sz) => (
-                  <button
-                    key={sz}
-                    type="button"
-                    onClick={() => setPanelSize(sz)}
-                    className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase transition-colors cursor-pointer ${
-                      panelSize === sz
-                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-2xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                    title={`Panel size: ${sz.toUpperCase()}`}
-                  >
-                    {sz === 'sm' ? 'S' : sz === 'md' ? 'M' : 'L'}
-                  </button>
-                ))}
-              </div>
               {go && (
                 <button
                   type="button"
                   onClick={() => {
-                    setIsOpen(false);
+                    closePanel();
                     go('chat');
                   }}
                   className="p-1.5 rounded-lg hover:text-orange-600 dark:hover:text-orange-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
@@ -442,7 +531,7 @@ export default function FloatingAiAssistant({ go, page }) {
               )}
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={closePanel}
                 className="p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Minimize"
               >
@@ -450,7 +539,7 @@ export default function FloatingAiAssistant({ go, page }) {
               </button>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={closePanel}
                 className="p-1.5 rounded-lg hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                 title="Close"
               >
@@ -460,9 +549,7 @@ export default function FloatingAiAssistant({ go, page }) {
           </div>
 
           {/* ── Messages Transcript Area ── */}
-          <div className={`overflow-y-auto px-4 py-3.5 space-y-3 text-xs relative z-10 bg-[#F8FAFC]/60 dark:bg-slate-950/40 ${
-            panelSize === 'sm' ? 'max-h-56 min-h-[150px]' : panelSize === 'lg' ? 'max-h-[400px] min-h-[240px]' : 'max-h-72 min-h-[180px]'
-          }`}>
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3.5 space-y-3 text-xs relative z-10 bg-[#F8FAFC]/60 dark:bg-slate-950/40 select-text">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -569,11 +656,27 @@ export default function FloatingAiAssistant({ go, page }) {
       ) : (
         /* ── MODE 2: PURE 3D FLOATING ROBOTIC ORB ONLY ── */
         <div
+          ref={widgetRef}
           role="button"
           tabIndex={0}
           aria-label="AI Assistant"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
           onMouseEnter={() => setOrbState('hover')}
           onMouseLeave={() => setOrbState('idle')}
+          style={{
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+            willChange: 'transform',
+            transition: isDragging ? 'none' : 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+            zIndex: 40,
+            touchAction: 'none',
+            userSelect: 'none',
+          }}
           className={`relative group cursor-grab active:cursor-grabbing ${
             isDragging ? 'scale-105' : 'hover:scale-105'
           } transition-transform duration-200 select-none`}
@@ -587,6 +690,6 @@ export default function FloatingAiAssistant({ go, page }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

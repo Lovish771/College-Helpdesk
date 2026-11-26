@@ -125,9 +125,9 @@ function AppContent() {
       isThemeChangingRef.current = false;
     };
 
-    // GPU-composited circular View Transition (do NOT combine with CSS transitions,
-    // otherwise ::view-transition-new(root) snapshots mid-transition colors and jitters)
+    // GPU-composited circular View Transition (skip on full-screen chat to avoid 100dvh scroll-container snapshot glitch)
     if (
+      page !== 'chat' &&
       !prefersReducedMotion &&
       typeof document !== 'undefined' &&
       typeof document.startViewTransition === 'function'
@@ -155,7 +155,7 @@ function AppContent() {
                 ],
               },
               {
-                duration: 2200,
+                duration: 1100,
                 easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
                 fill: 'both',
                 pseudoElement: '::view-transition-new(root)',
@@ -164,21 +164,21 @@ function AppContent() {
           } catch {}
         });
         transition.finished.then(finishTransition, finishTransition);
-        window.setTimeout(finishTransition, 2300);
+        window.setTimeout(finishTransition, 1180);
         return;
       } catch {
         // Fallback below
       }
     }
 
-    // Smooth fallback for browsers without View Transitions API
+    // Smooth fallback for full-screen chat or browsers without View Transitions API
     if (!prefersReducedMotion) {
       document.documentElement.classList.add('theme-transitioning');
     }
     flushSync(() => setTheme(nextTheme));
     applyThemeToDom(nextTheme);
-    window.setTimeout(finishTransition, prefersReducedMotion ? 0 : 2250);
-  }, [theme, applyThemeToDom]);
+    window.setTimeout(finishTransition, prefersReducedMotion ? 0 : 1120);
+  }, [theme, page, applyThemeToDom]);
 
   const chat = useChat();
 
@@ -273,7 +273,7 @@ function AppContent() {
       <main
         id="main"
         key={page}
-        className={`flex flex-1 flex-col ${page === 'chat' ? 'min-h-0 overflow-hidden' : 'pt-16 sm:pt-20 animate-page-enter'}`}
+        className={`flex flex-1 flex-col pt-16 sm:pt-20 ${page === 'chat' ? 'min-h-0 overflow-hidden' : 'animate-page-enter'}`}
       >
         <ErrorBoundary onReset={() => go('home')}>
           <Suspense fallback={<PageSkeleton />}>

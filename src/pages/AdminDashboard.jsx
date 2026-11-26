@@ -15,7 +15,7 @@ import { formatISTTime, formatISTDate, formatISTDateTime } from '../utils/dateUt
 export default function AdminDashboard({ go, onOpenAuth }) {
   const { user, token, isAdmin } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('nlp_study'); // 'nlp_study' | 'overview' | 'users' | 'security_logs'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'users' | 'conversations' | 'unanswered_tracker' | 'db_explorer' | 'security_logs' | 'nlp_study'
   const [range, setRange] = useState('30d');
   const [metrics, setMetrics] = useState(null);
   const [loadingMetrics, setLoadingMetrics] = useState(true);
@@ -317,6 +317,35 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     }
   };
 
+  const groupedConversationsByEmail = useMemo(() => {
+    const map = {};
+    for (const c of conversations) {
+      const email = c.userEmail || 'Anonymous Guest Student';
+      if (!map[email]) {
+        map[email] = {
+          email,
+          userName: c.userName || 'Student',
+          sessions: [],
+          totalMessages: 0,
+          lastActivity: c.lastActivity,
+          lastMessage: c.lastMessage,
+        };
+      }
+      map[email].sessions.push(c);
+      map[email].totalMessages += c.messageCount || 0;
+      if (c.lastActivity && (!map[email].lastActivity || c.lastActivity > map[email].lastActivity)) {
+        map[email].lastActivity = c.lastActivity;
+        map[email].lastMessage = c.lastMessage;
+      }
+    }
+    return Object.values(map).sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''));
+  }, [conversations]);
+
+  const activeEmailGroup = useMemo(() => {
+    if (!groupedConversationsByEmail.length) return null;
+    return groupedConversationsByEmail.find((g) => g.email === selectedUserEmail) || groupedConversationsByEmail[0];
+  }, [groupedConversationsByEmail, selectedUserEmail]);
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-white dark:bg-[#070B14] text-slate-900 dark:text-slate-100 flex items-center justify-center p-4">
@@ -361,35 +390,6 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     serverHealth: null
   };
 
-  const groupedConversationsByEmail = useMemo(() => {
-    const map = {};
-    for (const c of conversations) {
-      const email = c.userEmail || 'Anonymous Guest Student';
-      if (!map[email]) {
-        map[email] = {
-          email,
-          userName: c.userName || 'Student',
-          sessions: [],
-          totalMessages: 0,
-          lastActivity: c.lastActivity,
-          lastMessage: c.lastMessage,
-        };
-      }
-      map[email].sessions.push(c);
-      map[email].totalMessages += c.messageCount || 0;
-      if (c.lastActivity && (!map[email].lastActivity || c.lastActivity > map[email].lastActivity)) {
-        map[email].lastActivity = c.lastActivity;
-        map[email].lastMessage = c.lastMessage;
-      }
-    }
-    return Object.values(map).sort((a, b) => (b.lastActivity || '').localeCompare(a.lastActivity || ''));
-  }, [conversations]);
-
-  const activeEmailGroup = useMemo(() => {
-    if (!groupedConversationsByEmail.length) return null;
-    return groupedConversationsByEmail.find((g) => g.email === selectedUserEmail) || groupedConversationsByEmail[0];
-  }, [groupedConversationsByEmail, selectedUserEmail]);
-
   const maxVolume = Math.max(...(metrics?.chatVolume || []).map((i) => i.count), 1);
   const health = m.serverHealth;
   const healthOk = !health || health.status === 'healthy';
@@ -421,77 +421,59 @@ export default function AdminDashboard({ go, onOpenAuth }) {
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-400 text-xs font-bold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin Analytics &amp; Academic Evaluation</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white">
-              Helpdesk Intelligence &amp; Evaluation Console
+              Admin Console
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Empirical 20+ user study, NLTK/spaCy preprocessing pipeline, rule base expansion analytics, and system monitoring.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Live metrics, user accounts, email-wise chat logs, unanswered query tracking, and database explorer.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => {
                 fetchMetrics();
                 fetchUsers();
                 fetchLogs();
+                fetchConversations();
+                fetchUnansweredTracker();
                 fetchNlpEvaluation();
               }}
-              className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-600 transition-colors shadow-xs"
-              title="Refresh all metrics"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-orange-600 transition-colors shadow-xs cursor-pointer"
+              title="Refresh all data"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingMetrics || loadingNlp ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingMetrics || loadingNlp ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
             </button>
           </div>
         </div>
 
-        {/* Dashboard Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800">
-          <button
-            onClick={() => setActiveTab('nlp_study')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'nlp_study'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BrainCircuit className="w-4 h-4" />
-            <span>NLP Evaluation &amp; 20-User Study</span>
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-              activeTab === 'nlp_study' ? 'bg-white/20 text-white' : 'bg-orange-100 dark:bg-orange-950 text-orange-600'
-            }`}>
-              CSE276
-            </span>
-          </button>
-
+        {/* Dashboard Navigation Tabs (Clean Wrapping Grid - No Cut-Off Scrollbar) */}
+        <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'overview'
                 ? 'bg-orange-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
-            <span>System Metrics &amp; Volume</span>
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Overview</span>
           </button>
 
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'users'
                 ? 'bg-orange-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>Registered Accounts ({usersTotal})</span>
+            <Users className="w-3.5 h-3.5" />
+            <span>Users ({usersTotal})</span>
           </button>
 
           <button
@@ -499,26 +481,14 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               setActiveTab('conversations');
               fetchConversations();
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'conversations'
                 ? 'bg-orange-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <MessageSquare className="w-4 h-4" />
-            <span>Live User Chats ({conversationsTotal})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('security_logs')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'security_logs'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <ShieldAlert className="w-4 h-4" />
-            <span>Security Audit Logs</span>
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Live Chats ({conversationsTotal})</span>
           </button>
 
           <button
@@ -526,13 +496,13 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               setActiveTab('unanswered_tracker');
               fetchUnansweredTracker();
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'unanswered_tracker'
                 ? 'bg-orange-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-3.5 h-3.5" />
             <span>Unanswered &amp; Fixed</span>
           </button>
 
@@ -541,14 +511,38 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               setActiveTab('db_explorer');
               fetchDbExplorer();
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               activeTab === 'db_explorer'
                 ? 'bg-orange-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <Database className="w-4 h-4" />
-            <span>Database Explorer</span>
+            <Database className="w-3.5 h-3.5" />
+            <span>Database</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('security_logs')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeTab === 'security_logs'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>Security Logs</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('nlp_study')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              activeTab === 'nlp_study'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <BrainCircuit className="w-3.5 h-3.5" />
+            <span>NLP Study</span>
           </button>
         </div>
 
