@@ -175,12 +175,6 @@ export default function Contact({ go, ask }) {
               className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 shadow-xs"
             />
           </div>
-
-          {/* Quick status banner */}
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Showing <strong>{filteredDepartments.length}</strong> verified departmental desks</span>
-          </div>
         </div>
 
         {/* Category Pills */}
@@ -288,7 +282,6 @@ export default function Contact({ go, ask }) {
                     <span>Inquire via AI Helpdesk</span>
                     <ArrowRight size={13} />
                   </button>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Verified Desk</span>
                 </div>
               </div>
             );

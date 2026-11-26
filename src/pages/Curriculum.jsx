@@ -376,10 +376,10 @@ export default function Curriculum({ ask, go }) {
             </div>
 
             {/* Bottom AI CTA */}
-            <div className="bg-slate-900 text-white rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-2xs">
               <div>
-                <p className="font-bold text-sm">Need subject-wise course handouts or previous exam papers?</p>
-                <p className="text-slate-400 text-[11px]">Ask our AI Helpdesk for module objectives, marks distribution (MTE/ETE/CA), or reference textbooks.</p>
+                <p className="font-bold text-sm text-slate-900 dark:text-white">Need subject-wise course handouts or previous exam papers?</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px]">Ask our AI Helpdesk for module objectives, marks distribution (MTE/ETE/CA), or reference textbooks.</p>
               </div>
               <button
                 onClick={() => ask && ask(`What are the continuous assessment (CA) components and marks distribution for ${selectedSemester} in ${activeProgram.short}?`)}

@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search, ArrowRight, X, CheckCircle2, Award, Briefcase, GraduationCap,
   Clock, ShieldCheck, Building2, BookOpen, ChevronRight, ArrowLeft,
@@ -184,8 +185,12 @@ const ALL_DEGREE_ITEMS = [
 
 // Detailed Program View (Comprehensive, Lists All Degree Details)
 function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
-  const [activeTab, setActiveTab] = useState('Overview');
   const tabs = ['Overview & Pathways', 'Curriculum & Semester 1', 'Placements & Recruiters', 'Eligibility & Criteria', 'Fee & Scholarships'];
+  const [activeTab, setActiveTab] = useState('Overview & Pathways');
+
+  useEffect(() => {
+    setActiveTab('Overview & Pathways');
+  }, [p.id]);
 
   const mainDegree = getMainDegree(p);
   const mainDeg = mainDegree;
@@ -229,7 +234,7 @@ function ProgramDetailsView({ p, onBack, ask, onOpenCompare }) {
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-100 pb-20 transition-colors">
       {/* Top Breadcrumb Bar */}
-      <div className="sticky top-16 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="sticky top-16 sm:top-20 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
@@ -1002,42 +1007,57 @@ export default function Programs({ ask, onOpenCompare }) {
 
       </div>
 
-      {/* ── Floating Degree Comparison Drawer (Appears when degrees are selected) ── */}
-      {compareQueue.length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-40 animate-slide-up">
-          <div className="bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <span className="p-2 rounded-xl bg-orange-600 text-white shrink-0">
-                <Scale size={16} />
+      {/* ── Floating Degree Comparison Bar (Bottom-Middle Portal above page, theme-matched) ── */}
+      {compareQueue.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl animate-slide-up">
+          <div className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-white backdrop-blur-xl border border-slate-200/90 dark:border-slate-700/80 rounded-2xl p-3.5 sm:px-4 sm:py-3 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.25)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <span className="p-2 rounded-xl bg-orange-600 text-white shrink-0 shadow-xs">
+                <Scale size={15} />
               </span>
-              <div className="truncate">
-                <p className="text-xs font-bold text-white truncate">
-                  {compareQueue.length} {compareQueue.length === 1 ? 'Degree' : 'Degrees'} in Compare Queue
-                </p>
-                <p className="text-[10px] text-slate-400 truncate">
-                  Compare side-by-side in real time
-                </p>
+              <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                {compareQueue.map((id) => {
+                  const prog = programs.find((item) => item.id === id);
+                  return (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-800 dark:text-slate-200"
+                    >
+                      <span className="truncate max-w-[120px]">{prog?.short || id}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleCompareQueue(id)}
+                        className="text-slate-400 hover:text-rose-500 cursor-pointer"
+                        aria-label={`Remove ${prog?.short || id}`}
+                      >
+                        <X size={11} />
+                      </button>
+                    </span>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center justify-end gap-2 shrink-0">
               <button
+                type="button"
                 onClick={() => setCompareQueue([])}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-                title="Clear queue"
+                className="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                <X size={15} />
+                Clear
               </button>
               <button
+                type="button"
                 onClick={handleLaunchComparison}
-                className="btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+                className="btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer shadow-sm"
               >
                 <span>Compare ({compareQueue.length})</span>
                 <ArrowRight size={13} />
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

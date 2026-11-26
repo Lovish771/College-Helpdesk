@@ -573,26 +573,26 @@ export default function Fees({ ask, onOpenCompare, go }) {
               </div>
 
               {/* Overall Total Tenure Expenditure Banner */}
-              <div className="rounded-lg bg-slate-900 text-white p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-orange-200/80 dark:border-orange-900/50 shadow-sm p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-orange-600 text-white uppercase tracking-wider">
                       Grand Total Estimate
                     </span>
-                    <span className="text-xs text-slate-300">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       Across all {tenureYears} Years ({activeCourse.short})
                     </span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl sm:text-4xl font-extrabold font-display text-white">
+                    <span className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 dark:text-white">
                       ₹{totalTenureCost.toLocaleString()}
                     </span>
-                    <span className="text-xs text-slate-400">Total Expected Expenditure</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Total Expected Expenditure</span>
                   </div>
                   
                   {/* Metric Chips */}
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-300 pt-1">
-                    <span className="bg-white/10 px-2.5 py-1 rounded-lg">Tuition: ₹{totalTuitionCost.toLocaleString()}</span>
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300 pt-1">
+                    <span className="bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-lg">Tuition: ₹{totalTuitionCost.toLocaleString()}</span>
                     <span className="bg-white/10 px-2.5 py-1 rounded-lg">Hostel: ₹{totalHostelCost.toLocaleString()}</span>
                     <span className="bg-white/10 px-2.5 py-1 rounded-lg">Mess: ₹{totalMessCost.toLocaleString()}</span>
                     <span className="bg-white/10 px-2.5 py-1 rounded-lg">Laundry: ₹{totalLaundryCost.toLocaleString()}</span>
@@ -1001,31 +1001,34 @@ export default function Fees({ ask, onOpenCompare, go }) {
             TAB 4: SCHOLARSHIPS & MERIT WAIVERS
         ════════════════════════════════════════════════════════════ */}
         {activeTab === 'scholarships' && (
-          <div className="space-y-8 animate-fade-in">
-            <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-6 animate-fade-in">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {mockScholarships.map((s) => (
                 <div
                   key={s.id}
-                  className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between"
+                  className="group relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 p-6 shadow-xs hover:shadow-[0_18px_36px_-8px_rgba(234,88,12,0.16)] dark:hover:shadow-[0_18px_36px_-8px_rgba(234,88,12,0.28)] hover:border-orange-500/60 dark:hover:border-orange-500/50 hover:-translate-y-1.5 transition-all duration-300 ease-out flex flex-col justify-between overflow-hidden"
                 >
                   <div>
-                    <div className="flex items-center gap-2 mb-3 text-orange-600 dark:text-orange-400">
-                      <Award size={18} />
-                      <span className="text-xs font-bold uppercase tracking-wider">Financial Aid</span>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 border border-orange-200/70 dark:border-orange-800/50 text-[11px] font-bold uppercase tracking-wider">
+                        <Award size={13} />
+                        <span>Scholarship</span>
+                      </span>
                     </div>
-                    <h4 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                    <h4 className="text-base font-extrabold text-slate-900 dark:text-white font-display group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                       {s.name}
                     </h4>
-                    <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="mt-2.5 text-xs sm:text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed">
                       {s.text}
                     </p>
                   </div>
 
                   <button
                     onClick={() => ask(`Am I eligible for ${s.name}?`)}
-                    className="mt-6 w-full py-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 hover:bg-orange-600 hover:text-white font-bold text-xs transition-colors cursor-pointer border border-orange-200 dark:border-orange-800"
+                    className="mt-5 w-full py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 hover:bg-orange-600 hover:text-white dark:hover:bg-orange-600 font-bold text-xs transition-all duration-200 cursor-pointer border border-slate-200/80 dark:border-slate-700 hover:border-transparent active:scale-98 flex items-center justify-center gap-1.5"
                   >
-                    Check Eligibility with Assistant →
+                    <span>Check Eligibility</span>
+                    <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </div>
               ))}

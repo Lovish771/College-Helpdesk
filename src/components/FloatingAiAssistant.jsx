@@ -9,6 +9,43 @@ import { sendMessage } from '../api/chatbotApi';
 
 const STORAGE_KEY = 'lpu_ai_orb_position_v3';
 
+function renderBotText(raw) {
+  if (!raw) return null;
+  const lines = String(raw).split('\n');
+  return (
+    <div className="space-y-1.5 leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={idx} className="h-1" />;
+        if (/^-{3,}$/.test(trimmed)) {
+          return <hr key={idx} className="border-slate-200 dark:border-slate-800 my-1.5" />;
+        }
+        const isHeading = /^#{1,4}\s+/.test(trimmed);
+        const clean = trimmed.replace(/^#{1,4}\s+/, '').replace(/^[•\-]\s*/, '');
+        const isBullet = !isHeading && (trimmed.startsWith('•') || trimmed.startsWith('- '));
+        const parts = clean.split(/(\*\*.*?\*\*)/g).map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            return <strong key={pIdx} className="font-bold text-slate-900 dark:text-white">{part.slice(2, -2)}</strong>;
+          }
+          return part;
+        });
+        if (isHeading) {
+          return <p key={idx} className="font-bold text-slate-900 dark:text-white text-xs pt-1">{parts}</p>;
+        }
+        if (isBullet) {
+          return (
+            <div key={idx} className="flex items-start gap-1.5">
+              <span className="text-orange-500 font-bold shrink-0">•</span>
+              <span className="flex-1">{parts}</span>
+            </div>
+          );
+        }
+        return <p key={idx}>{parts}</p>;
+      })}
+    </div>
+  );
+}
+
 /**
  * FloatingAiAssistant: Authentic 3D AI Orb Assistant matching the Reference Mockup
  * - Real 3D WebGL Three.js Sphere Robot with metallic pearlescent white & graphite chassis
@@ -344,62 +381,62 @@ export default function FloatingAiAssistant({ go, page }) {
       }}
       className="select-none"
     >
-      {/* ── MODE 1: EXPANDED CHAT PANEL (Matches Reference Image Exactly) ── */}
+      {/* ── MODE 1: EXPANDED CHAT PANEL (Theme-matched Light & Dark) ── */}
       {isOpen ? (
         <div
           role="dialog"
           aria-label="AI Assistant"
           onClick={(e) => e.stopPropagation()}
-          className="relative w-[calc(100vw-28px)] sm:w-[560px] max-w-[560px] flex flex-col rounded-3xl overflow-hidden
-            bg-[#0B101B]/90 backdrop-blur-2xl border border-white/15
-            shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-5px_rgba(249,115,22,0.38)]
-            text-white animate-scale-up"
+          className="relative w-[calc(100vw-28px)] sm:w-[440px] max-w-[440px] flex flex-col rounded-3xl overflow-hidden
+            bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800
+            shadow-[0_24px_60px_-15px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)]
+            text-slate-800 dark:text-slate-100 animate-scale-up"
         >
-          {/* Subtle Orange Light Perimeter Inset Glow */}
-          <div className="absolute inset-0 rounded-3xl pointer-events-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),inset_0_-1px_1px_rgba(249,115,22,0.4)]" />
-
-          {/* Golden/Orange Wave Graphic in Background (Right side as in mockup) */}
-          <div
-            className="absolute top-0 right-0 w-64 h-36 opacity-35 pointer-events-none bg-no-repeat bg-contain"
-            style={{
-              backgroundImage:
-                'radial-gradient(ellipse at 80% 20%, rgba(249,115,22,0.28) 0%, transparent 70%)',
-            }}
-          />
-
-          {/* ── Header: Genuine 3D AI Orb + Title Pill + Window Controls ── */}
-          <div className="p-4 sm:p-5 flex items-center justify-between shrink-0 relative z-10 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              {/* Genuine 3D Orb Avatar in Header */}
-              <div className="relative w-12 h-12 -my-2 shrink-0 filter drop-shadow-[0_0_16px_rgba(249,115,22,0.55)]">
+          {/* ── Header: 3D AI Orb + Title + Window Controls ── */}
+          <div className="px-4 py-3.5 flex items-center justify-between shrink-0 relative z-10 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="flex items-center gap-2.5">
+              <div className="relative w-10 h-10 -my-1 shrink-0">
                 <ThreeAiOrb
-                  size={52}
+                  size={44}
                   state={orbState}
                   enableLookAt={false}
                 />
               </div>
 
-              {/* Pill: Student Helpdesk • Online */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.08] border border-white/15 backdrop-blur-md shadow-inner">
-                <span className="text-orange-400 font-bold text-xs flex items-center gap-1.5">
-                  <Bot size={13} className="text-orange-400" />
-                  <span className="font-display tracking-tight text-white font-bold text-xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display tracking-tight text-slate-900 dark:text-white font-bold text-sm">
                     LPU Helpdesk
                   </span>
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium pl-2 border-l border-white/15">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Online
-                </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Online
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Fees, scholarships, hostels &amp; admissions
+                </p>
               </div>
             </div>
 
-            {/* Window buttons: Minus / Close */}
-            <div className="flex items-center gap-1 text-slate-400">
+            <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+              {go && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    go('chat');
+                  }}
+                  className="p-1.5 rounded-lg hover:text-orange-600 dark:hover:text-orange-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Open full chat"
+                >
+                  <Maximize2 size={14} />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Minimize"
               >
                 <Minus size={15} />
@@ -407,7 +444,7 @@ export default function FloatingAiAssistant({ go, page }) {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                 title="Close"
               >
                 <X size={15} />
@@ -415,47 +452,35 @@ export default function FloatingAiAssistant({ go, page }) {
             </div>
           </div>
 
-          {/* ── Greeting Banner ── */}
-          <div className="px-5 sm:px-6 pt-4 pb-2 relative z-10">
-            <h2 className="text-lg sm:text-xl font-extrabold text-white font-display tracking-tight flex items-center gap-2">
-              <span>LPU Student Helpdesk</span>
-              <span className="text-xl">👋</span>
-            </h2>
-            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              Ask about tuition fees, LPUNEST scholarships, programmes, or hostel life.
-            </p>
-          </div>
-
           {/* ── Messages Transcript Area ── */}
-          <div className="max-h-56 overflow-y-auto px-5 sm:px-6 py-2 space-y-3 scrollbar-thin scrollbar-thumb-white/10 text-xs relative z-10">
-            {messages.slice(1).map((m) => (
+          <div className="max-h-72 min-h-[180px] overflow-y-auto px-4 py-3.5 space-y-3 text-xs relative z-10 bg-[#F8FAFC]/60 dark:bg-slate-950/40">
+            {messages.map((m) => (
               <div
                 key={m.id}
-                className={`flex gap-2.5 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {m.sender === 'bot' && (
-                  <div className="w-6 h-6 rounded-lg bg-orange-500/20 border border-orange-500/40 text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/60 border border-orange-200 dark:border-orange-800/60 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
                     <Bot size={13} />
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl leading-relaxed whitespace-pre-wrap break-words ${
+                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl leading-relaxed break-words ${
                     m.sender === 'user'
-                      ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-tr-xs shadow-md shadow-orange-600/20'
-                      : 'bg-white/[0.06] border border-white/10 text-slate-200 rounded-tl-xs backdrop-blur-md'
+                      ? 'bg-orange-600 text-white rounded-tr-xs shadow-xs font-medium'
+                      : 'bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 rounded-tl-xs shadow-2xs'
                   }`}
                 >
-                  <p>{m.text}</p>
+                  {m.sender === 'bot' ? renderBotText(m.text) : <p className="whitespace-pre-wrap">{m.text}</p>}
 
-                  {/* Suggestion Quick Chips */}
                   {m.suggestions && m.suggestions.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-white/10 flex flex-wrap gap-1.5">
+                    <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-1.5">
                       {m.suggestions.map((sug, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => handleSendMessage(sug)}
-                          className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-orange-500/15 text-orange-300 border border-orange-500/30 hover:bg-orange-500/30 transition-all cursor-pointer"
+                          className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/60 hover:bg-orange-100 dark:hover:bg-orange-900/60 transition-all cursor-pointer"
                         >
                           {sug} →
                         </button>
@@ -467,29 +492,28 @@ export default function FloatingAiAssistant({ go, page }) {
             ))}
 
             {isSending && (
-              <div className="flex gap-2 items-center text-slate-400 text-xs py-1">
-                <div className="w-5 h-5 rounded-md bg-orange-500/20 text-orange-400 flex items-center justify-center">
-                  <Bot size={11} className="animate-pulse" />
+              <div className="flex gap-2 items-center text-slate-500 dark:text-slate-400 text-xs py-1">
+                <div className="w-6 h-6 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+                  <Bot size={12} className="animate-pulse" />
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-[11px] text-slate-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce [animation-delay:0.4s]" />
-                  <span className="ml-1 text-slate-400">Processing...</span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-bounce [animation-delay:0.4s]" />
                 </div>
               </div>
             )}
             <div ref={chatBottomRef} />
           </div>
 
-          {/* ── Input Box ── */}
-          <div className="p-4 sm:p-5 pt-2 relative z-10 space-y-3">
+          {/* ── Input Box & Quick Chips ── */}
+          <div className="p-3.5 relative z-10 space-y-2.5 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="relative flex items-center rounded-2xl bg-white/[0.06] border border-white/15 focus-within:border-orange-500/60 focus-within:ring-1 focus-within:ring-orange-500/30 transition-all px-4 py-1.5 shadow-inner"
+              className="relative flex items-center rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/20 transition-all px-3 py-1"
             >
               <input
                 ref={inputRef}
@@ -499,22 +523,20 @@ export default function FloatingAiAssistant({ go, page }) {
                 onFocus={() => setOrbState('listening')}
                 onBlur={() => !isSending && setOrbState('hover')}
                 placeholder="Ask about fees, courses, hostels, scholarships..."
-                className="w-full bg-transparent py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none"
+                className="w-full bg-transparent py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
               />
 
-              {/* Orange Circular Send Button */}
               <button
                 type="submit"
                 disabled={!inputText.trim() || isSending}
-                className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 disabled:opacity-40 text-white flex items-center justify-center shadow-md shadow-orange-500/40 shrink-0 transition-transform active:scale-95 cursor-pointer ml-2"
+                className="w-7 h-7 rounded-lg bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white flex items-center justify-center shadow-xs shrink-0 transition-transform active:scale-95 cursor-pointer ml-2"
                 aria-label="Send"
               >
-                <Send size={13} className="ml-0.5" />
+                <Send size={13} />
               </button>
             </form>
 
-            {/* ── Action Chips matching College Admissions Helpdesk ── */}
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none text-[11px] pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[11px]">
               {[
                 { label: 'Fees', icon: Wallet },
                 { label: 'Scholarships', icon: Award },
@@ -526,9 +548,9 @@ export default function FloatingAiAssistant({ go, page }) {
                   key={label}
                   type="button"
                   onClick={() => handleQuickChip(label)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/10 hover:border-orange-500/40 text-slate-300 hover:text-white transition-all whitespace-nowrap cursor-pointer active:scale-95"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 border border-slate-200/80 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 text-slate-600 dark:text-slate-300 hover:text-orange-700 dark:hover:text-orange-300 transition-all whitespace-nowrap cursor-pointer active:scale-95"
                 >
-                  <ChipIcon size={11} className="text-orange-400" />
+                  <ChipIcon size={11} className="text-orange-500" />
                   <span>{label}</span>
                 </button>
               ))}
@@ -536,57 +558,23 @@ export default function FloatingAiAssistant({ go, page }) {
           </div>
         </div>
       ) : (
-        /* ── MODE 2: GENUINE 3D FLOATING ROBOTIC ORB (Identical to Reference Image) ── */
+        /* ── MODE 2: PURE 3D FLOATING ROBOTIC ORB ONLY ── */
         <div
           role="button"
           tabIndex={0}
-          aria-label="Interactive 3D AI Orb Assistant"
+          aria-label="AI Assistant"
           onMouseEnter={() => setOrbState('hover')}
           onMouseLeave={() => setOrbState('idle')}
           className={`relative group cursor-grab active:cursor-grabbing ${
             isDragging ? 'scale-105' : 'hover:scale-105'
           } transition-transform duration-200 select-none`}
         >
-          {/* Edge Snap Vertical Neon Glow Bar (Shown in reference image bottom center) */}
-          {isEdgeSnapped && (
-            <div
-              className={`absolute top-1/2 -translate-y-1/2 w-1.5 h-20 rounded-full bg-gradient-to-b from-orange-400 via-orange-500 to-amber-600 shadow-[0_0_20px_#FF6A00,0_0_35px_#FF8C00] pointer-events-none animate-pulse ${
-                snapSide === 'left' ? '-left-2' : '-right-2'
-              }`}
-            />
-          )}
-
-          {/* Ambient Warm Under-Glow Aura behind 3D Orb */}
-          <div
-            className={`absolute inset-0 rounded-full transition-all duration-300 pointer-events-none ${
-              orbState === 'hover'
-                ? 'bg-gradient-to-r from-orange-600/55 via-amber-500/45 to-orange-500/55 blur-2xl scale-125'
-                : 'bg-gradient-to-r from-orange-600/30 via-amber-500/25 to-orange-500/30 blur-xl'
-            }`}
-          />
-
-          {/* The Genuine Three.js 3D WebGL Robotic Orb Canvas */}
-          <div className="relative filter drop-shadow-[0_15px_30px_rgba(249,115,22,0.4)]">
+          <div className="relative filter drop-shadow-[0_12px_24px_rgba(15,23,42,0.18)] dark:drop-shadow-[0_12px_24px_rgba(249,115,22,0.28)]">
             <ThreeAiOrb
-              size={124}
+              size={116}
               state={orbState}
               enableLookAt={true}
             />
-
-            {/* Compact Mode Red Notification Dot at top-right (As in reference image) */}
-            <span className="absolute top-2 right-2 flex h-3 w-3 pointer-events-none">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-gradient-to-tr from-orange-600 to-amber-500 border border-white/60 shadow-[0_0_8px_#FF6A00]" />
-            </span>
-          </div>
-
-          {/* Discreet Hover Indicator Pill */}
-          <div
-            className="pointer-events-none absolute left-1/2 -bottom-3 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0
-              px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-orange-500/40 text-white text-[10px] font-bold tracking-tight whitespace-nowrap shadow-xl backdrop-blur-md flex items-center gap-1.5"
-          >
-            <Bot size={11} className="text-orange-400" />
-            <span className="capitalize">{orbState} Mode • Click to Chat</span>
           </div>
         </div>
       )}

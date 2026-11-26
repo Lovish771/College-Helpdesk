@@ -253,6 +253,7 @@ input, textarea, [contenteditable="true"], .cursor-text {
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+  animation: none;
 }
 ::view-transition-old(root) {
   z-index: 1;
@@ -261,7 +262,7 @@ input, textarea, [contenteditable="true"], .cursor-text {
   z-index: 9999;
 }
 
-/* Lightweight fallback color transition when View Transitions API is unavailable */
+/* Global 60fps smooth color blending during theme change (fallback when ViewTransition unavailable) */
 html.theme-transitioning,
 html.theme-transitioning body,
 html.theme-transitioning #root,
@@ -281,9 +282,10 @@ html.theme-transitioning h4,
 html.theme-transitioning span,
 html.theme-transitioning button,
 html.theme-transitioning input {
-  transition: background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-              color 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: background-color 2200ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 2200ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 1800ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 2200ms cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
 }
 
@@ -313,11 +315,10 @@ html.theme-transitioning input {
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 .animate-page-enter {
   animation: page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: opacity, transform;
 }

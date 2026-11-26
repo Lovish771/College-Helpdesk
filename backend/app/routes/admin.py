@@ -296,3 +296,77 @@ def admin_conversations():
         'limit': limit,
         'totalPages': (total + limit - 1) // limit if limit > 0 else 1
     }), 200
+
+@bp.route('/admin/db-explorer', methods=['GET'])
+@admin_required
+def admin_db_explorer():
+    """Supabase-style database table browser for inspecting all backend tables directly in the frontend."""
+    from app.models import KnowledgeEntry
+    table_map = {
+        'users': User,
+        'conversation_sessions': ConversationSession,
+        'conversation_messages': ConversationMessage,
+        'unanswered_queries': UnansweredQuery,
+        'security_logs': SecurityLog,
+        'programs': Program,
+        'knowledge_entries': KnowledgeEntry,
+    }
+
+    table_name = request.args.get('table', 'users')
+    if table_name not in table_map:
+        table_name = 'users'
+
+    page = max(1, int(request.args.get('page', 1)))
+    limit = min(50, max(5, int(request.args.get('limit', 20))))
+    model = table_map[table_name]
+
+    table_counts = {}
+    for name, mdl in table_map.items():
+        try:
+            table_counts[name] = mdl.query.count()
+        except Exception:
+            table_counts[name] = 0
+
+    total = table_counts.get(table_name, 0)
+    # Order by primary key or id desc if present
+    order_col = getattr(model, 'timestamp', None) or getattr(model, 'created_at', None) or getattr(model, 'last_activity', None) or getattr(model, 'id', None)
+    query = model.query
+    if order_col is not None:
+        query = query.order_by(order_col.desc())
+    items = query.offset((page - 1) * limit).limit(limit).all()
+
+    rows = []
+    columns = []
+    for item in items:
+        if hasattr(item, 'to_dict'):
+            d = item.to_dict()
+        else:
+            d = {c.name: getattr(item, c.name) for c in item.__table__.columns}
+        # Ensure JSON-serializable values
+        clean_row = {}
+        for k, v in d.items():
+            if hasattr(v, 'isoformat'):
+                clean_row[k] = v.isoformat()
+            elif isinstance(v, (list, dict)):
+                clean_row[k] = str(v)[:140]
+            else:
+                clean_row[k] = v
+        if not columns:
+            columns = list(clean_row.keys())
+        rows.append(clean_row)
+
+    dialect = db.engine.dialect.name
+    engine_label = 'Supabase PostgreSQL' if 'postgres' in dialect else 'Local SQLite'
+
+    return jsonify({
+        'success': True,
+        'engine': engine_label,
+        'table': table_name,
+        'tableCounts': table_counts,
+        'columns': columns,
+        'rows': rows,
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'totalPages': max(1, (total + limit - 1) // limit)
+    }), 200

@@ -39,6 +39,12 @@ export default function AdminDashboard({ go, onOpenAuth }) {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState(null);
 
+  // Supabase / Database Explorer state
+  const [dbTable, setDbTable] = useState('users');
+  const [dbPage, setDbPage] = useState(1);
+  const [dbData, setDbData] = useState(null);
+  const [loadingDb, setLoadingDb] = useState(false);
+
   // NLP Evaluation state
   const [nlpData, setNlpData] = useState(null);
   const [loadingNlp, setLoadingNlp] = useState(true);
@@ -145,6 +151,28 @@ export default function AdminDashboard({ go, onOpenAuth }) {
       setLoadingConversations(false);
     }
   }, [token, conversationsPage, conversationsSearch]);
+
+  const fetchDbExplorer = useCallback(async (tableOverride, pageOverride) => {
+    if (!token) return;
+    const targetTable = tableOverride || dbTable;
+    const targetPage = pageOverride || dbPage;
+    setLoadingDb(true);
+    try {
+      const res = await fetch(resolveApiUrl(`/api/admin/db-explorer?table=${encodeURIComponent(targetTable)}&page=${targetPage}&limit=15`), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setDbData(data);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching db explorer:', err);
+    } finally {
+      setLoadingDb(false);
+    }
+  }, [token, dbTable, dbPage]);
 
   const fetchNlpEvaluation = useCallback(async () => {
     if (!token) return;
@@ -391,6 +419,21 @@ export default function AdminDashboard({ go, onOpenAuth }) {
           >
             <ShieldAlert className="w-4 h-4" />
             <span>Security Audit Logs</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('db_explorer');
+              fetchDbExplorer();
+            }}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'db_explorer'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Database className="w-4 h-4" />
+            <span>Database Explorer</span>
           </button>
         </div>
 
@@ -1357,6 +1400,151 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            TAB 6: DATABASE / SUPABASE TABLE EXPLORER
+        ══════════════════════════════════════════════════════════════════ */}
+        {activeTab === 'db_explorer' && (
+          <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden animate-fade-in">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">
+                    Database Table Explorer
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                    {dbData?.engine || 'Connected'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Browse live database tables, rows, users, and chat records directly from your admin console.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => fetchDbExplorer(dbTable, dbPage)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/40 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingDb ? 'animate-spin' : ''}`} />
+                <span>Refresh Table</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+              {/* Left Table Selector */}
+              <div className="lg:col-span-3 border-r border-slate-100 dark:border-slate-800 p-3 space-y-1 bg-slate-50/50 dark:bg-slate-950/30">
+                <p className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Tables
+                </p>
+                {Object.entries(dbData?.tableCounts || {
+                  users: 0,
+                  conversation_sessions: 0,
+                  conversation_messages: 0,
+                  unanswered_queries: 0,
+                  security_logs: 0,
+                  programs: 0,
+                  knowledge_entries: 0,
+                }).map(([tbl, cnt]) => (
+                  <button
+                    key={tbl}
+                    type="button"
+                    onClick={() => {
+                      setDbTable(tbl);
+                      setDbPage(1);
+                      fetchDbExplorer(tbl, 1);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      dbTable === tbl
+                        ? 'bg-orange-600 text-white shadow-xs'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <span className="font-mono text-[11px] truncate">{tbl}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                      dbTable === tbl ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}>
+                      {cnt}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Right Table Grid */}
+              <div className="lg:col-span-9 flex flex-col justify-between overflow-hidden">
+                <div className="overflow-x-auto flex-1">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400">
+                        {(dbData?.columns || []).map((col) => (
+                          <th key={col} className="py-2.5 px-3 font-mono text-[11px] font-bold whitespace-nowrap">
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {loadingDb ? (
+                        <tr>
+                          <td colSpan={Math.max(1, (dbData?.columns || []).length)} className="py-10 text-center text-slate-400 italic">
+                            Loading table rows...
+                          </td>
+                        </tr>
+                      ) : dbData?.rows && dbData.rows.length > 0 ? (
+                        dbData.rows.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                            {(dbData.columns || []).map((col) => (
+                              <td key={col} className="py-2 px-3 text-slate-700 dark:text-slate-300 max-w-[240px] truncate font-mono text-[11px]" title={String(row[col] ?? '')}>
+                                {row[col] === null || row[col] === undefined ? <span className="text-slate-400 italic">null</span> : String(row[col])}
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={Math.max(1, (dbData?.columns || []).length)} className="py-10 text-center text-slate-400 italic">
+                            No records found in {dbTable}.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                  <span>
+                    Page {dbData?.page || 1} of {dbData?.totalPages || 1} ({dbData?.total || 0} rows)
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      disabled={(dbData?.page || 1) <= 1}
+                      onClick={() => {
+                        const next = Math.max(1, dbPage - 1);
+                        setDbPage(next);
+                        fetchDbExplorer(dbTable, next);
+                      }}
+                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={(dbData?.page || 1) >= (dbData?.totalPages || 1)}
+                      onClick={() => {
+                        const next = Math.min(dbData?.totalPages || 1, dbPage + 1);
+                        setDbPage(next);
+                        fetchDbExplorer(dbTable, next);
+                      }}
+                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

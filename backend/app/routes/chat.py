@@ -102,9 +102,9 @@ def chat():
     if not message:
         return jsonify({'error': 'Message is required'}), 400
 
-    # Enforce 500-character input cap
-    if len(message) > 500:
-        return jsonify({'error': 'Message length exceeds maximum limit of 500 characters'}), 400
+    # Enforce 2000-character input cap
+    if len(message) > 2000:
+        return jsonify({'error': 'Message length exceeds maximum limit of 2000 characters'}), 400
     
     current_user = get_current_user()
     user_id = getattr(current_user, 'id', None)

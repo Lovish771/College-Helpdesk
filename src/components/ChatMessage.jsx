@@ -88,7 +88,11 @@ function FormattedText({ text }) {
           return <div key={idx} className="h-1" />;
         }
 
-        const headingMatch = trimmed.match(/^#{2,3}\s+(.*)$/);
+        if (/^-{3,}$/.test(trimmed)) {
+          return <hr key={idx} className="border-slate-200 dark:border-slate-800 my-2" />;
+        }
+
+        const headingMatch = trimmed.match(/^#{1,4}\s+(.*)$/);
         if (headingMatch) {
           return (
             <h4 key={idx} className="text-[13.5px] sm:text-sm font-bold text-slate-900 dark:text-white pt-1">

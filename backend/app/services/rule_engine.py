@@ -74,6 +74,9 @@ class RuleEngine:
             # Check if user mentioned a program directly
             if program:
                 return self._format_program_info(program), 'program_query', 0.92, False, None, [f'Fee for {program.short_name}', f'Eligibility for {program.short_name}', 'Admission Process']
+            kb_match = self._search_knowledge_fallback(message)
+            if kb_match:
+                return kb_match[0], kb_match[1], 0.88, False, None, ['Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities', 'Admission Process']
             return self._handle_unknown(), intent, confidence, False, None, ['Available Programmes', 'Fee Structure', 'LPUNEST Scholarship', 'Hostel Facilities', 'Placements']
         
         # Check for missing slots (e.g. asking for fee without specifying program)
@@ -101,6 +104,29 @@ class RuleEngine:
     def _handle_goodbye(self):
         return "Thank you for connecting with the Lovely Professional University Helpdesk. If you need any further assistance, feel free to ask anytime. Best of luck with your academic journey!"
     
+    def _search_knowledge_fallback(self, message):
+        """Search KnowledgeEntry records by keyword overlap when primary intent is unknown."""
+        import re
+        stopwords = {'what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you', 'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does'}
+        tokens = [t for t in re.findall(r'[a-z0-9]{2,}', message.lower()) if t not in stopwords]
+        if not tokens:
+            return None
+        entries = KnowledgeEntry.query.filter_by(is_active=True).all()
+        best_entry = None
+        best_score = 0
+        for entry in entries:
+            haystack = f"{entry.title or ''} {entry.category or ''} {entry.content or ''}".lower()
+            score = sum(1 for tok in tokens if tok in haystack)
+            if entry.title and any(tok in entry.title.lower() for tok in tokens):
+                score += 1
+            if score > best_score:
+                best_score = score
+                best_entry = entry
+        if best_entry and best_score >= 2:
+            reply = f"**{best_entry.title}**\n\n{best_entry.content}"
+            return reply, 'knowledge_query'
+        return None
+
     def _handle_unknown(self):
         return (
             "I'm sorry, I couldn't identify the exact information you requested.\n\n"

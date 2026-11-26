@@ -45,13 +45,13 @@ def test_cors_lockdown_unauthorized_origins(client):
     assert res.headers.get('Access-Control-Allow-Origin') != 'https://malicious-phishing-site.com'
 
 def test_chat_message_length_limit_exceeded(client):
-    """Verify chat messages longer than 500 characters are rejected with HTTP 400"""
-    oversized_message = "A" * 501
+    """Verify chat messages longer than 2000 characters are rejected with HTTP 400"""
+    oversized_message = "A" * 2001
     res = client.post('/api/chat', json={'message': oversized_message})
     assert res.status_code == 400
     data = res.get_json()
     assert 'error' in data
-    assert '500 characters' in data['error']
+    assert '2000 characters' in data['error']
 
 def test_chat_empty_or_whitespace_message(client):
     """Verify empty or whitespace-only messages return HTTP 400"""

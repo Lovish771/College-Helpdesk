@@ -45,7 +45,7 @@ export default function KnowledgeBase({ ask }) {
         <div className="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
-              Student Knowledge Hub • Batch 2026-27
+              Student Knowledge Hub
             </span>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-display mt-1">
               Official FAQs &amp; University Guidelines

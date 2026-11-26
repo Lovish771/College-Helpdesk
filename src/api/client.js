@@ -74,8 +74,16 @@ export async function request(path, mock, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId = controller ? setTimeout(() => controller.abort(), options.timeoutMs || 5000) : null;
+
   try {
-    const res = await fetch(fullUrl, { ...options, headers });
+    const res = await fetch(fullUrl, {
+      ...options,
+      headers,
+      signal: options.signal || controller?.signal,
+    });
+    if (timeoutId) clearTimeout(timeoutId);
     if (!res.ok) {
       if (res.status === 401) {
         const errorData = await res.json().catch(() => ({}));

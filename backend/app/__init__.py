@@ -60,6 +60,7 @@ def create_app(config_name=None, **kwargs):
         database_url = os.getenv('DATABASE_URL', '').strip()
         is_serverless = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
         driver_valid = False
+        engine_options = {'pool_pre_ping': True}
         if database_url:
             if database_url.startswith('postgres://'):
                 database_url = 'postgresql://' + database_url[len('postgres://'):]
@@ -72,8 +73,8 @@ def create_app(config_name=None, **kwargs):
                     driver_valid = True
                 except ImportError:
                     try:
-                        import psycopg2  # noqa: F401
-                        driver_valid = True
+                    import psycopg2  # noqa: F401
+                    driver_valid = True
                     except ImportError:
                         try:
                             import pg8000  # noqa: F401

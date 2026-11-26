@@ -86,9 +86,8 @@ export default function Admissions({ ask, go }) {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
-                    Admissions Roadmap • Batch 2026-27
+                    Admissions Roadmap
                   </h2>
-                  <span className="text-xs font-semibold text-slate-400">5 Clear Sequential Steps</span>
                 </div>
 
                 <ol className="space-y-3.5">

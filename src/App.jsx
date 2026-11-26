@@ -155,7 +155,7 @@ function AppContent() {
                 ],
               },
               {
-                duration: 480,
+                duration: 2200,
                 easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
                 fill: 'both',
                 pseudoElement: '::view-transition-new(root)',
@@ -164,20 +164,20 @@ function AppContent() {
           } catch {}
         });
         transition.finished.then(finishTransition, finishTransition);
-        window.setTimeout(finishTransition, 550);
+        window.setTimeout(finishTransition, 2300);
         return;
       } catch {
         // Fallback below
       }
     }
 
-    // Lightweight fallback for browsers without View Transitions API
+    // Smooth fallback for browsers without View Transitions API
     if (!prefersReducedMotion) {
       document.documentElement.classList.add('theme-transitioning');
     }
     flushSync(() => setTheme(nextTheme));
     applyThemeToDom(nextTheme);
-    window.setTimeout(finishTransition, prefersReducedMotion ? 0 : 250);
+    window.setTimeout(finishTransition, prefersReducedMotion ? 0 : 2250);
   }, [theme, applyThemeToDom]);
 
   const chat = useChat();
