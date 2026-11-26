@@ -510,7 +510,7 @@ export default function Fees({ ask, onOpenCompare, go }) {
                       2. Customize Hostel, Mess &amp; Laundry Per Academic Year
                     </p>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                      Tuition (<strong>₹{netTuitionPerSem.toLocaleString()} / sem</strong> = <strong>₹{annualNetTuition.toLocaleString()} / yr</strong>) + Exam (<strong>₹{ANNUAL_EXAM_FEE.toLocaleString()} / yr</strong>) are automatically included in every year below.
+                      <strong>{activeCourse.short}</strong>: ₹{netTuitionPerSem.toLocaleString('en-IN')}/sem (₹{annualNetTuition.toLocaleString('en-IN')}/yr) + ₹{ANNUAL_EXAM_FEE.toLocaleString('en-IN')} exam included below.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -545,121 +545,90 @@ export default function Fees({ ask, onOpenCompare, go }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                   {yearlyBreakdowns.map((item) => {
                     const currentPlan = yearPlans[item.year] || { hostel: 'none', mess: 'none', laundry: false };
                     return (
                       <div
                         key={item.year}
-                        className="rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-orange-300 dark:hover:border-slate-700 transition-all"
+                        className="rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/90 dark:border-slate-800 p-3.5 flex flex-col justify-between space-y-2.5 hover:border-orange-300 dark:hover:border-slate-700 transition-all"
                       >
-                        <div>
-                          {/* Year Header */}
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-700/70">
+                        <div className="space-y-2.5">
+                          {/* Compact Year Header */}
+                          <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-slate-700/70">
                             <div>
-                              <span className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-white block">
+                              <span className="font-display font-extrabold text-sm text-slate-900 dark:text-white">
                                 Year {item.year}
                               </span>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                                Sem {item.year * 2 - 1} &amp; Sem {item.year * 2}
+                              <span className="text-[10px] text-slate-400 font-medium ml-1.5">
+                                Sem {item.year * 2 - 1}–{item.year * 2}
                               </span>
                             </div>
-                            <div className="text-right">
-                              <span className="font-extrabold text-orange-600 dark:text-orange-400 text-base sm:text-lg font-display block">
-                                ₹{item.total.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Year {item.year} Combined</span>
-                            </div>
+                            <span className="font-extrabold text-orange-600 dark:text-orange-400 text-sm font-display">
+                              ₹{item.total.toLocaleString('en-IN')}
+                            </span>
                           </div>
 
-                          {/* Controls: Hostel & Mess Side-by-Side */}
-                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                <BedDouble size={12} className="text-orange-500" />
-                                Hostel Room:
-                              </label>
-                              <select
-                                value={currentPlan.hostel}
-                                onChange={(e) => updateYearPlan(item.year, 'hostel', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
-                              >
-                                <option value="none">Day Scholar / None (₹0)</option>
-                                <option value="studio-1">1-Seater Studio AC (₹1,90,000)</option>
-                                <option value="studio-2">2-Seater Studio AC (₹1,40,000)</option>
-                                <option value="studio-3">3-Seater Studio AC (₹1,20,000)</option>
-                                <option value="studio-4">4-Seater Studio AC (₹1,00,000)</option>
-                                <option value="ac-1">1-Seater Standard AC (₹1,53,000)</option>
-                                <option value="ac-2">2-Seater Room AC (₹1,33,000)</option>
-                                <option value="ac-3">3-Seater Room AC (₹1,13,000)</option>
-                                <option value="ac-4">4-Seater Room AC (₹93,000)</option>
-                                <option value="standard-2">2-Seater Cooler (₹1,13,000)</option>
-                                <option value="standard-3">3-Seater Cooler (₹98,000)</option>
-                                <option value="standard-4">4-Seater Cooler (₹83,000)</option>
-                              </select>
-                            </div>
+                          {/* Compact Hostel & Mess Selects */}
+                          <div className="space-y-2">
+                            <select
+                              aria-label={`Year ${item.year} Hostel Room`}
+                              value={currentPlan.hostel}
+                              onChange={(e) => updateYearPlan(item.year, 'hostel', e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
+                            >
+                              <option value="none">Hostel: Day Scholar (₹0)</option>
+                              <option value="studio-1">1-Seater Studio AC (₹1,90,000)</option>
+                              <option value="studio-2">2-Seater Studio AC (₹1,40,000)</option>
+                              <option value="studio-3">3-Seater Studio AC (₹1,20,000)</option>
+                              <option value="studio-4">4-Seater Studio AC (₹1,00,000)</option>
+                              <option value="ac-1">1-Seater Standard AC (₹1,53,000)</option>
+                              <option value="ac-2">2-Seater Room AC (₹1,33,000)</option>
+                              <option value="ac-3">3-Seater Room AC (₹1,13,000)</option>
+                              <option value="ac-4">4-Seater Room AC (₹93,000)</option>
+                              <option value="standard-2">2-Seater Cooler (₹1,13,000)</option>
+                              <option value="standard-3">3-Seater Cooler (₹98,000)</option>
+                              <option value="standard-4">4-Seater Cooler (₹83,000)</option>
+                            </select>
 
-                            <div className="space-y-1">
-                              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                                <Coffee size={12} className="text-emerald-500" />
-                                Mess Plan:
-                              </label>
-                              <select
-                                value={currentPlan.mess}
-                                onChange={(e) => updateYearPlan(item.year, 'mess', e.target.value)}
-                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
-                              >
-                                <option value="none">No Mess / Food Court (₹0)</option>
-                                <option value="std-4">4-Meal Mess (₹50,000)</option>
-                                <option value="std-3">3-Meal Mess (₹46,000)</option>
-                                <option value="std-2">2-Meal Mess (₹42,000)</option>
-                                <option value="special">Special Mess (₹58,000)</option>
-                              </select>
-                            </div>
+                            <select
+                              aria-label={`Year ${item.year} Mess Plan`}
+                              value={currentPlan.mess}
+                              onChange={(e) => updateYearPlan(item.year, 'mess', e.target.value)}
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-slate-800 dark:text-slate-200 outline-none cursor-pointer focus:border-orange-500 truncate"
+                            >
+                              <option value="none">Mess: None / Food Court (₹0)</option>
+                              <option value="std-4">4-Meal Mess (₹50,000)</option>
+                              <option value="std-3">3-Meal Mess (₹46,000)</option>
+                              <option value="std-2">2-Meal Mess (₹42,000)</option>
+                              <option value="special">Special Mess (₹58,000)</option>
+                            </select>
                           </div>
 
-                          {/* Laundry Service Toggle */}
-                          <div className="mt-2.5 flex items-center justify-between px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800">
-                            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 cursor-pointer">
-                              <Shirt size={12} className="text-blue-500" />
-                              Automated Laundry (₹5,400 / yr)
-                            </label>
+                          {/* Compact Laundry Toggle */}
+                          <label className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 cursor-pointer">
+                            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                              <Shirt size={11} className="text-blue-500" />
+                              Laundry (₹5,400)
+                            </span>
                             <input
                               type="checkbox"
                               checked={currentPlan.laundry}
                               onChange={(e) => updateYearPlan(item.year, 'laundry', e.target.checked)}
-                              className="h-4 w-4 rounded accent-orange-600 cursor-pointer"
+                              className="h-3.5 w-3.5 rounded accent-orange-600 cursor-pointer"
                             />
-                          </div>
+                          </label>
                         </div>
 
-                        {/* Ordered itemized breakdown: Fee/Sem -> Hostel -> Mess -> Tuition & Exam */}
-                        <div className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-3 space-y-1.5 text-xs">
-                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                            <span>1. Fee per Sem (Tuition):</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">₹{netTuitionPerSem.toLocaleString()} / sem</span>
+                        {/* Compact 2-line Summary */}
+                        <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800 space-y-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                          <div className="flex items-center justify-between">
+                            <span>Tuition + Exam:</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.tuition.toLocaleString('en-IN')} + ₹{item.exam.toLocaleString('en-IN')}</span>
                           </div>
-                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                            <span>2. Hostel Fee (Annual):</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">₹{item.hostel.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                            <span>3. Mess Fee (Annual):</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">₹{item.mess.toLocaleString()}</span>
-                          </div>
-                          {item.laundry > 0 && (
-                            <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                              <span>Laundry Service:</span>
-                              <span className="font-semibold text-slate-800 dark:text-slate-200">₹{item.laundry.toLocaleString()}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                            <span>4. Tuition (2 Sems) + Exam:</span>
-                            <span className="font-semibold text-slate-800 dark:text-slate-200">₹{item.tuition.toLocaleString()} + ₹{item.exam.toLocaleString()}</span>
-                          </div>
-                          <div className="pt-1.5 mt-1 border-t border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200">Year {item.year} Total (All Included):</span>
-                            <span className="font-extrabold text-orange-600 dark:text-orange-400">₹{item.total.toLocaleString()}</span>
+                          <div className="flex items-center justify-between">
+                            <span>Hostel + Mess{item.laundry > 0 ? ' + Laundry' : ''}:</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">₹{item.living.toLocaleString('en-IN')}</span>
                           </div>
                         </div>
                       </div>
