@@ -27,9 +27,19 @@ except ImportError:
 class RuleEngine:
     """IF-THEN rule engine for generating authentic LPU responses"""
     
-    def __init__(self):
-        self.intent_detector = IntentDetector()
+    def __init__(self, use_cache=False):
+        self.use_cache = use_cache
+        self.intent_detector = IntentDetector(use_cache=use_cache)
         self.slot_filling = SlotFilling()
+        self._knowledge_cache = None
+
+    def _get_knowledge_entries(self):
+        if self.use_cache and self._knowledge_cache is not None:
+            return self._knowledge_cache
+        entries = KnowledgeEntry.query.filter_by(is_active=True).all()
+        if self.use_cache:
+            self._knowledge_cache = entries
+        return entries
     
     def process_message(self, message, conversation_id):
         """
@@ -168,7 +178,7 @@ class RuleEngine:
                 best_title = title
                 best_content = content
 
-        entries = KnowledgeEntry.query.filter_by(is_active=True).all()
+        entries = self._get_knowledge_entries()
         for entry in entries:
             e_title = getattr(entry, 'question', None) or getattr(entry, 'title', '') or ''
             e_body = getattr(entry, 'answer', None) or getattr(entry, 'content', '') or ''

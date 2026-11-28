@@ -263,17 +263,49 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     }
   }, [token]);
 
-  // Fetch only the active tab's data on demand for instant initial load
+  // Client-side stale-while-revalidate tab cache (30s TTL) for instant 0ms tab switches
+  const tabFetchedAtRef = useRef({});
+
+  // Fetch only the active tab's data on demand (skip if fresh < 30s), plus background prefetch
   useEffect(() => {
     if (!isAdmin) return;
-    if (activeTab === 'overview') fetchMetrics();
-    else if (activeTab === 'users') fetchUsers();
-    else if (activeTab === 'conversations') fetchConversations();
-    else if (activeTab === 'security_logs') fetchLogs();
-    else if (activeTab === 'unanswered_tracker') fetchUnansweredTracker();
-    else if (activeTab === 'db_explorer') fetchDbExplorer();
-    else if (activeTab === 'nlp_study') fetchNlpEvaluation();
-  }, [isAdmin, activeTab, fetchMetrics, fetchUsers, fetchConversations, fetchLogs, fetchUnansweredTracker, fetchDbExplorer, fetchNlpEvaluation]);
+    const now = Date.now();
+    const isFresh = (key) => now - (tabFetchedAtRef.current[key] || 0) < 30000;
+
+    if (activeTab === 'overview') {
+      if (!isFresh(`overview:${range}`)) {
+        tabFetchedAtRef.current[`overview:${range}`] = now;
+        fetchMetrics();
+      }
+      // Background-prefetch Live Chats & Users so switching to them is instant
+      if (!isFresh('conversations')) {
+        tabFetchedAtRef.current.conversations = now;
+        fetchConversations();
+      }
+      if (!isFresh('users')) {
+        tabFetchedAtRef.current.users = now;
+        fetchUsers();
+      }
+    } else if (activeTab === 'users' && !isFresh('users')) {
+      tabFetchedAtRef.current.users = now;
+      fetchUsers();
+    } else if (activeTab === 'conversations' && !isFresh('conversations')) {
+      tabFetchedAtRef.current.conversations = now;
+      fetchConversations();
+    } else if (activeTab === 'security_logs' && !isFresh('security_logs')) {
+      tabFetchedAtRef.current.security_logs = now;
+      fetchLogs();
+    } else if (activeTab === 'unanswered_tracker' && !isFresh('unanswered_tracker')) {
+      tabFetchedAtRef.current.unanswered_tracker = now;
+      fetchUnansweredTracker();
+    } else if (activeTab === 'db_explorer' && !isFresh(`db:${dbTable}:${dbPage}`)) {
+      tabFetchedAtRef.current[`db:${dbTable}:${dbPage}`] = now;
+      fetchDbExplorer();
+    } else if (activeTab === 'nlp_study' && !isFresh('nlp_study')) {
+      tabFetchedAtRef.current.nlp_study = now;
+      fetchNlpEvaluation();
+    }
+  }, [isAdmin, activeTab, range, dbTable, dbPage, fetchMetrics, fetchUsers, fetchConversations, fetchLogs, fetchUnansweredTracker, fetchDbExplorer, fetchNlpEvaluation]);
 
   const handleTestNlpPipeline = async (queryText) => {
     const q = (queryText !== undefined ? queryText : interactiveQuery).trim();

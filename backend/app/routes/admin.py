@@ -1,4 +1,7 @@
 import os
+import time
+import threading
+from collections import defaultdict
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, g
 from app import db
@@ -10,11 +13,45 @@ from app.routes.auth import admin_required
 
 bp = Blueprint('admin', __name__)
 
+# Thread-safe in-memory TTL cache for expensive admin aggregations
+_ADMIN_CACHE = {}
+_ADMIN_CACHE_LOCK = threading.Lock()
+
+
+def _cache_get(key):
+    with _ADMIN_CACHE_LOCK:
+        entry = _ADMIN_CACHE.get(key)
+        if entry and entry[0] > time.monotonic():
+            return entry[1]
+        if entry:
+            _ADMIN_CACHE.pop(key, None)
+    return None
+
+
+def _cache_set(key, value, ttl_seconds=20):
+    with _ADMIN_CACHE_LOCK:
+        _ADMIN_CACHE[key] = (time.monotonic() + ttl_seconds, value)
+
+
+def _cache_invalidate(*prefixes):
+    with _ADMIN_CACHE_LOCK:
+        if not prefixes:
+            _ADMIN_CACHE.clear()
+            return
+        for k in list(_ADMIN_CACHE.keys()):
+            if any(k.startswith(p) for p in prefixes):
+                _ADMIN_CACHE.pop(k, None)
+
+
 @bp.route('/admin/metrics', methods=['GET'])
 @admin_required
 def admin_metrics():
     """Retrieve comprehensive system metrics and real database analytics."""
     range_param = request.args.get('range', '30d')
+    cache_key = f'metrics:{range_param}'
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return jsonify(cached), 200
     days = 7 if range_param == '7d' else (90 if range_param == '90d' else 30)
     cutoff = datetime.utcnow() - timedelta(days=days)
 
@@ -54,7 +91,7 @@ def admin_metrics():
 
     chat_volume = [{'category': intent.replace('_', ' ').title(), 'count': count} for intent, count in category_counts]
 
-    return jsonify({
+    payload = {
         'success': True,
         'metrics': {
             'totalUsers': total_users,
@@ -76,7 +113,9 @@ def admin_metrics():
         'registrationTrends': registration_trends,
         'chatVolume': chat_volume,
         'range': range_param
-    }), 200
+    }
+    _cache_set(cache_key, payload, ttl_seconds=15)
+    return jsonify(payload), 200
 
 @bp.route('/admin/users', methods=['GET'])
 @admin_required
@@ -178,8 +217,22 @@ def admin_user_details(user_id):
     category_counts = {}
     detailed_sessions = []
 
+    # Batch-load all messages for all sessions in a single IN query (O(M) hash-map grouping, zero N+1)
+    session_ids = [s.id for s in sessions]
+    msgs_by_session = defaultdict(list)
+    if session_ids:
+        all_msgs = (
+            ConversationMessage.query
+            .filter(ConversationMessage.session_id.in_(session_ids))
+            .order_by(ConversationMessage.timestamp.asc())
+            .all()
+        )
+        for m in all_msgs:
+            msgs_by_session[m.session_id].append(m)
+
+    seen_unanswered = set()
     for s in sessions:
-        msgs = ConversationMessage.query.filter_by(session_id=s.id).order_by(ConversationMessage.timestamp.asc()).all()
+        msgs = msgs_by_session.get(s.id, [])
         session_msgs = []
         user_msg = None
 
@@ -203,6 +256,7 @@ def admin_user_details(user_id):
                 )
                 msg_data['is_unanswered'] = is_unanswered
                 if is_unanswered and user_msg:
+                    seen_unanswered.add(user_msg)
                     unanswered_list.append({
                         'query': user_msg,
                         'botResponse': m.content[:240] + ('...' if len(m.content) > 240 else ''),
@@ -222,12 +276,12 @@ def admin_user_details(user_id):
             'messages': session_msgs
         })
 
-    # Also check UnansweredQuery table for this user's sessions
-    session_ids = [s.id for s in sessions]
+    # Also check UnansweredQuery table for this user's sessions (O(1) set lookup)
     if session_ids:
         raw_unanswered = UnansweredQuery.query.filter(UnansweredQuery.session_id.in_(session_ids)).all()
         for uq in raw_unanswered:
-            if not any(u['query'] == uq.query_text for u in unanswered_list):
+            if uq.query_text not in seen_unanswered:
+                seen_unanswered.add(uq.query_text)
                 unanswered_list.append({
                     'query': uq.query_text,
                     'botResponse': 'No direct answer found in verified knowledge base.',
@@ -429,8 +483,12 @@ def admin_db_explorer():
 @admin_required
 def admin_unanswered_tracker():
     """Return real unanswered queries from live chats and test each against current RuleEngine to show Fixed vs Pending."""
+    cached = _cache_get('unanswered_tracker')
+    if cached is not None:
+        return jsonify(cached), 200
+
     from app.services.rule_engine import RuleEngine
-    engine = RuleEngine()
+    engine = RuleEngine(use_cache=True)
 
     queries = UnansweredQuery.query.order_by(UnansweredQuery.last_seen.desc()).limit(30).all()
     items = []
@@ -438,7 +496,7 @@ def admin_unanswered_tracker():
         if uq.status == 'resolved':
             reply, intent, conf, is_fixed_now = '', 'resolved', 1.0, True
         else:
-            # Test against current RuleEngine to see if we have since fixed it
+            # Test against current RuleEngine (uses cached patterns/programs/knowledge: O(1) DB calls)
             try:
                 reply, intent, conf, _, _, _ = engine.process_message(uq.query_text, f'eval-{uq.id}')
                 is_fixed_now = (intent != 'unknown' and conf >= 0.5)
@@ -462,13 +520,15 @@ def admin_unanswered_tracker():
     fixed_count = sum(1 for i in items if i['isFixedNow'])
     pending_count = len(items) - fixed_count
 
-    return jsonify({
+    payload = {
         'success': True,
         'total': len(items),
         'fixedCount': fixed_count,
         'pendingCount': pending_count,
         'items': items,
-    }), 200
+    }
+    _cache_set('unanswered_tracker', payload, ttl_seconds=30)
+    return jsonify(payload), 200
 
 @bp.route('/admin/unanswered-tracker/<int:query_id>/resolve', methods=['POST'])
 @admin_required
@@ -477,6 +537,7 @@ def resolve_unanswered_query(query_id):
     uq = UnansweredQuery.query.get_or_404(query_id)
     uq.status = 'resolved'
     db.session.commit()
+    _cache_invalidate('unanswered_tracker', 'metrics:')
     return jsonify({'success': True, 'id': uq.id, 'status': uq.status}), 200
 
 
@@ -484,8 +545,12 @@ def resolve_unanswered_query(query_id):
 @admin_required
 def admin_nlp_evaluation():
     """Return NLP study evaluation metrics, unanswered clusters, participants, grade details, and live rule evaluation."""
+    cached = _cache_get('nlp_evaluation')
+    if cached is not None:
+        return jsonify(cached), 200
+
     from app.services.rule_engine import RuleEngine
-    engine = RuleEngine()
+    engine = RuleEngine(use_cache=True)
 
     clusters = [
         {
@@ -530,49 +595,71 @@ def admin_nlp_evaluation():
         },
     ]
 
-    # Build real dialogue transcripts from recent user messages tested against current RuleEngine
+    # Batch-load recent user messages + sessions + users in 3 queries (O(1) dict join, zero N+1)
     recent_user_msgs = (
         ConversationMessage.query
-        .filter_by(sender='user')
+        .filter_by(role='user')
         .order_by(ConversationMessage.timestamp.desc())
         .limit(35)
         .all()
     )
+    msg_session_ids = list({m.session_id for m in recent_user_msgs if m.session_id})
+    sess_map = {}
+    if msg_session_ids:
+        for s in ConversationSession.query.filter(ConversationSession.id.in_(msg_session_ids)).all():
+            sess_map[s.id] = s
+
+    real_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+    needed_user_ids = list({s.user_id for s in sess_map.values() if s.user_id} | {u.id for u in real_users})
+    user_map = {u.id: u for u in real_users}
+    missing_uids = [uid for uid in needed_user_ids if uid not in user_map]
+    if missing_uids:
+        for u in User.query.filter(User.id.in_(missing_uids)).all():
+            user_map[u.id] = u
+
     sample_logs = []
     for idx, msg in enumerate(recent_user_msgs, start=1):
-        sess = db.session.get(ConversationSession, msg.session_id)
-        user_obj = db.session.get(User, sess.user_id) if (sess and sess.user_id) else None
+        sess = sess_map.get(msg.session_id)
+        user_obj = user_map.get(sess.user_id) if sess and sess.user_id else None
         student_label = (user_obj.email.split('@')[0] if user_obj and user_obj.email else 'Student')
         try:
-            _, cur_intent, cur_conf, _, _, _ = engine.process_message(msg.message_text, f'nlp-eval-{msg.id}')
+            _, cur_intent, cur_conf, _, _, _ = engine.process_message(msg.content, f'nlp-eval-{msg.id}')
             after_ok = (cur_intent != 'unknown' and cur_conf >= 0.5)
         except Exception:
-            cur_intent, cur_conf, after_ok = (msg.detected_intent or 'unknown'), (msg.confidence_score or 0.2), False
+            cur_intent, cur_conf, after_ok = (msg.detected_intent or 'unknown'), (msg.confidence or 0.2), False
 
         orig_intent = msg.detected_intent or 'unknown'
-        before_ok = orig_intent != 'unknown' and (msg.confidence_score or 0) >= 0.5
+        before_ok = orig_intent != 'unknown' and (msg.confidence or 0) >= 0.5
         sample_logs.append({
             'id': msg.id or idx,
             'user': student_label,
-            'query': msg.message_text,
+            'query': msg.content,
             'intent': cur_intent if after_ok else orig_intent,
-            'confidence': cur_conf if after_ok else (msg.confidence_score or 0.2),
+            'confidence': cur_conf if after_ok else (msg.confidence or 0.2),
             'beforeAnswered': before_ok,
             'afterAnswered': after_ok,
         })
 
-    # Include registered users + study cohort up to 22 participants
-    real_users = User.query.order_by(User.created_at.desc()).limit(10).all()
+    # Batch-count user turns in 1 GROUP BY query
+    turn_counts = {}
+    if real_users:
+        real_uids = [u.id for u in real_users]
+        rows = (
+            db.session.query(ConversationSession.user_id, db.func.count(ConversationMessage.id))
+            .join(ConversationMessage, ConversationMessage.session_id == ConversationSession.id)
+            .filter(ConversationSession.user_id.in_(real_uids), ConversationMessage.role == 'user')
+            .group_by(ConversationSession.user_id)
+            .all()
+        )
+        turn_counts = {uid: cnt for uid, cnt in rows}
+
     participants = []
-    for i, u in enumerate(real_users, start=1):
-        turns = ConversationMessage.query.join(
-            ConversationSession, ConversationMessage.session_id == ConversationSession.id
-        ).filter(ConversationSession.user_id == u.id, ConversationMessage.sender == 'user').count()
+    for u in real_users:
         participants.append({
             'id': f'u-{u.id}',
             'name': u.name or u.email.split('@')[0],
             'email': u.email,
-            'turns': max(turns, 2),
+            'turns': max(turn_counts.get(u.id, 0), 2),
             'satisfaction': '4.7',
         })
     while len(participants) < 22:
@@ -585,7 +672,7 @@ def admin_nlp_evaluation():
             'satisfaction': '4.6' if n % 2 == 0 else '4.7',
         })
 
-    return jsonify({
+    payload = {
         'success': True,
         'unansweredClusters': clusters,
         'sampleLogs': sample_logs,
@@ -600,4 +687,6 @@ def admin_nlp_evaluation():
             'assessmentWeightage': '30% CA + 20% MTE + 50% ETE',
             'scale': 'UGC-CBCS 10-Point Relative Grading (O=10 to F=0)',
         },
-    }), 200
+    }
+    _cache_set('nlp_evaluation', payload, ttl_seconds=30)
+    return jsonify(payload), 200

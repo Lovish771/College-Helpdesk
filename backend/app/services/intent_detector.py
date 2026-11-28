@@ -2,8 +2,34 @@ import re
 from app.models import IntentPattern, Program
 
 class IntentDetector:
-    def __init__(self):
+    def __init__(self, use_cache=False):
         self.cache = {}
+        self.use_cache = use_cache
+        self._patterns_cache = None
+        self._programs_cache = None
+
+    def _get_patterns(self):
+        if self.use_cache and self._patterns_cache is not None:
+            return self._patterns_cache
+        patterns = IntentPattern.query.filter_by(is_active=True).order_by(IntentPattern.priority.desc()).all()
+        if self.use_cache:
+            self._patterns_cache = patterns
+        return patterns
+
+    def _get_sorted_programs(self):
+        if self.use_cache and self._programs_cache is not None:
+            return self._programs_cache
+        programs = Program.query.filter_by(is_active=True).all()
+        sorted_programs = sorted(
+            programs,
+            key=lambda p: (
+                p.id == 'btech-cse',
+                -len(p.short_name)
+            )
+        )
+        if self.use_cache:
+            self._programs_cache = sorted_programs
+        return sorted_programs
     
     def detect_intent(self, message):
         """
@@ -20,8 +46,8 @@ class IntentDetector:
         if re.search(r'\b(hostel|hostels|mess|studio\s*apartment|seater|laundry)\b', message_lower) and not re.search(r'\b(tuition|b\.?tech|mba|bca|mca|b\.?com|bba)\b', message_lower):
             return 'hostel_query', 0.95, 'hostel_priority_pattern'
 
-        # Load active intent patterns from database ordered by priority
-        patterns = IntentPattern.query.filter_by(is_active=True).order_by(IntentPattern.priority.desc()).all()
+        # Load active intent patterns from memory cache / database ordered by priority
+        patterns = self._get_patterns()
         
         best_match = None
         best_pattern = None
@@ -63,19 +89,10 @@ class IntentDetector:
     
     def extract_program(self, message):
         """Extract program reference from message using name, short_name, or regex pattern"""
-        programs = Program.query.filter_by(is_active=True).all()
+        sorted_programs = self._get_sorted_programs()
         msg_lower = message.lower()
         msg_norm = re.sub(r'[().,/]+', ' ', msg_lower)
         msg_norm = re.sub(r'\s+', ' ', msg_norm).strip()
-        
-        # Sort candidates so specializations/specific tracks are evaluated before base/core CSE
-        sorted_programs = sorted(
-            programs,
-            key=lambda p: (
-                p.id == 'btech-cse',
-                -len(p.short_name)
-            )
-        )
         
         # 1. Exact match with short_name or full name (specific first)
         for program in sorted_programs:
@@ -97,17 +114,9 @@ class IntentDetector:
 
     def extract_programs(self, message):
         """Extract multiple program references from message"""
-        programs = Program.query.filter_by(is_active=True).all()
+        sorted_programs = self._get_sorted_programs()
         msg_lower = message.lower()
         matched = []
-        
-        sorted_programs = sorted(
-            programs,
-            key=lambda p: (
-                p.id == 'btech-cse',
-                -len(p.short_name)
-            )
-        )
         
         for program in sorted_programs:
             if program.short_name.lower() in msg_lower or program.name.lower() in msg_lower:
