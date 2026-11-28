@@ -113,8 +113,8 @@ export default function FloatingAiAssistant({ go, page }) {
   // Calculate default bottom-right position
   const getDefaultPos = useCallback(() => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-    const orbWidth = isMobile ? 100 : 126;
-    const padding = isMobile ? 16 : 28;
+    const orbWidth = isMobile ? 60 : 68;
+    const padding = isMobile ? 14 : 20;
     return {
       x: Math.max(12, (window.innerWidth || 1200) - orbWidth - padding),
       y: Math.max(12, (window.innerHeight || 800) - orbWidth - padding),
@@ -135,8 +135,8 @@ export default function FloatingAiAssistant({ go, page }) {
     const handleResize = () => {
       const next = hasCustomPosRef.current
         ? {
-            x: Math.min(Math.max(12, posRef.current.x), Math.max(12, window.innerWidth - 132)),
-            y: Math.min(Math.max(12, posRef.current.y), Math.max(12, window.innerHeight - 132)),
+            x: Math.min(Math.max(12, posRef.current.x), Math.max(12, window.innerWidth - 80)),
+            y: Math.min(Math.max(12, posRef.current.y), Math.max(12, window.innerHeight - 80)),
           }
         : getDefaultPos();
       posRef.current = next;
@@ -361,7 +361,7 @@ export default function FloatingAiAssistant({ go, page }) {
       let finalX = posRef.current.x;
       let finalY = posRef.current.y;
       const isMobile = window.innerWidth < 640;
-      const width = isOpen ? (isMobile ? window.innerWidth - 32 : 560) : 126;
+      const width = isOpen ? (isMobile ? window.innerWidth - 32 : 560) : (isMobile ? 60 : 68);
 
       // Magnetic Edge Snapping (threshold 80px)
       const magneticThreshold = 80;
@@ -671,16 +671,22 @@ export default function FloatingAiAssistant({ go, page }) {
           </div>
         </div>
       ) : (
-        /* ── MODE 2: PURE 3D FLOATING ROBOTIC ORB ONLY ── */
+        /* ── MODE 2: COMPACT 3D FLOATING ROBOTIC ORB WITH HOVER CUE ── */
         <div
           ref={widgetRef}
           role="button"
           tabIndex={0}
-          aria-label="AI Assistant"
+          aria-label="Ask AI Assistant"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openPanel();
+            }
+          }}
           onMouseEnter={() => setOrbState('hover')}
           onMouseLeave={() => setOrbState('idle')}
           style={{
@@ -694,13 +700,16 @@ export default function FloatingAiAssistant({ go, page }) {
             touchAction: 'none',
             userSelect: 'none',
           }}
-          className={`relative group cursor-grab active:cursor-grabbing ${
+          className={`relative group cursor-grab active:cursor-grabbing rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
             isDragging ? 'scale-105' : 'hover:scale-105'
           } transition-transform duration-200 select-none`}
         >
-          <div className="relative filter drop-shadow-[0_12px_24px_rgba(15,23,42,0.18)] dark:drop-shadow-[0_12px_24px_rgba(249,115,22,0.28)]">
+          <span className="pointer-events-none hidden sm:inline-flex items-center gap-1.5 absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold whitespace-nowrap shadow-md opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150">
+            Ask AI
+          </span>
+          <div className="relative filter drop-shadow-[0_10px_18px_rgba(15,23,42,0.18)] dark:drop-shadow-[0_10px_18px_rgba(249,115,22,0.28)]">
             <ThreeAiOrb
-              size={116}
+              size={64}
               state={orbState}
               enableLookAt={true}
             />
