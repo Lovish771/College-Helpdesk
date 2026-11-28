@@ -105,36 +105,58 @@ class RuleEngine:
         return "Thank you for connecting with Student Helpdesk. If you need any further assistance, feel free to ask anytime. Best of luck with your academic journey!"
     
     def _search_knowledge_fallback(self, message):
-        """Search KnowledgeEntry records and built-in LPU FAQ knowledge by keyword overlap."""
+        """Search KnowledgeEntry records and built-in LPU FAQ knowledge by whole-word keyword overlap."""
         import re
-        stopwords = {'what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you', 'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does', 'rule'}
+        stopwords = {
+            'what', 'when', 'where', 'which', 'how', 'the', 'for', 'and', 'with', 'are', 'you',
+            'can', 'tell', 'about', 'lpu', 'is', 'in', 'to', 'of', 'a', 'an', 'do', 'does',
+            'rule', 'it', 'this', 'that', 'bro', 'bhai', 'please', 'properly', 'explain',
+            'find', 'collage', 'college', 'its', 'purpose',
+        }
         tokens = [t for t in re.findall(r'[a-z0-9]{2,}', message.lower()) if t not in stopwords]
         if not tokens:
             return None
 
-        # Built-in verified LPU FAQ entries so attendance, loans, studio rooms, UMS, exams always resolve accurately
+        # Built-in verified LPU FAQ entries so attendance, loans, CA/grading, campus cycles, hostels always resolve accurately
         builtin_faqs = [
+            ('Continuous Assessment (CA), MTE, ETE & 10-Point Grading System',
+             'At LPU, **CA stands for Continuous Assessment** under the UGC-CBCS grading pattern:\n'
+             '• **30% Continuous Assessment (CA):** Best 2 of 3 class tests/quizzes, lab evaluations, and assignments.\n'
+             '• **20% Mid-Term Examination (MTE):** Conducted mid-semester.\n'
+             '• **50% End-Term Examination (ETE):** Conducted at semester end.\n'
+             '• **10-Point Relative Grading Scale:** **O** (10), **A+** (9), **A** (8), **B+** (7), **B** (6), **C** (5), **P** (4, Pass), **F** (0, Fail). TGPA & CGPA are computed credit-weighted across semesters.'),
+            ('Campus Bicycles, E-Cycles & Intra-Campus Transport',
+             'Across LPU\'s 600+ acre campus, students can commute easily via:\n'
+             '• **Campus Cycles & E-Cycles (Uni-Cycle):** Designated cycle stands and rental/shared bicycle & e-cycle docks are located near Residential Hostels, Uni-Mall, and Academic Blocks (Blocks 14, 29, 32, 34).\n'
+             '• **Campus Shuttle & E-Rickshaws:** Frequent battery-operated e-rickshaws and campus shuttles run between the Main Gate, Uni-Mall, Hostels, and Academic Blocks.'),
             ('Mandatory 75% Attendance & UMS Duty Leave Rule',
              'At LPU, students must maintain a minimum of **75% attendance** in every registered course to be eligible for End-Term Examinations (ETE). Attendance is tracked via biometric punches and UMS. Medical certificates and official event Duty Leaves (DL) must be uploaded on UMS within 3 working days.'),
             ('Education Loan Process & On-Campus Banks',
              'Download your official Bonafide Certificate & Multi-Year Fee Estimate Letter from UMS or the Loan Helpdesk (Block 29, Room 104). Apply via the Vidya Lakshmi portal selecting on-campus branches (SBI, PNB, Canara Bank, HDFC, ICICI) for direct university disbursement and CSIS interest subsidy eligibility.'),
-            ('Continuous Assessment (CA), MTE & ETE Examination Pattern',
-             'LPU follows the UGC-CBCS grading system: **30% Continuous Assessment (CA)** (best 2 of 3 class tests, labs, and assignments), **20% Mid-Term Examination (MTE)**, and **50% End-Term Examination (ETE)** evaluated on a 10-point relative grading scale.'),
             ('Studio Apartments & Luxury Hostel Facilities',
              'LPU Studio Apartments include Split AC, private kitchenette with induction, attached geyser washroom, study desks, and weekly housekeeping. Annual rates: 1-Seater ₹1,90,000; 2-Seater ₹1,40,000; 3-Seater ₹1,20,000; 4-Seater ₹1,00,000 per academic year.'),
             ('Hostel Reallocation, Mess & Laundry Policy',
              'Students can change room types, opt in or out of mess plans (₹42,000–₹58,000/yr), add Uni-Laundry (₹5,400/yr), or convert to Day Scholar status annually via the UMS reallocation window in April–May.'),
         ]
 
+        def count_word_matches(haystack, title_text):
+            score = 0
+            title_l = (title_text or '').lower()
+            hay_l = (haystack or '').lower()
+            for tok in tokens:
+                pat = r'(?<![a-z0-9])' + re.escape(tok) + r'(?![a-z0-9])'
+                if re.search(pat, hay_l):
+                    score += 1
+                    if re.search(pat, title_l):
+                        score += 2
+            return score
+
         best_title = None
         best_content = None
         best_score = 0
 
         for title, content in builtin_faqs:
-            haystack = f"{title} {content}".lower()
-            score = sum(1 for tok in tokens if tok in haystack)
-            if any(tok in title.lower() for tok in tokens):
-                score += 1
+            score = count_word_matches(f"{title} {content}", title)
             if score > best_score:
                 best_score = score
                 best_title = title
@@ -142,15 +164,15 @@ class RuleEngine:
 
         entries = KnowledgeEntry.query.filter_by(is_active=True).all()
         for entry in entries:
-            haystack = f"{entry.title or ''} {entry.category or ''} {entry.content or ''}".lower()
-            score = sum(1 for tok in tokens if tok in haystack)
-            if entry.title and any(tok in entry.title.lower() for tok in tokens):
-                score += 1
+            e_title = getattr(entry, 'question', None) or getattr(entry, 'title', '') or ''
+            e_body = getattr(entry, 'answer', None) or getattr(entry, 'content', '') or ''
+            score = count_word_matches(f"{e_title} {entry.category or ''} {e_body}", e_title)
             if score > best_score:
                 best_score = score
-                best_title = entry.title
-                best_content = entry.content
+                best_title = e_title or (entry.category or 'LPU Info').title()
+                best_content = e_body
 
+        # Require >= 2 weighted points (so a single exact title word match like "CA" or "cycles" = 3 points passes, while accidental single body word = 1 point does not)
         if best_title and best_score >= 2:
             reply = f"**{best_title}**\n\n{best_content}"
             return reply, 'knowledge_query'
@@ -275,14 +297,14 @@ class RuleEngine:
         
         if intent == 'hostel_query':
             return (
-                "**LPU Uni-World Residential Facilities:**\n"
-                "Lovely Professional University provides safe, comfortable on-campus student housing across multiple towers.\n\n"
-                "• **Room Types:** 1-Seater, 2-Seater, 3-Seater, 4-Seater (both AC and Non-AC available with study desks and attached washrooms).\n"
-                "• **Dining & Mess:** Multi-cuisine dining serving hygienic North Indian, South Indian, and Continental menus.\n"
-                "• **Uni-Hospital:** 24/7 in-house 50+ bed hospital with residential doctors, ambulance, and pharmacy.\n"
-                "• **Uni-Mall:** 6-storey on-campus shopping mall featuring departmental stores, cafes (Domino's, Subway, CCD), and lifestyle stores.\n"
-                "• **Security:** 24x7 security, turnstile gates, biometric attendance, and 4,000+ CCTV surveillance cameras.\n"
-                "• **Sports & Fitness:** Indoor sports stadium, Olympic-size swimming pool, and modern fitness gymnasiums."
+                "**LPU Uni-World Residential Facilities & 2026–27 Tariffs:**\n"
+                "Lovely Professional University provides safe, furnished on-campus housing across multiple residential towers.\n\n"
+                "• **Standard Air-Cooled Rooms (Annual):** 4-Seater ₹83,000 | 3-Seater ₹98,000 | 2-Seater ₹1,13,000\n"
+                "• **Standard AC Rooms (Annual):** 4-Seater ₹93,000 | 3-Seater ₹1,13,000 | 2-Seater ₹1,33,000 | 1-Seater ₹1,53,000\n"
+                "• **Studio Apartments AC + Kitchenette (Annual):** 4-Seater ₹1,00,000 | 3-Seater ₹1,20,000 | 2-Seater ₹1,40,000 | 1-Seater ₹1,90,000\n"
+                "• **Mess Dining Plans (Annual):** 2-Meal ₹42,000 | 3-Meal ₹46,000 | 4-Meal ₹50,000 | Special Multi-Cuisine ₹58,000\n"
+                "• **Automated Laundry (Optional):** ₹5,400 / year\n"
+                "• **Campus Amenities:** 24/7 Uni-Hospital (50+ beds), 6-storey Uni-Mall, Olympic swimming pool, and 4,000+ CCTV biometric security."
             )
         
         if intent == 'scholarship_query':
@@ -350,12 +372,25 @@ class RuleEngine:
             )
         
         if intent == 'placements':
+            prog_avg = ""
+            if program:
+                if program.id in ('btech-cse', 'btech-aiml', 'btech-ds', 'btech-cyber', 'btech-cloud', 'btech-fullstack'):
+                    prog_avg = f"• **{program.short_name} Average Package:** ₹7.5 – ₹12 LPA (Top 10% offers ₹18–42+ LPA)\n"
+                elif program.id == 'mba':
+                    prog_avg = "• **MBA Average Package:** ₹8.5 – ₹12 LPA (Top recruiters: Deloitte, KPMG, HDFC, Federal Bank, Amazon)\n"
+                elif program.id in ('bcom-hons', 'bba', 'bba-hons'):
+                    prog_avg = f"• **{program.short_name} Average Package:** ₹4.5 – ₹6.5 LPA (Top recruiters: Deloitte, KPMG, EY, ICICI Bank, Genpact)\n"
+                elif program.id in ('bca', 'bca-hons', 'mca'):
+                    prog_avg = f"• **{program.short_name} Average Package:** ₹5.5 – ₹8.5 LPA (Top recruiters: Cognizant, Infosys, TCS, Capgemini, Accenture)\n"
+                else:
+                    prog_avg = f"• **{program.short_name} Average Package:** ₹5.0 – ₹8.0 LPA across core & industry recruiters\n"
             return (
-                "**LPU Placements Highlights & Track Record:**\n\n"
+                "**LPU Placements Highlights & Average Packages:**\n\n"
+                f"{prog_avg}"
                 f"• **Highest International Package:** {lpu_placements['highest_international']}\n"
                 f"• **Highest Domestic Package:** {lpu_placements['highest_domestic']}\n"
-                f"• **Top Recruiter Network:** 2,000+ recruiting companies including Google, Microsoft, Amazon, Cisco, Apple, Cognizant, and Deloitte.\n"
-                f"• **Super Dream Offers:** Over 1,000+ Fortune 500 companies actively hire LPU engineering and management graduates."
+                "• **University Average Package:** ₹7–10 LPA (CSE/Tech) | ₹8.5–12 LPA (MBA) | ₹4.5–6.5 LPA (Commerce/BBA)\n"
+                "• **Top Recruiter Network:** 2,000+ recruiting companies including Google, Microsoft, Amazon, Cisco, Apple, Cognizant, and Deloitte."
             )
         
         return self._handle_unknown()

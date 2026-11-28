@@ -16,6 +16,10 @@ class IntentDetector:
         if re.search(r'\b(compare|comparison|comparative|vs\.?|versus|difference\s+between)\b', message_lower):
             return 'compare_query', 0.99, 'compare_pattern'
 
+        # Priority check: Hostel / mess fee queries shouldn't be hijacked by general fee_query
+        if re.search(r'\b(hostel|hostels|mess|studio\s*apartment|seater|laundry)\b', message_lower) and not re.search(r'\b(tuition|b\.?tech|mba|bca|mca|b\.?com|bba)\b', message_lower):
+            return 'hostel_query', 0.95, 'hostel_priority_pattern'
+
         # Load active intent patterns from database ordered by priority
         patterns = IntentPattern.query.filter_by(is_active=True).order_by(IntentPattern.priority.desc()).all()
         
@@ -38,13 +42,31 @@ class IntentDetector:
             # High-confidence matched rule
             confidence = 0.95 if highest_priority >= 5 else 0.88
             return best_match, confidence, best_pattern
-        
+
+        # Built-in fallback intent patterns so conversational queries never fall through
+        # when DB IntentPattern rows are partial or phrased colloquially
+        fallback_rules = [
+            ('hostel_query', r'\b(hostel|hostels|mess|accommodation|seater|studio|laundry|dorm|day\s*scholar)\b', 0.92),
+            ('scholarship_query', r'\b(scholarship|scholarships|waiver|concession|merit\s*slab|lpunest\s*(?:slab|criteria|scholarship))\b', 0.92),
+            ('placements', r'\b(placement|placements|package|packages|average\s*package|highest\s*package|ctc|salary|recruiter|recruiters)\b', 0.92),
+            ('fee_query', r'\b(fee|fees|tuition|slab|slabs|fee\s*structure|charges|exam(?:ination)?\s*fee)\b', 0.90),
+            ('admission_query', r'\b(admission|admissions|deadline|deadlines|documents|checklist|reporting|counselling|counseling|how\s+to\s+apply)\b', 0.90),
+            ('eligibility_query', r'\b(eligibility|eligible|criteria|qualify|cutoff|cut-off)\b', 0.90),
+            ('curriculum_query', r'\b(curriculum|syllabus|syllabi|subjects|modules)\b', 0.90),
+            ('greeting', r'^(?:hi|hello|hey|namaste|hlo|yo|good\s*(?:morning|afternoon|evening))\b', 0.92),
+        ]
+        for intent_name, pat, conf in fallback_rules:
+            if re.search(pat, message_lower, re.IGNORECASE):
+                return intent_name, conf, f'builtin:{intent_name}'
+
         return 'unknown', 0.20, None
     
     def extract_program(self, message):
         """Extract program reference from message using name, short_name, or regex pattern"""
         programs = Program.query.filter_by(is_active=True).all()
         msg_lower = message.lower()
+        msg_norm = re.sub(r'[().,/]+', ' ', msg_lower)
+        msg_norm = re.sub(r'\s+', ' ', msg_norm).strip()
         
         # Sort candidates so specializations/specific tracks are evaluated before base/core CSE
         sorted_programs = sorted(
@@ -57,14 +79,16 @@ class IntentDetector:
         
         # 1. Exact match with short_name or full name (specific first)
         for program in sorted_programs:
-            if program.short_name.lower() in msg_lower or program.name.lower() in msg_lower:
+            short_l = program.short_name.lower()
+            name_l = program.name.lower()
+            if short_l in msg_lower or name_l in msg_lower or short_l in msg_norm or name_l in msg_norm:
                 return program
         
         # 2. Pattern match via match_pattern (specific first)
         for program in sorted_programs:
             if program.match_pattern:
                 try:
-                    if re.search(program.match_pattern, msg_lower, re.IGNORECASE):
+                    if re.search(program.match_pattern, msg_lower, re.IGNORECASE) or re.search(program.match_pattern, msg_norm, re.IGNORECASE):
                         return program
                 except re.error:
                     continue

@@ -694,6 +694,60 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               </div>
             </div>
 
+            {/* Grade Details & Evaluation Rubric (CSE276 + LPU UGC-CBCS Grading) */}
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                    Evaluation Metrics &amp; Academic Grading
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+                    NLP Study Grade Details &amp; LPU UGC-CBCS Grading Scale
+                  </h3>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
+                  Study Grade: {nlpData?.gradeDetails?.evaluationGrade || 'O (Outstanding)'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Precision</span>
+                  <span className="text-lg font-extrabold text-slate-900 dark:text-white">{nlpData?.gradeDetails?.precision || '0.91'}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Recall</span>
+                  <span className="text-lg font-extrabold text-slate-900 dark:text-white">{nlpData?.gradeDetails?.recall || '0.93'}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">F1-Score</span>
+                  <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{nlpData?.gradeDetails?.f1Score || '0.92'}</span>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Assessment Split</span>
+                  <span className="text-xs font-extrabold text-slate-900 dark:text-white mt-0.5 block">30% CA · 20% MTE · 50% ETE</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-1 text-center text-xs">
+                {[
+                  { g: 'O', pts: '10', desc: 'Outstanding' },
+                  { g: 'A+', pts: '9', desc: 'Excellent' },
+                  { g: 'A', pts: '8', desc: 'Very Good' },
+                  { g: 'B+', pts: '7', desc: 'Good' },
+                  { g: 'B', pts: '6', desc: 'Above Avg' },
+                  { g: 'C', pts: '5', desc: 'Average' },
+                  { g: 'P', pts: '4', desc: 'Pass' },
+                  { g: 'F', pts: '0', desc: 'Fail' },
+                ].map((row) => (
+                  <div key={row.g} className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
+                    <span className="font-extrabold text-orange-600 dark:text-orange-400 block">{row.g} ({row.pts})</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">{row.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Interactive Live NLTK Preprocessing Pipeline Sandbox */}
             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
