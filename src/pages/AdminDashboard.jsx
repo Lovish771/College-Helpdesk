@@ -301,9 +301,15 @@ export default function AdminDashboard({ go, onOpenAuth }) {
     } else if (activeTab === 'db_explorer' && !isFresh(`db:${dbTable}:${dbPage}`)) {
       tabFetchedAtRef.current[`db:${dbTable}:${dbPage}`] = now;
       fetchDbExplorer();
-    } else if (activeTab === 'nlp_study' && !isFresh('nlp_study')) {
-      tabFetchedAtRef.current.nlp_study = now;
-      fetchNlpEvaluation();
+    } else if (activeTab === 'nlp_study') {
+      if (!isFresh('nlp_study')) {
+        tabFetchedAtRef.current.nlp_study = now;
+        fetchNlpEvaluation();
+      }
+      if (!isFresh('unanswered_tracker')) {
+        tabFetchedAtRef.current.unanswered_tracker = now;
+        fetchUnansweredTracker();
+      }
     }
   }, [isAdmin, activeTab, range, dbTable, dbPage, fetchMetrics, fetchUsers, fetchConversations, fetchLogs, fetchUnansweredTracker, fetchDbExplorer, fetchNlpEvaluation]);
 
@@ -461,307 +467,110 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               Admin Console
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-              Live metrics, user accounts, email-wise chat logs, unanswered query tracking, and database explorer.
+              Operational metrics, user accounts, live conversations, and query quality.
             </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button
+              type="button"
               onClick={() => {
-                fetchMetrics();
-                fetchUsers();
-                fetchLogs();
-                fetchConversations();
-                fetchUnansweredTracker();
-                fetchNlpEvaluation();
+                tabFetchedAtRef.current = {};
+                if (activeTab === 'overview') fetchMetrics();
+                else if (activeTab === 'users') fetchUsers();
+                else if (activeTab === 'conversations') fetchConversations();
+                else if (activeTab === 'nlp_study') {
+                  fetchNlpEvaluation();
+                  fetchUnansweredTracker();
+                } else if (activeTab === 'db_explorer') fetchDbExplorer();
+                else if (activeTab === 'security_logs') fetchLogs();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-orange-600 transition-colors shadow-xs cursor-pointer"
-              title="Refresh all data"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-orange-600 transition-colors shadow-xs cursor-pointer"
+              title="Refresh active tab"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loadingMetrics || loadingNlp ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingMetrics || loadingNlp || loadingTracker ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
           </div>
         </div>
 
-        {/* Dashboard Navigation Tabs (Clean Wrapping Grid - No Cut-Off Scrollbar) */}
-        <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'overview'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span>Overview</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'users'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>Users ({usersTotal})</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveTab('conversations');
-              fetchConversations();
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'conversations'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>Live Chats ({conversationsTotal})</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveTab('unanswered_tracker');
-              fetchUnansweredTracker();
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'unanswered_tracker'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Unanswered &amp; Fixed</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveTab('db_explorer');
-              fetchDbExplorer();
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'db_explorer'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Database className="w-3.5 h-3.5" />
-            <span>Database</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('security_logs')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'security_logs'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Security Logs</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('nlp_study')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeTab === 'nlp_study'
-                ? 'bg-orange-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <BrainCircuit className="w-3.5 h-3.5" />
-            <span>NLP Study</span>
-          </button>
+        {/* Clean Segmented Navigation Tabs (6 Focused Sections) */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'users', label: `Users (${usersTotal})`, icon: Users },
+            { id: 'conversations', label: `Live Chats (${conversationsTotal})`, icon: MessageSquare },
+            { id: 'nlp_study', label: 'NLP & Quality', icon: BrainCircuit },
+            { id: 'db_explorer', label: 'Database', icon: Database },
+            { id: 'security_logs', label: 'Security', icon: ShieldAlert },
+          ].map(({ id, label, icon: Icon }) => {
+            const active = activeTab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActiveTab(id)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  active
+                    ? 'bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
-            TAB 1: NLP EVALUATION & 20-USER STUDY (CSE276 EVALUATION FOCUS)
+            TAB 1: NLP EVALUATION, GRADE DETAILS & LIVE QUERY QUALITY
         ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'nlp_study' && (
           <div className="space-y-6 animate-fade-in">
-            {/* Academic Evaluation Summary Header Card */}
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent border border-orange-200 dark:border-orange-900/40 relative overflow-hidden">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div className="space-y-2 max-w-2xl">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-orange-700 dark:text-orange-400">
-                    <span className="px-2.5 py-1 rounded-lg bg-orange-100 dark:bg-orange-950/80 font-mono text-[11px]">
-                      Framework: Flask 3.0 REST + NLTK/spaCy Pipeline
-                    </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 font-mono text-[11px]">
-                      Study Group: 22 Real Student Testers
-                    </span>
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-900 dark:text-white">
-                    Empirical User Study &amp; Measured Rule Base Expansion
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Following evaluation criteria, the deployed Flask chatbot was tested with <strong>22 real student users</strong> across 31 dialogue transcripts. Unanswered queries were tokenized, lemmatized, and clustered via NLP preprocessing to expand the rule base from <strong>48 to 80 rules</strong>, driving a <strong>+34.5% net improvement</strong> in question coverage.
-                  </p>
-                </div>
-
-                {/* 4 Summary Counters */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 shrink-0">
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Participants</span>
-                    <span className="text-2xl font-black font-display text-slate-900 dark:text-white">22</span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">Real Students</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Avg CSAT</span>
-                    <span className="text-2xl font-black font-display text-orange-600 dark:text-orange-400">4.62<span className="text-xs text-slate-400">/5</span></span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block">Satisfaction</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Rule Base</span>
-                    <span className="text-2xl font-black font-display text-blue-600 dark:text-blue-400">48 → 80</span>
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold block">+32 Rules Added</span>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Coverage Gain</span>
-                    <span className="text-2xl font-black font-display text-emerald-600 dark:text-emerald-400">+34.5%</span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">58.1% → 92.6%</span>
-                  </div>
-                </div>
+            {/* Compact 4-Card Executive Strip */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Question Coverage</span>
+                <span className="text-2xl font-extrabold font-display text-emerald-600 dark:text-emerald-400 mt-1 block">92.6%</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block">+34.5% over 58.1% baseline</span>
               </div>
-            </div>
-
-            {/* Before vs After Rule Base Expansion Comparative Metric Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Baseline (Before Expansion) */}
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs relative">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white font-display">
-                      Baseline System (Before Rule Base Expansion)
-                    </h3>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 text-[10px] font-bold">
-                    Initial State
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">Question Coverage Rate</span>
-                      <span className="font-bold text-rose-600 dark:text-rose-400">58.1% (18/31 Answered)</span>
-                    </div>
-                    <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                      <div className="h-full bg-rose-500 rounded-full" style={{ width: '58.1%' }}></div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs">
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                      <span className="text-slate-400 block text-[10px]">Active Rules</span>
-                      <span className="font-extrabold text-slate-900 dark:text-white text-base">48</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                      <span className="text-slate-400 block text-[10px]">Unanswered Fallbacks</span>
-                      <span className="font-extrabold text-rose-600 dark:text-rose-400 text-base">13 Queries</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-                      <span className="text-slate-400 block text-[10px]">Avg Latency</span>
-                      <span className="font-extrabold text-slate-900 dark:text-white text-base">240 ms</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 italic">
-                    Limitation: Strict regex keywords failed on conversational synonyms, fee installment extensions, hostel room migrations, and medical attendance rules.
-                  </p>
-                </div>
-              </div>
-
-              {/* Expanded Rule Base (After Expansion) */}
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/50 shadow-xs relative">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white font-display">
-                      Expanded Rule Base (After NLP Clustering &amp; Expansion)
-                    </h3>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
-                    +34.5% Improvement
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-500">Question Coverage Rate</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">92.6% (28/31 Answered)</span>
-                    </div>
-                    <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '92.6%' }}></div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-center text-xs">
-                    <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30">
-                      <span className="text-slate-400 block text-[10px]">Expanded Rules</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">80 (+32)</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30">
-                      <span className="text-slate-400 block text-[10px]">Unanswered Fallbacks</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">Only 3</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30">
-                      <span className="text-slate-400 block text-[10px]">Avg Latency</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base">95 ms (-60%)</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400/90 font-medium">
-                    Achievement: Integrated NLTK morphological lemmatizer + expanded rule templates resolved all 5 major unanswered question clusters.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Grade Details & Evaluation Rubric (CSE276 + LPU UGC-CBCS Grading) */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-                    Evaluation Metrics &amp; Academic Grading
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                    NLP Study Grade Details &amp; LPU UGC-CBCS Grading Scale
-                  </h3>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
-                  Study Grade: {nlpData?.gradeDetails?.evaluationGrade || 'O (Outstanding)'}
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">NLP Evaluation Grade</span>
+                <span className="text-2xl font-extrabold font-display text-orange-600 dark:text-orange-400 mt-1 block">
+                  {nlpData?.gradeDetails?.evaluationGrade || 'O (Outstanding)'}
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block">
+                  P: {nlpData?.gradeDetails?.precision || '0.91'} · R: {nlpData?.gradeDetails?.recall || '0.93'} · F1: {nlpData?.gradeDetails?.f1Score || '0.92'}
                 </span>
               </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Precision</span>
-                  <span className="text-lg font-extrabold text-slate-900 dark:text-white">{nlpData?.gradeDetails?.precision || '0.91'}</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Recall</span>
-                  <span className="text-lg font-extrabold text-slate-900 dark:text-white">{nlpData?.gradeDetails?.recall || '0.93'}</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="text-[10px] font-bold uppercase text-slate-400 block">F1-Score</span>
-                  <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{nlpData?.gradeDetails?.f1Score || '0.92'}</span>
-                </div>
-                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
-                  <span className="text-[10px] font-bold uppercase text-slate-400 block">Assessment Split</span>
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white mt-0.5 block">30% CA · 20% MTE · 50% ETE</span>
-                </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Rule Base</span>
+                <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white mt-1 block">48 → 80+</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block">22-user study · Avg CSAT 4.62/5</span>
               </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Live Query Tracker</span>
+                <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white mt-1 block">
+                  {unansweredTracker?.fixedCount ?? 0} Fixed
+                </span>
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5 block">
+                  {unansweredTracker?.pendingCount ?? 0} pending review
+                </span>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-1 text-center text-xs">
+            {/* LPU UGC-CBCS Grading Scale */}
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-display">
+                  LPU UGC-CBCS Assessment &amp; 10-Point Grade Scale
+                </h3>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  30% CA · 20% MTE · 50% ETE
+                </span>
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 text-center text-xs">
                 {[
                   { g: 'O', pts: '10', desc: 'Outstanding' },
                   { g: 'A+', pts: '9', desc: 'Excellent' },
@@ -780,32 +589,120 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               </div>
             </div>
 
-            {/* Interactive Live NLTK Preprocessing Pipeline Sandbox */}
+            {/* Live Unanswered & Fixed Queries Table */}
             <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400 text-[11px] font-bold mb-1">
-                    <Code2 className="w-3.5 h-3.5" />
-                    <span>NLTK / spaCy Preprocessing Pipeline</span>
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                    Live Lexical Preprocessing &amp; Lemmatization Sandbox
+                  <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">
+                    Live Unanswered &amp; Fixed Queries
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Test how student input text is cleaned, tokenized, stripped of stopwords, and lemmatized into base linguistic tokens.
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Real questions from user chats automatically re-tested against the current rule engine.
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={fetchUnansweredTracker}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer shrink-0 self-start sm:self-auto"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loadingTracker ? 'animate-spin' : ''}`} />
+                  <span>Re-test</span>
+                </button>
+              </div>
 
-                {/* Pre-fill Quick Chips */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400">
+                      <th className="py-3 px-4 font-bold">User Question</th>
+                      <th className="py-3 px-3 font-bold text-center">Asked</th>
+                      <th className="py-3 px-3 font-bold">Last Seen (IST)</th>
+                      <th className="py-3 px-3 font-bold text-center">Current Status</th>
+                      <th className="py-3 px-4 font-bold text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {loadingTracker ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-slate-400 italic">
+                          Evaluating live unanswered queries...
+                        </td>
+                      </tr>
+                    ) : unansweredTracker?.items?.length > 0 ? (
+                      unansweredTracker.items.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                          <td className="py-3 px-4">
+                            <p className="font-semibold text-slate-900 dark:text-white">{item.query}</p>
+                            {item.isFixedNow && item.currentReplyPreview && (
+                              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 line-clamp-1">
+                                {item.currentReplyPreview}
+                              </p>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                            {item.occurrenceCount}x
+                          </td>
+                          <td className="py-3 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                            {formatISTDateTime(item.lastSeen)}
+                          </td>
+                          <td className="py-3 px-3 text-center whitespace-nowrap">
+                            {item.isFixedNow ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                                <CheckCheck className="w-3 h-3" /> Fixed ({Math.round((item.currentConfidence || 0) * 100)}%)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-bold">
+                                <AlertTriangle className="w-3 h-3" /> Pending
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            {item.dbStatus !== 'resolved' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleResolveUnanswered(item.id)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white text-[11px] font-bold transition-colors cursor-pointer"
+                              >
+                                Mark Fixed
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-slate-400 font-semibold">Resolved</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="py-10 text-center text-slate-400 italic">
+                          No unanswered queries logged yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Compact Live NLTK Preprocessing Sandbox */}
+            <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white font-display">
+                    NLTK Preprocessing &amp; Lemmatization Sandbox
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Inspect tokenization, stopword removal, and lemmatization for any query.
+                  </p>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {[
-                    'Can students with 1 backlog sit for campus placements?',
-                    'How to change from 4-seater to 2-seater AC hostel room?',
-                    'What is the late fee penalty for semester tuition?',
-                    'Minimum attendance condonation for medical duty leave?'
+                    'Can students with 1 backlog sit for placements?',
+                    'How to change hostel room?',
+                    'What is CA and grading?',
                   ].map((preset, idx) => (
                     <button
                       key={idx}
+                      type="button"
                       onClick={() => {
                         setInteractiveQuery(preset);
                         handleTestNlpPipeline(preset);
@@ -818,39 +715,32 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                 </div>
               </div>
 
-              {/* Input field + Run button */}
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Type any student query to inspect NLTK tokenization & lemmatization..."
+                  placeholder="Type a student query to inspect tokens & lemmas..."
                   value={interactiveQuery}
                   onChange={(e) => setInteractiveQuery(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleTestNlpPipeline();
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="flex-1 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
                 <button
+                  type="button"
                   onClick={() => handleTestNlpPipeline()}
                   disabled={testingNlp || !interactiveQuery.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all shadow-sm active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   {testingNlp ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-                  <span>Run Pipeline</span>
+                  <span>Run</span>
                 </button>
               </div>
 
-              {/* Pipeline Demonstration Visualization Cards */}
-              {nlpTestResult ? (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">1. Raw Text</span>
-                    <p className="text-xs font-mono text-slate-800 dark:text-slate-200 break-words">
-                      &quot;{nlpTestResult.raw}&quot;
-                    </p>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">2. Tokenized Words ({nlpTestResult.tokens?.length || 0})</span>
+              {nlpTestResult && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">Tokens ({nlpTestResult.tokens?.length || 0})</span>
                     <div className="flex flex-wrap gap-1">
                       {(nlpTestResult.tokens || []).map((t, i) => (
                         <span key={i} className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-[10px] font-mono border border-slate-200 dark:border-slate-700">
@@ -859,8 +749,8 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                       ))}
                     </div>
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">3. Stopwords Filtered</span>
+                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 space-y-1">
+                    <span className="text-[10px] font-bold uppercase text-slate-400">Filtered</span>
                     <div className="flex flex-wrap gap-1">
                       {(nlpTestResult.filteredTokens || []).map((t, i) => (
                         <span key={i} className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-mono border border-blue-200 dark:border-blue-900">
@@ -869,8 +759,8 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                       ))}
                     </div>
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">4. Lemmatized Base Forms</span>
+                  <div className="p-3 rounded-2xl bg-orange-50/60 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 space-y-1">
+                    <span className="text-[10px] font-bold uppercase text-orange-600 dark:text-orange-400">Lemmas</span>
                     <div className="flex flex-wrap gap-1">
                       {(nlpTestResult.lemmas || []).map((t, i) => (
                         <span key={i} className="px-1.5 py-0.5 rounded bg-orange-600 text-white text-[10px] font-bold font-mono">
@@ -880,230 +770,7 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 text-center">
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Click any preset chip above or type a query to visualize NLTK tokenization, stopword removal, and morphological lemmatization in real time.
-                  </p>
-                </div>
               )}
-            </div>
-
-            {/* 5 Identified Unanswered Question Clusters */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                    Top 5 Unanswered Question Clusters &amp; Rule Base Expansion
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Discovered by clustering conversation logs from 22 real users using NLTK preprocessing. Each cluster was resolved by expanding the rule base.
-                  </p>
-                </div>
-                {selectedClusterId !== 'all' && (
-                  <button
-                    onClick={() => setSelectedClusterId('all')}
-                    className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-orange-600 transition-colors"
-                  >
-                    Reset Cluster Filter
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(nlpData?.unansweredClusters || []).map((cluster) => {
-                  const isSelected = selectedClusterId === cluster.id;
-                  return (
-                    <div
-                      key={cluster.id}
-                      onClick={() => setSelectedClusterId(isSelected ? 'all' : cluster.id)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
-                        isSelected
-                          ? 'bg-orange-50/80 dark:bg-orange-950/40 border-orange-500 shadow-sm'
-                          : 'bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
-                          <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 text-[10px] font-extrabold font-mono">
-                            {cluster.occurrenceCount} Occurrences
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
-                            {cluster.status}
-                          </span>
-                        </div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug">
-                          {cluster.topic}
-                        </h4>
-                      </div>
-
-                      <div className="space-y-1.5 text-[11px]">
-                        <span className="text-slate-400 font-semibold block text-[10px] uppercase">Sample Query:</span>
-                        <p className="text-slate-600 dark:text-slate-300 italic font-sans bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
-                          &quot;{cluster.sampleQueries[0]}&quot;
-                        </p>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800 space-y-1 text-[11px]">
-                        <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Rule Resolution:</span>
-                        </div>
-                        <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed">
-                          {cluster.resolution}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 22 Real Student Participants Registry */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                    22 Real Student Test Subjects (Controlled Empirical Study)
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Participants who performed comprehensive helpdesk testing sessions across admissions, hostel facilities, academics, and placements.
-                  </p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold font-mono">
-                  Average Rating: 4.62 / 5.00
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-                {(nlpData?.study?.participants || []).map((p) => (
-                  <div key={p.id} className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs space-y-1">
-                    <span className="font-bold text-slate-900 dark:text-white block truncate">{p.name}</span>
-                    <span className="text-[10px] text-slate-400 block truncate font-mono">{p.email}</span>
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/40 text-[10px]">
-                      <span className="text-slate-500">{p.turns} turns</span>
-                      <span className="text-amber-600 dark:text-amber-400 font-bold">★ {p.satisfaction}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Real User Conversation Logs & Before/After Evaluation Table */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
-                    Real User Dialogue Transcripts ({filteredLogs.length} Entries)
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Complete transcript logs showing query intent classification, confidence score, and baseline vs expanded resolution.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search query, intent, student..."
-                      value={transcriptSearch}
-                      onChange={(e) => setTranscriptSearch(e.target.value)}
-                      className="pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    />
-                  </div>
-
-                  <div className="flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold">
-                    <button
-                      onClick={() => setTranscriptFilter('all')}
-                      className={`px-2.5 py-1 rounded-lg transition-all ${
-                        transcriptFilter === 'all'
-                          ? 'bg-white dark:bg-slate-900 text-orange-600 dark:text-orange-400 shadow-xs'
-                          : 'text-slate-500'
-                      }`}
-                    >
-                      All
-                    </button>
-                    <button
-                      onClick={() => setTranscriptFilter('before_unanswered')}
-                      className={`px-2.5 py-1 rounded-lg transition-all ${
-                        transcriptFilter === 'before_unanswered'
-                          ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-xs'
-                          : 'text-slate-500'
-                      }`}
-                    >
-                      Baseline Unanswered
-                    </button>
-                    <button
-                      onClick={() => setTranscriptFilter('after_answered')}
-                      className={`px-2.5 py-1 rounded-lg transition-all ${
-                        transcriptFilter === 'after_answered'
-                          ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-xs'
-                          : 'text-slate-500'
-                      }`}
-                    >
-                      Resolved
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400">
-                      <th className="py-2.5 px-3 font-bold">Student</th>
-                      <th className="py-2.5 px-3 font-bold">Query Dialogue</th>
-                      <th className="py-2.5 px-3 font-bold">Detected Intent</th>
-                      <th className="py-2.5 px-3 font-bold">Confidence</th>
-                      <th className="py-2.5 px-3 font-bold text-center">Baseline Rule Base</th>
-                      <th className="py-2.5 px-3 font-bold text-center">Expanded Rule Base</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {filteredLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                        <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                          {log.user}
-                        </td>
-                        <td className="py-2.5 px-3 font-medium text-slate-700 dark:text-slate-300 max-w-xs sm:max-w-md">
-                          &quot;{log.query}&quot;
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px]">
-                            {log.intent}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 font-mono font-bold text-slate-600 dark:text-slate-400">
-                          {Math.round(log.confidence * 100)}%
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          {log.beforeAnswered ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
-                              <Check className="w-3 h-3" /> Answered
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 text-[10px] font-bold">
-                              <X className="w-3 h-3" /> Unanswered
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          {log.afterAnswered ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold shadow-2xs">
-                              <CheckCheck className="w-3 h-3" /> Resolved
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 text-[10px] font-bold">
-                              In Progress
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
         )}
@@ -1133,35 +800,22 @@ export default function AdminDashboard({ go, onOpenAuth }) {
               </div>
             </div>
 
-            {/* 6 Core Metric Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            {/* 4 Focused Executive KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
                 <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Total Users</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Registered Users</span>
                   <Users className="w-4 h-4 text-orange-500" />
                 </div>
                 <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white block">
                   {m.totalUsers}
                 </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1 block">
-                  +{m.newRegistrations} this period
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1 block">
+                  +{m.newRegistrations} new · {m.activeUsers} active ({range})
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Active Users</span>
-                  <Activity className="w-4 h-4 text-emerald-500" />
-                </div>
-                <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white block">
-                  {m.activeUsers}
-                </span>
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  Past {range} activity
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
                 <div className="flex items-center justify-between text-slate-400 mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider">Conversations</span>
                   <MessageSquare className="w-4 h-4 text-blue-500" />
@@ -1169,49 +823,40 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                 <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white block">
                   {m.totalConversations}
                 </span>
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  {m.totalMessages} messages in period
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
+                  {m.totalMessages} total messages
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab('nlp_study')}
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700 shadow-xs text-left transition-colors cursor-pointer"
+              >
                 <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Unanswered</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Unanswered Queue</span>
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                 </div>
                 <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white block">
                   {m.unansweredQueries || 0}
                 </span>
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1 block">
-                  Logged for rule expansion
+                <span className="text-[11px] text-orange-600 dark:text-orange-400 font-semibold mt-1 block">
+                  Review in NLP &amp; Quality →
                 </span>
-              </div>
+              </button>
 
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
                 <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Failed Logins</span>
-                  <ShieldAlert className="w-4 h-4 text-rose-500" />
-                </div>
-                <span className="text-2xl font-extrabold font-display text-slate-900 dark:text-white block">
-                  {m.failedLogins}
-                </span>
-                <span className="text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-1 block">
-                  Zero-trust blocked
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-                <div className="flex items-center justify-between text-slate-400 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">Server Health</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">System Health</span>
                   <Database className={`w-4 h-4 ${healthOk ? 'text-emerald-500' : 'text-rose-500'}`} />
                 </div>
-                <span className={`text-sm font-extrabold font-display block pt-1 ${
+                <span className={`text-lg font-extrabold font-display block ${
                   healthOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                 }`}>
                   {loadingMetrics ? '…' : `● ${healthOk ? 'Healthy' : 'Degraded'}`}
                 </span>
-                <span className="text-[10px] text-slate-400 mt-1 block truncate">
-                  {health ? `Database ${health.database}` : 'Health unknown'}
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block truncate">
+                  {health ? health.database : 'Checking'} · {m.failedLogins} blocked
                 </span>
               </div>
             </div>
@@ -1558,12 +1203,12 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                                 >
                                   <div className="flex items-center gap-1.5 mb-1 px-1 text-[10px] text-slate-400">
                                     <span>{isUser ? 'User' : 'AI Helpdesk'}</span>
-                                    {m.intent && (
+                                    {!isUser && m.intent && (
                                       <span className="px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-slate-800 font-mono text-[9px] text-slate-600 dark:text-slate-300">
                                         {m.intent}
                                       </span>
                                     )}
-                                    {m.confidence !== null && m.confidence !== undefined && (
+                                    {!isUser && m.confidence !== null && m.confidence !== undefined && (
                                       <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[9px]">
                                         {Math.round(m.confidence * 100)}%
                                       </span>
@@ -1656,112 +1301,6 @@ export default function AdminDashboard({ go, onOpenAuth }) {
                     <tr>
                       <td colSpan={5} className="py-6 text-center text-slate-400 italic">
                         {loadingLogs ? 'Loading security stream...' : 'No audit events recorded yet.'}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB 6: REAL UNANSWERED VS FIXED QUERIES TRACKER
-        ══════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'unanswered_tracker' && (
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-5 animate-fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="text-base font-bold font-display text-slate-900 dark:text-white">
-                  Live Unanswered &amp; Fixed Queries Tracker
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Real questions from user chats that the AI could not answer at the time, automatically re-tested against the current engine to show which ones are now fixed.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                  Fixed: {unansweredTracker?.fixedCount ?? 0}
-                </span>
-                <span className="px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs font-bold text-amber-700 dark:text-amber-300">
-                  Pending: {unansweredTracker?.pendingCount ?? 0}
-                </span>
-                <button
-                  type="button"
-                  onClick={fetchUnansweredTracker}
-                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 text-slate-600 dark:text-slate-300 cursor-pointer"
-                  title="Re-test queries"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loadingTracker ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400">
-                    <th className="py-3 px-4 font-bold">User Question</th>
-                    <th className="py-3 px-3 font-bold text-center">Asked</th>
-                    <th className="py-3 px-3 font-bold">Last Seen (IST)</th>
-                    <th className="py-3 px-3 font-bold text-center">Current Engine Status</th>
-                    <th className="py-3 px-4 font-bold text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {loadingTracker ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-slate-400 italic">
-                        Evaluating live unanswered queries...
-                      </td>
-                    </tr>
-                  ) : unansweredTracker?.items?.length > 0 ? (
-                    unansweredTracker.items.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                        <td className="py-3 px-4">
-                          <p className="font-semibold text-slate-900 dark:text-white">{item.query}</p>
-                          {item.isFixedNow && item.currentReplyPreview && (
-                            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-1 line-clamp-1">
-                              Now answers: {item.currentReplyPreview}
-                            </p>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-center font-bold text-slate-700 dark:text-slate-300">
-                          {item.occurrenceCount}x
-                        </td>
-                        <td className="py-3 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                          {formatISTDateTime(item.lastSeen)}
-                        </td>
-                        <td className="py-3 px-3 text-center whitespace-nowrap">
-                          {item.isFixedNow ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                              <CheckCheck className="w-3 h-3" /> Fixed Now ({Math.round((item.currentConfidence || 0) * 100)}%)
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-[10px] font-bold">
-                              <AlertTriangle className="w-3 h-3" /> Still Unanswered
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          {item.dbStatus !== 'resolved' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleResolveUnanswered(item.id)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white text-[11px] font-bold transition-colors cursor-pointer"
-                            >
-                              Mark Fixed
-                            </button>
-                          ) : (
-                            <span className="text-[10px] text-slate-400 font-semibold">Resolved</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="py-10 text-center text-slate-400 italic">
-                        No unanswered queries logged in the database yet.
                       </td>
                     </tr>
                   )}
