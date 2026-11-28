@@ -83,6 +83,12 @@ class RuleEngine:
         missing_slots = self.slot_filling.get_missing_slots(intent, context)
         if missing_slots:
             slot = missing_slots[0]
+            if slot == 'program':
+                family_prompt = self._disambiguate_degree_family(message)
+                if family_prompt:
+                    question, suggestions = family_prompt
+                    context['pending_intent'] = intent
+                    return question, intent, confidence, True, slot, suggestions
             question, suggestions = self.slot_filling.generate_slot_question(slot, context)
             context['pending_intent'] = intent
             return question, intent, confidence, True, slot, suggestions
@@ -178,18 +184,43 @@ class RuleEngine:
             return reply, 'knowledge_query'
         return None
 
+    def _disambiguate_degree_family(self, message):
+        """When user asks about a broad degree family (e.g. 'B.Tech fee', 'B.Sc'), ask which specific specialization."""
+        import re
+        msg_l = (message or '').lower()
+        if re.search(r'\bb\.?\s*tech\b', msg_l):
+            return (
+                "LPU offers multiple **B.Tech** programmes with different fee slabs:\n"
+                "• **B.Tech CSE (Core):** ₹1,60,000 / sem\n"
+                "• **B.Tech CSE Specializations (AI & ML, Data Science, Cyber Security, Cloud, Full Stack):** ₹2,00,000 / sem\n"
+                "• **B.Tech Aerospace:** ₹1,50,000 / sem\n"
+                "• **B.Tech ECE / Mechanical / Civil / Electrical / Biotech:** ₹1,40,000 / sem\n\n"
+                "Which **B.Tech programme** are you asking about?",
+                ['B.Tech CSE', 'B.Tech AI & ML', 'B.Tech Data Science', 'B.Tech Cyber Security', 'B.Tech ECE', 'B.Tech Mechanical'],
+            )
+        if re.search(r'\bb\.?\s*sc\b', msg_l):
+            return (
+                "Which **B.Sc** programme at LPU are you asking about?",
+                ['B.Sc Agriculture', 'B.Sc Forensic Science', 'B.Sc Biotechnology', 'B.Sc Microbiology', 'B.Sc Animation'],
+            )
+        if re.search(r'\b(law|llb|ll\.b)\b', msg_l):
+            return (
+                "Which **Law** programme at LPU are you asking about?",
+                ['B.A. LL.B (Hons.)', 'B.B.A. LL.B (Hons.)', 'LL.B (3 Years)', 'LL.M (1 Year)'],
+            )
+        return None
+
     def _handle_unknown(self):
         return (
-            "I'm sorry, I couldn't identify the exact information you requested.\n\n"
-            "I can assist you with official Lovely Professional University details on:\n"
-            "• **Programmes & Specializations** (B.Tech CSE, AI & ML, MBA, BCA, MCA, B.Sc Agri)\n"
-            "• **LPUNEST & Admissions** (Dates, Steps, Proctored Exam)\n"
-            "• **Fee Structure & Expenses**\n"
-            "• **Scholarships up to 50%** (LPUNEST, 12th Board marks, Sports, Defense)\n"
-            "• **Curriculum & Semester Subjects**\n"
-            "• **Hostel & Uni-World Campus Facilities**\n"
-            "• **Placements & Top Recruiters**\n\n"
-            "Could you please rephrase or choose from the quick suggestions below?"
+            "I'm a rule-based LPU helpdesk assistant and couldn't match your exact question.\n\n"
+            "Try asking with a specific programme or topic, for example:\n"
+            "• **\"BCA fees\"** or **\"B.Tech AI & ML fee\"**\n"
+            "• **\"Hostel AC room and mess charges\"**\n"
+            "• **\"LPUNEST scholarship slabs\"**\n"
+            "• **\"What is CA and grading system?\"**\n\n"
+            "For anything outside these topics, please contact the **LPU Admissions Desk**:\n"
+            f"• **Toll-Free:** {lpu_contact['toll_free']} | **Helpline:** {lpu_contact['phone']}\n"
+            f"• **Email:** {lpu_contact['email']} | **Office:** {lpu_contact['office']}"
         )
     
     def _handle_comparison(self, message):
