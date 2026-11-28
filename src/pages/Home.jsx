@@ -133,7 +133,7 @@ export default function Home({ go, ask, onOpenCompare }) {
             </div>
 
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">
-              Instant answers on admissions, <span className="text-orange-500">fees &amp; hostel life</span>.
+              Instant answers on admissions, <span className="text-orange-700 dark:text-orange-400">fees &amp; hostel life.</span>
             </h1>
 
             <p className="mt-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-sans">
@@ -165,7 +165,7 @@ export default function Home({ go, ask, onOpenCompare }) {
 
             {/* Quick Suggestion Chips */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-slate-400">Popular:</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Popular:</span>
               {[
                 'B.Tech CSE fees',
                 'LPUNEST scholarship slabs',
@@ -176,7 +176,7 @@ export default function Home({ go, ask, onOpenCompare }) {
                   key={tag}
                   type="button"
                   onClick={() => ask(tag)}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-white transition-all cursor-pointer"
+                  className="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/90 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 hover:text-orange-700 dark:hover:text-white transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 >
                   {tag}
                 </button>
@@ -243,32 +243,34 @@ export default function Home({ go, ask, onOpenCompare }) {
             {TASKS.map((task) => {
               const Icon = task.icon;
               return (
-                <div
+                <button
                   key={task.title}
+                  type="button"
                   onClick={task.action(go)}
-                  className="group relative flex flex-col p-5 rounded-2xl cursor-pointer border transition-all duration-300 select-none
+                  className="group relative flex flex-col text-left p-5 rounded-2xl cursor-pointer border transition-all duration-300
                     bg-white dark:bg-[#0D131F] border-slate-200/90 dark:border-slate-800/90
                     hover:-translate-y-1.5 hover:border-orange-500/60
-                    hover:shadow-md dark:hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.2)] shadow-2xs"
+                    hover:shadow-md dark:hover:shadow-[0_15px_30px_-10px_rgba(249,115,22,0.2)] shadow-2xs
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 >
                   {/* Emblem squircle */}
                   <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 mb-3 transition-transform duration-300 group-hover:scale-105 ${task.bg}`}>
                     <Icon size={19} className={task.color} />
                   </div>
 
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">
                     {task.title}
                   </h3>
 
-                  <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed flex-1">
+                  <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed flex-1">
                     {task.desc}
                   </p>
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-orange-600 dark:text-orange-400 group-hover:translate-x-1 transition-transform">
+                  <div className="mt-4 pt-3 w-full border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs font-bold text-orange-700 dark:text-orange-400 group-hover:translate-x-1 transition-transform">
                     <span>{task.cta}</span>
                     <ArrowRight size={13} />
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -308,26 +310,26 @@ export default function Home({ go, ask, onOpenCompare }) {
             {CAMPUS_HIGHLIGHTS.map((item) => (
               <article
                 key={item.id}
-                className="group rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0D131F] shadow-2xs hover:border-orange-500/50 hover:shadow-md transition-all duration-300"
+                className="rounded-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0D131F] shadow-2xs"
               >
                 <div className="relative h-36 w-full overflow-hidden bg-slate-900">
                   <img
                     src={item.image}
                     alt={item.title}
                     loading="lazy"
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-orange-400 text-[10px] font-bold border border-white/10">
-                    <MapPin size={10} className="text-orange-400 shrink-0" />
+                  <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-orange-300 text-[10px] font-bold border border-white/10">
+                    <MapPin size={10} className="text-orange-300 shrink-0" />
                     <span>{item.location}</span>
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                     {item.title}
                   </h3>
-                  <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                  <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
                     {item.desc}
                   </p>
                 </div>
