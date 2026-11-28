@@ -14,7 +14,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
   };
 
   return (
-    <footer className="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 pt-12 pb-8 border-t border-slate-200 dark:border-slate-800 font-sans relative overflow-hidden transition-colors duration-300">
+    <footer className="bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 pt-12 pb-24 sm:pb-20 border-t border-slate-200 dark:border-slate-800 font-sans relative overflow-hidden transition-colors duration-300">
       {/* Subtle ambient lighting */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none translate-y-1/2" />
@@ -63,7 +63,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
               <button
                 type="button"
                 onClick={() => go && go('chat')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-700 hover:bg-orange-800 dark:bg-orange-600 dark:hover:bg-orange-500 text-white text-xs font-bold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-orange-700 hover:bg-orange-800 text-white text-xs font-bold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>Ask AI Assistant</span>
@@ -89,8 +89,9 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
                 <button
+                  type="button"
                   onClick={() => go && go('programs')}
-                  className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors flex items-center gap-1.5 text-left cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                 >
                   <ChevronRight className="w-3 h-3 text-orange-500 shrink-0" />
                   <span>44 Degree Programmes</span>
@@ -232,7 +233,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
                   <HeartPulse className="w-3.5 h-3.5 text-rose-500 shrink-0" />
                   <span>Uni-Hospital 24/7 Helpline</span>
                 </div>
-                <a href="tel:01824517000" className="font-extrabold text-slate-900 dark:text-white hover:text-rose-600">
+                <a href="tel:01824517000" className="font-extrabold text-slate-900 dark:text-white hover:text-rose-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
                   Ext 1000 / 1001
                 </a>
               </div>
@@ -250,26 +251,30 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
 
           <div className="flex flex-wrap justify-center items-center gap-x-5 gap-y-2">
             <button
+              type="button"
               onClick={() => handleLegal('disclaimer')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               Disclaimer
             </button>
             <button
+              type="button"
               onClick={() => handleLegal('privacy')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               Privacy Policy
             </button>
             <button
+              type="button"
               onClick={() => handleLegal('terms')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               Terms &amp; Conditions
             </button>
             <button
+              type="button"
               onClick={() => handleLegal('sources')}
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               Data Sources
             </button>
@@ -277,7 +282,7 @@ export default function Footer({ go, onOpenCompare, onOpenLegal }) {
               href="https://www.lpu.in"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors inline-flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300"
+              className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors inline-flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               <span>Official University Portal</span>
               <ExternalLink className="w-3 h-3" />

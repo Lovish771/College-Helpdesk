@@ -148,13 +148,13 @@ export default function Home({ go, ask, onOpenCompare }) {
                       setQuickQuery(e.target.value);
                       if (searchHint) setSearchHint(false);
                     }}
-                    placeholder="Ask fees, hostel, or LPUNEST..."
+                    placeholder="Ask fees or hostel..."
                     aria-label="Ask a question about admissions or fees"
                     className="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 outline-none font-sans"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-full bg-orange-700 hover:bg-orange-800 dark:bg-orange-600 dark:hover:bg-orange-500 text-white text-xs font-bold shrink-0 shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    className="px-3.5 sm:px-4 py-2 rounded-full bg-orange-700 hover:bg-orange-800 text-white text-xs font-bold shrink-0 shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                   >
                     <span>Ask Helpdesk</span>
                     <ArrowRight size={13} />
@@ -361,7 +361,7 @@ export default function Home({ go, ask, onOpenCompare }) {
               <button
                 type="button"
                 onClick={() => go('chat')}
-                className="px-4 py-2.5 rounded-xl bg-orange-700 hover:bg-orange-800 dark:bg-orange-600 dark:hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="px-4 py-2.5 rounded-xl bg-orange-700 hover:bg-orange-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 <GraduationCap size={15} />
                 <span>Ask AI Assistant</span>
